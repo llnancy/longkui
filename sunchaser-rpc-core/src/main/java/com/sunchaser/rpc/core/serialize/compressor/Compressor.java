@@ -1,7 +1,5 @@
 package com.sunchaser.rpc.core.serialize.compressor;
 
-import java.io.IOException;
-
 /**
  * 压缩器
  *
@@ -15,16 +13,16 @@ public interface Compressor {
      *
      * @param data 原比特数组
      * @return 压缩后的数据
-     * @throws IOException throw
+     * @throws Exception throw
      */
-    byte[] compress(byte[] data) throws IOException;
+    byte[] compress(byte[] data) throws Exception;
 
     /**
      * 将数据解压缩
      *
      * @param data 压缩的数据
      * @return 原数据
-     * @throws IOException throw
+     * @throws Exception throw
      */
-    byte[] unCompress(byte[] data) throws IOException;
+    byte[] unCompress(byte[] data) throws Exception;
 }

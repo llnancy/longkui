@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
- * rpc 协议消息请求体
+ * rpc request 协议消息请求体
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/12

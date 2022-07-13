@@ -15,18 +15,14 @@ import java.util.Objects;
 public class SnappyCompressor implements Compressor {
 
     @Override
-    public byte[] compress(byte[] data) throws IOException {
-        if (Objects.isNull(data)) {
-            return null;
-        }
+    public byte[] compress(byte[] data) throws Exception {
+        Objects.requireNonNull(data);
         return Snappy.compress(data);
     }
 
     @Override
-    public byte[] unCompress(byte[] data) throws IOException {
-        if (Objects.isNull(data)) {
-            return null;
-        }
+    public byte[] unCompress(byte[] data) throws Exception {
+        Objects.requireNonNull(data);
         return Snappy.uncompress(data);
     }
 }
