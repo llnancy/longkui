@@ -53,6 +53,7 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcMessage<Rp
     }
 
     private void handlerException(ChannelHandlerContext ctx, RpcHeader rpcHeader, Exception e) {
+        log.error("process request {} error", rpcHeader.getMessageId(), e);
         RpcMessage<RpcResponse> rpcMessage = RpcMessage.<RpcResponse>builder()
                 .rpcHeader(rpcHeader)
                 .content(RpcResponse.builder()
@@ -71,10 +72,10 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcMessage<Rp
                 .content(rpcResponse)
                 .build();
 
-        if (System.currentTimeMillis() - rpcHeader.getTs() > 3 * 60 * 1000) {
-            rpcResponse.setErrorMsg("The timestamp difference between invoke and executor exceeds the limit - three minutes.");
-            return rpcMessage;
-        }
+        // if (System.currentTimeMillis() - rpcHeader.getTs() > 3 * 60 * 1000) {
+        //     rpcResponse.setErrorMsg("The timestamp difference between invoke and executor exceeds the limit - three minutes.");
+        //     return rpcMessage;
+        // }
 
         RpcRequest rpcRequest = msg.getContent();
         Object result = doInvoke(rpcRequest);
@@ -91,6 +92,8 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcMessage<Rp
         String methodName = rpcRequest.getMethodName();
         Class<?>[] argTypes = rpcRequest.getArgTypes();
         Object[] args = rpcRequest.getArgs();
+
+        // todo FastClass
         Method method = bean.getClass().getMethod(methodName, argTypes);
         method.setAccessible(true);
         return method.invoke(bean, args);

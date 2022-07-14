@@ -4,10 +4,10 @@ import com.sunchaser.rpc.core.protocol.RpcHeader;
 import com.sunchaser.rpc.core.protocol.RpcMessage;
 import com.sunchaser.rpc.core.protocol.RpcRequest;
 import com.sunchaser.rpc.core.protocol.RpcResponse;
-import com.sunchaser.rpc.core.serialize.compressor.Compressor;
-import com.sunchaser.rpc.core.serialize.factory.CompressorFactory;
-import com.sunchaser.rpc.core.serialize.factory.SerializerFactory;
-import com.sunchaser.rpc.core.serialize.serializator.Serializer;
+import com.sunchaser.rpc.core.compress.Compressor;
+import com.sunchaser.rpc.core.compress.CompressorFactory;
+import com.sunchaser.rpc.core.serialize.SerializerFactory;
+import com.sunchaser.rpc.core.serialize.Serializer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

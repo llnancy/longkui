@@ -1,8 +1,7 @@
-package com.sunchaser.rpc.core.serialize.factory;
+package com.sunchaser.rpc.core.compress;
 
 import com.google.common.collect.Maps;
-import com.sunchaser.rpc.core.serialize.compressor.Compressor;
-import com.sunchaser.rpc.core.serialize.compressor.impl.SnappyCompressor;
+import com.sunchaser.rpc.core.compress.impl.SnappyCompressor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -10,10 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Compressor Factory
- *
  * @author sunchaser admin@lilu.org.cn
- * @since JDK8 2022/7/12
+ * @since JDK8 2022/7/14
  */
 public class CompressorFactory {
 

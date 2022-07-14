@@ -1,4 +1,4 @@
-package com.sunchaser.rpc.core.serialize.compressor;
+package com.sunchaser.rpc.core.compress;
 
 /**
  * 压缩器
@@ -13,16 +13,14 @@ public interface Compressor {
      *
      * @param data 原比特数组
      * @return 压缩后的数据
-     * @throws Exception throw
      */
-    byte[] compress(byte[] data) throws Exception;
+    byte[] compress(byte[] data);
 
     /**
      * 将数据解压缩
      *
      * @param data 压缩的数据
      * @return 原数据
-     * @throws Exception throw
      */
-    byte[] unCompress(byte[] data) throws Exception;
+    byte[] unCompress(byte[] data);
 }

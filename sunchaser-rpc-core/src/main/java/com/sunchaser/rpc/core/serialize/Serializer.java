@@ -1,6 +1,4 @@
-package com.sunchaser.rpc.core.serialize.serializator;
-
-import java.io.IOException;
+package com.sunchaser.rpc.core.serialize;
 
 /**
  * 序列化器
@@ -16,9 +14,8 @@ public interface Serializer {
      * @param obj 待序列化的对象
      * @param <T> 对象泛型类型
      * @return 序列化后的byte字节数组
-     * @throws IOException throw
      */
-    <T> byte[] serialize(T obj) throws IOException;
+    <T> byte[] serialize(T obj);
 
     /**
      * 将二进制字节数组进行反序列化
@@ -27,7 +24,6 @@ public interface Serializer {
      * @param clazz 待反序列化的class类型
      * @param <T>   泛型类型
      * @return 反序列化后的对象
-     * @throws IOException throw
      */
-    <T> T deserialize(byte[] data, Class<T> clazz) throws IOException;
+    <T> T deserialize(byte[] data, Class<T> clazz);
 }

@@ -1,9 +1,9 @@
-package com.sunchaser.rpc.core.serialize.compressor.impl;
+package com.sunchaser.rpc.core.compress.impl;
 
-import com.sunchaser.rpc.core.serialize.compressor.Compressor;
+import com.sunchaser.rpc.core.compress.Compressor;
+import lombok.SneakyThrows;
 import org.xerial.snappy.Snappy;
 
-import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -14,14 +14,16 @@ import java.util.Objects;
  */
 public class SnappyCompressor implements Compressor {
 
+    @SneakyThrows
     @Override
-    public byte[] compress(byte[] data) throws Exception {
+    public byte[] compress(byte[] data) {
         Objects.requireNonNull(data);
         return Snappy.compress(data);
     }
 
+    @SneakyThrows
     @Override
-    public byte[] unCompress(byte[] data) throws Exception {
+    public byte[] unCompress(byte[] data) {
         Objects.requireNonNull(data);
         return Snappy.uncompress(data);
     }
