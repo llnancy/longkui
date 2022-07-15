@@ -3,7 +3,7 @@ package com.sunchaser.rpc.core.handler;
 import com.sunchaser.rpc.core.common.RpcContext;
 import com.sunchaser.rpc.core.exceptions.RpcException;
 import com.sunchaser.rpc.core.protocol.RpcHeader;
-import com.sunchaser.rpc.core.protocol.RpcMessage;
+import com.sunchaser.rpc.core.protocol.RpcProtocol;
 import com.sunchaser.rpc.core.protocol.RpcRequest;
 import com.sunchaser.rpc.core.protocol.RpcResponse;
 import com.sunchaser.rpc.core.util.BeanFactory;
@@ -23,7 +23,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @since JDK8 2022/7/13
  */
 @Slf4j
-public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcMessage<RpcRequest>> {
+public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<RpcRequest>> {
 
     private final ThreadPoolExecutor requestHandlerPool;
 
@@ -32,7 +32,7 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcMessage<Rp
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, RpcMessage<RpcRequest> msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcRequest> msg) throws Exception {
         RpcHeader rpcHeader = msg.getRpcHeader();
         if (RpcContext.isHeartbeat(rpcHeader.getProtocolHeader())) {
             log.debug("*********** sunchaser-rpc netty RpcRequestHandler read heartbeat.");
@@ -42,45 +42,44 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcMessage<Rp
         // 将消息类型从请求转为响应
         rpcHeader.setProtocolHeader(RpcContext.transformToResponse(rpcHeader.getProtocolHeader()));
 
-        requestHandlerPool.execute(() -> {
+        Runnable rpc = () -> {
             try {
-                RpcMessage<RpcResponse> rpcMessage = invokeService(msg);
-                ctx.writeAndFlush(rpcMessage);
+                RpcProtocol<RpcResponse> rpcProtocol = invokeService(msg);
+                ctx.writeAndFlush(rpcProtocol);
             } catch (Exception e) {
                 handlerException(ctx, rpcHeader, e);
             }
-        });
+        };
+
+        if (Objects.nonNull(requestHandlerPool)) {
+            requestHandlerPool.execute(rpc);
+        } else {
+            rpc.run();
+        }
     }
 
     private void handlerException(ChannelHandlerContext ctx, RpcHeader rpcHeader, Exception e) {
-        log.error("process request {} error", rpcHeader.getMessageId(), e);
-        RpcMessage<RpcResponse> rpcMessage = RpcMessage.<RpcResponse>builder()
+        log.error("process request {} error", rpcHeader.getSequenceId(), e);
+        RpcProtocol<RpcResponse> rpcProtocol = RpcProtocol.<RpcResponse>builder()
                 .rpcHeader(rpcHeader)
                 .content(RpcResponse.builder()
                         .errorMsg(ThrowableUtils.toString(e))
                         .build()
                 )
                 .build();
-        ctx.writeAndFlush(rpcMessage);
+        ctx.writeAndFlush(rpcProtocol);
     }
 
-    private RpcMessage<RpcResponse> invokeService(RpcMessage<RpcRequest> msg) throws Exception {
+    private RpcProtocol<RpcResponse> invokeService(RpcProtocol<RpcRequest> msg) throws Exception {
         RpcHeader rpcHeader = msg.getRpcHeader();
         RpcResponse rpcResponse = new RpcResponse();
-        RpcMessage<RpcResponse> rpcMessage = RpcMessage.<RpcResponse>builder()
+        RpcProtocol<RpcResponse> rpcProtocol = RpcProtocol.<RpcResponse>builder()
                 .rpcHeader(rpcHeader)
                 .content(rpcResponse)
                 .build();
-
-        // if (System.currentTimeMillis() - rpcHeader.getTs() > 3 * 60 * 1000) {
-        //     rpcResponse.setErrorMsg("The timestamp difference between invoke and executor exceeds the limit - three minutes.");
-        //     return rpcMessage;
-        // }
-
-        RpcRequest rpcRequest = msg.getContent();
-        Object result = doInvoke(rpcRequest);
+        Object result = doInvoke(msg.getContent());
         rpcResponse.setResult(result);
-        return rpcMessage;
+        return rpcProtocol;
     }
 
     private Object doInvoke(RpcRequest rpcRequest) throws Exception {
