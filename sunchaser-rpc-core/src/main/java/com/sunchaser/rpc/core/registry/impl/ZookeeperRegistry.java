@@ -1,6 +1,8 @@
 package com.sunchaser.rpc.core.registry.impl;
 
 import com.sunchaser.rpc.core.balancer.LoadBalancer;
+import com.sunchaser.rpc.core.balancer.impl.RandomLoadBalancer;
+import com.sunchaser.rpc.core.exceptions.RpcException;
 import com.sunchaser.rpc.core.registry.Registry;
 import com.sunchaser.rpc.core.registry.ServiceMeta;
 import lombok.SneakyThrows;
@@ -14,6 +16,7 @@ import org.apache.curator.x.discovery.details.JsonInstanceSerializer;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 基于Zookeeper实现的服务注册与发现
@@ -29,7 +32,7 @@ public class ZookeeperRegistry implements Registry {
 
     private final ServiceDiscovery<ServiceMeta> serviceDiscovery;
 
-    private LoadBalancer<ServiceInstance<ServiceMeta>> loadBalancer;
+    private final LoadBalancer<ServiceInstance<ServiceMeta>> loadBalancer;
 
     public ZookeeperRegistry() {
         this(DEFAULT_ZK_ADDRESS);
@@ -37,15 +40,16 @@ public class ZookeeperRegistry implements Registry {
 
     @SneakyThrows
     public ZookeeperRegistry(String zkAddress) {
+        this.loadBalancer = new RandomLoadBalancer<>();
         CuratorFramework client = CuratorFrameworkFactory.newClient(zkAddress, new ExponentialBackoffRetry(1000, 3));
         client.start();
         JsonInstanceSerializer<ServiceMeta> serializer = new JsonInstanceSerializer<>(ServiceMeta.class);
-        serviceDiscovery = ServiceDiscoveryBuilder.builder(ServiceMeta.class)
+        this.serviceDiscovery = ServiceDiscoveryBuilder.builder(ServiceMeta.class)
                 .client(client)
                 .serializer(serializer)
                 .basePath(ZK_BASE_PATH)
                 .build();
-        serviceDiscovery.start();
+        this.serviceDiscovery.start();
     }
 
     /**
@@ -93,6 +97,9 @@ public class ZookeeperRegistry implements Registry {
     public ServiceMeta discovery(String serviceName) {
         Collection<ServiceInstance<ServiceMeta>> serviceInstances = serviceDiscovery.queryForInstances(serviceName);
         ServiceInstance<ServiceMeta> select = loadBalancer.select((List<ServiceInstance<ServiceMeta>>) serviceInstances);
+        if (Objects.isNull(select)) {
+            throw new RpcException("no service named " + serviceName + " was discovered");
+        }
         return select.getPayload();
     }
 
