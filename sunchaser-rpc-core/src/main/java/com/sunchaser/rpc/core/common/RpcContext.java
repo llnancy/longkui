@@ -13,9 +13,21 @@ public class RpcContext {
     /**
      * 1101110
      */
-    public static final byte MAGIC = (byte) 0x6E;
+    public static final byte MAGIC = 0x6E;
 
-    public static final byte VERSION = 1;
+    /**
+     * 0000 0100
+     * version: 0000 01
+     * type: 00
+     */
+    public static final byte PROTOCOL_HEADER = 0x4;
+
+    /**
+     * 0000 0000
+     * serialize: Hessian2
+     * compress: Snappy
+     */
+    public static final byte PROTOCOL_INFO = 0x0;
 
     public static final int HEARTBEAT_CODE = -1;
 

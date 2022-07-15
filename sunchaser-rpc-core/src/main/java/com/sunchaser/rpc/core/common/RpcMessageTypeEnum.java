@@ -1,7 +1,7 @@
 package com.sunchaser.rpc.core.common;
 
 import com.sunchaser.rpc.core.protocol.RpcHeader;
-import com.sunchaser.rpc.core.protocol.RpcMessage;
+import com.sunchaser.rpc.core.protocol.RpcProtocol;
 import com.sunchaser.rpc.core.protocol.RpcRequest;
 import com.sunchaser.rpc.core.protocol.RpcResponse;
 import com.sunchaser.rpc.core.compress.Compressor;
@@ -30,16 +30,16 @@ public enum RpcMessageTypeEnum {
     REQUEST() {
         @Override
         public void invoke(byte protocolInfo, RpcHeader rpcHeader, byte[] data, List<Object> out) throws Exception {
-            RpcMessage<RpcRequest> rpcMessage = buildRpcMessage(protocolInfo, rpcHeader, data, RpcRequest.class);
-            out.add(rpcMessage);
+            RpcProtocol<RpcRequest> rpcProtocol = buildRpcMessage(protocolInfo, rpcHeader, data, RpcRequest.class);
+            out.add(rpcProtocol);
         }
     },
 
     RESPONSE() {
         @Override
         public void invoke(byte protocolInfo, RpcHeader rpcHeader, byte[] data, List<Object> out) throws Exception {
-            RpcMessage<RpcResponse> rpcMessage = buildRpcMessage(protocolInfo, rpcHeader, data, RpcResponse.class);
-            out.add(rpcMessage);
+            RpcProtocol<RpcResponse> rpcProtocol = buildRpcMessage(protocolInfo, rpcHeader, data, RpcResponse.class);
+            out.add(rpcProtocol);
         }
     },
 
@@ -68,14 +68,14 @@ public enum RpcMessageTypeEnum {
         }
     }
 
-    <I> RpcMessage<I> buildRpcMessage(byte protocolInfo,
-                                      RpcHeader rpcHeader,
-                                      byte[] data,
-                                      Class<I> clazz) throws Exception {
+    <I> RpcProtocol<I> buildRpcMessage(byte protocolInfo,
+                                       RpcHeader rpcHeader,
+                                       byte[] data,
+                                       Class<I> clazz) throws Exception {
         Serializer serializer = SerializerFactory.getSerializer(protocolInfo);
         Compressor compressor = CompressorFactory.getCompressor(protocolInfo);
         I content = serializer.deserialize(compressor.unCompress(data), clazz);
-        return RpcMessage.<I>builder()
+        return RpcProtocol.<I>builder()
                 .rpcHeader(rpcHeader)
                 .content(content)
                 .build();
