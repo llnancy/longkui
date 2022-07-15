@@ -12,7 +12,7 @@ import java.io.Serializable;
  * +-------------------------------------------------+
  * |  魔数 1byte  |  协议版本 1byte  |  协议信息 1byte  |
  * +-------------------------------------------------+
- * |      消息ID 8byte      |      消息长度 4byte      |
+ * |      序列ID 8byte      |      消息长度 4byte      |
  * +-------------------------------------------------+
  * |               消息体（实际发送的数据）              |
  * +-------------------------------------------------+
@@ -54,8 +54,8 @@ public class RpcHeader implements Serializable {
     /**
      * 协议头（版本号+消息类型）
      * 消息类型：
-     * 00：RESPONSE
-     * 01：REQUEST
+     * 00：REQUEST
+     * 01：RESPONSE
      * 11：HEARTBEAT
      */
     private byte protocolHeader;
@@ -66,14 +66,9 @@ public class RpcHeader implements Serializable {
     private byte protocolInfo;
 
     /**
-     * 消息ID
+     * 序列号ID
      */
-    private long messageId;
-
-    /**
-     * 请求时间戳
-     */
-    // private long ts;
+    private long sequenceId;
 
     /**
      * 消息体长度

@@ -17,7 +17,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RpcMessage<T> implements Serializable {
+public class RpcProtocol<T> implements Serializable {
 
     private static final long serialVersionUID = 3022652409163567503L;
 
