@@ -14,6 +14,12 @@ import java.util.Objects;
  */
 public class SnappyCompressor implements Compressor {
 
+    /**
+     * 将数据进行压缩
+     *
+     * @param data 原比特数组
+     * @return 压缩后的数据
+     */
     @SneakyThrows
     @Override
     public byte[] compress(byte[] data) {
@@ -21,6 +27,12 @@ public class SnappyCompressor implements Compressor {
         return Snappy.compress(data);
     }
 
+    /**
+     * 将数据解压缩
+     *
+     * @param data 压缩的数据
+     * @return 原数据
+     */
     @SneakyThrows
     @Override
     public byte[] unCompress(byte[] data) {

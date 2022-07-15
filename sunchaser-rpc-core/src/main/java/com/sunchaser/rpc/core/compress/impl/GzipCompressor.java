@@ -3,12 +3,12 @@ package com.sunchaser.rpc.core.compress.impl;
 import com.sunchaser.rpc.core.compress.Compressor;
 
 /**
- * 不进行压缩
+ * Gzip压缩
  *
  * @author sunchaser admin@lilu.org.cn
- * @since JDK8 2022/7/14
+ * @since JDK8 2022/7/15
  */
-public class NoneCompressor implements Compressor {
+public class GzipCompressor implements Compressor {
 
     /**
      * 将数据进行压缩
