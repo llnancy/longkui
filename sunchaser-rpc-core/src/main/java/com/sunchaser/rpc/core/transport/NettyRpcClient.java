@@ -28,8 +28,10 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
 
     private volatile Channel channel;
 
+    public static final int DEFAULT_CONNECTION_TIMEOUT = 3000;
+
     public NettyRpcClient(String host, Integer port) {
-        this(host, port, 3000);
+        this(host, port, DEFAULT_CONNECTION_TIMEOUT);
     }
 
     public NettyRpcClient(String host, Integer port, Integer connectionTimeout) {
@@ -96,10 +98,11 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
 
     @Override
     public void invoke(RpcProtocol<T> rpcProtocol) {
-        channel.writeAndFlush(rpcProtocol).addListener(promise -> {
-            if (!promise.isSuccess()) {
-                log.error("Rpc netty client channel writeAndFlush error.", promise.cause());
-            }
-        });
+        channel.writeAndFlush(rpcProtocol)
+                .addListener(promise -> {
+                    if (!promise.isSuccess()) {
+                        log.error("Rpc netty client channel writeAndFlush error.", promise.cause());
+                    }
+                });
     }
 }

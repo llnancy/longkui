@@ -32,7 +32,6 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
         out.writeByte(protocolHeader);
         out.writeByte(protocolInfo);
         out.writeLong(rpcHeader.getSequenceId());
-        out.writeInt(rpcHeader.getLength());
         T content = msg.getContent();
         if (RpcContext.isHeartbeat(protocolHeader)) {// 心跳消息，无消息体
             out.writeInt(0);
@@ -47,7 +46,7 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        if (in.readableBytes() < RpcContext.HEADER_SIZE) {// 不足消息头长度23字节，暂不读取
+        if (in.readableBytes() < RpcContext.HEADER_SIZE) {// 不足消息头长度15字节，暂不读取
             return;
         }
         in.markReaderIndex();

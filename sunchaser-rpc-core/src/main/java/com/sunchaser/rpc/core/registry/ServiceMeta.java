@@ -1,6 +1,9 @@
 package com.sunchaser.rpc.core.registry;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 服务元数据
@@ -9,6 +12,9 @@ import lombok.Data;
  * @since JDK8 2022/7/14
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class ServiceMeta {
 
     /**
