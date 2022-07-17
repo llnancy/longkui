@@ -1,6 +1,7 @@
 package com.sunchaser.rpc.core.balancer.impl;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 随机
@@ -10,8 +11,10 @@ import java.util.List;
  */
 public class RandomLoadBalancer<T> extends AbstractLoadBalancer<T> {
 
+    private final ThreadLocalRandom random = ThreadLocalRandom.current();
+
     @Override
     protected T doSelect(List<T> servers) {
-        return null;
+        return servers.get(random.nextInt(servers.size()));
     }
 }

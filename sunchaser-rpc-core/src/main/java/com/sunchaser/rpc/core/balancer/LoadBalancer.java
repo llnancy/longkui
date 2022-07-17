@@ -11,5 +11,5 @@ import java.util.List;
  */
 public interface LoadBalancer<T> {
 
-    T select(List<T> servers);
+    T select(List<T> servers, Integer... weights);
 }

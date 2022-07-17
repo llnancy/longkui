@@ -14,7 +14,7 @@ import java.util.List;
 public abstract class AbstractLoadBalancer<T> implements LoadBalancer<T> {
 
     @Override
-    public T select(List<T> servers) {
+    public T select(List<T> servers, Integer... weights) {
         if (CollectionUtils.isEmpty(servers)) {
             return null;
         }
