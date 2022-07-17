@@ -9,6 +9,9 @@ import com.sunchaser.rpc.core.util.BeanFactory;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * use LocalRegistry
+ * Must be in a JVM process
+ *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/17
  */

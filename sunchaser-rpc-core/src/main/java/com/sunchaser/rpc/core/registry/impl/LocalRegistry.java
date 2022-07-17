@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * Local registry
+ * Must be in a JVM process
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/17
