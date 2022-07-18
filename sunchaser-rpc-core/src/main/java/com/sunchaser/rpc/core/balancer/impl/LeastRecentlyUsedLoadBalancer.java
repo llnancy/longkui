@@ -1,5 +1,7 @@
 package com.sunchaser.rpc.core.balancer.impl;
 
+import com.sunchaser.rpc.core.balancer.Invoker;
+
 import java.util.List;
 
 /**
@@ -8,10 +10,10 @@ import java.util.List;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/15
  */
-public class LeastRecentlyUsedLoadBalancer<T> extends AbstractLoadBalancer<T> {
+public class LeastRecentlyUsedLoadBalancer extends AbstractLoadBalancer {
 
     @Override
-    protected T doSelect(List<T> servers) {
+    protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, String routeKey) {
         return null;
     }
 }

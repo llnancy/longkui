@@ -51,9 +51,10 @@ public class RpcInvocationHandler implements InvocationHandler {
                 .protocolInfo(RpcContext.PROTOCOL_INFO)
                 .sequenceId(sequenceId)
                 .build();
+        String methodName = method.getName();
         RpcRequest rpcRequest = RpcRequest.builder()
                 .serviceName(serviceName)
-                .methodName(method.getName())
+                .methodName(methodName)
                 .argTypes(method.getParameterTypes())
                 .args(args)
                 .build();
@@ -62,7 +63,7 @@ public class RpcInvocationHandler implements InvocationHandler {
                 .content(rpcRequest)
                 .build();
         // 服务发现
-        ServiceMeta serviceMeta = registry.discovery(serviceName);
+        ServiceMeta serviceMeta = registry.discovery(serviceName, methodName);
         // rpc调用结果future对象
         RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()));
         RpcResponseHolder.putRpcFuture(sequenceId, rpcFuture);

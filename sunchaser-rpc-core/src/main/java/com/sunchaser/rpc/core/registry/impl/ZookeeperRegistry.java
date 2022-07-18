@@ -1,5 +1,6 @@
 package com.sunchaser.rpc.core.registry.impl;
 
+import com.sunchaser.rpc.core.balancer.Invoker;
 import com.sunchaser.rpc.core.balancer.LoadBalancer;
 import com.sunchaser.rpc.core.balancer.impl.RandomLoadBalancer;
 import com.sunchaser.rpc.core.exceptions.RpcException;
@@ -15,7 +16,6 @@ import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.details.JsonInstanceSerializer;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -32,7 +32,7 @@ public class ZookeeperRegistry implements Registry {
 
     private final ServiceDiscovery<ServiceMeta> serviceDiscovery;
 
-    private final LoadBalancer<ServiceInstance<ServiceMeta>> loadBalancer;
+    private final LoadBalancer loadBalancer;
 
     public ZookeeperRegistry() {
         this(DEFAULT_ZK_ADDRESS);
@@ -40,7 +40,7 @@ public class ZookeeperRegistry implements Registry {
 
     @SneakyThrows
     public ZookeeperRegistry(String zkAddress) {
-        this.loadBalancer = new RandomLoadBalancer<>();
+        this.loadBalancer = new RandomLoadBalancer();
         CuratorFramework client = CuratorFrameworkFactory.newClient(zkAddress, new ExponentialBackoffRetry(1000, 3));
         client.start();
         JsonInstanceSerializer<ServiceMeta> serializer = new JsonInstanceSerializer<>(ServiceMeta.class);
@@ -94,13 +94,13 @@ public class ZookeeperRegistry implements Registry {
      */
     @SneakyThrows
     @Override
-    public ServiceMeta discovery(String serviceName) {
+    public ServiceMeta discovery(String serviceName, String methodName) {
         Collection<ServiceInstance<ServiceMeta>> serviceInstances = serviceDiscovery.queryForInstances(serviceName);
-        ServiceInstance<ServiceMeta> select = loadBalancer.select((List<ServiceInstance<ServiceMeta>>) serviceInstances);
+        Invoker<ServiceInstance<ServiceMeta>> select = loadBalancer.select(LoadBalancer.wrap(serviceInstances));
         if (Objects.isNull(select)) {
             throw new RpcException("no service named " + serviceName + " was discovered");
         }
-        return select.getPayload();
+        return select.getNode().getPayload();
     }
 
     /**

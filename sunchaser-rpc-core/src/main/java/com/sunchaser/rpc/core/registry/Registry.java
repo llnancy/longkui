@@ -28,7 +28,7 @@ public interface Registry {
      * @param serviceName serviceName
      * @return ServiceMeta
      */
-    ServiceMeta discovery(String serviceName);
+    ServiceMeta discovery(String serviceName, String methodName);
 
     /**
      * 注册中心销毁

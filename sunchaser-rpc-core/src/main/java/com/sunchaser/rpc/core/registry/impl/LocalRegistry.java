@@ -37,7 +37,7 @@ public class LocalRegistry implements Registry {
     }
 
     @Override
-    public ServiceMeta discovery(String serviceName) {
+    public ServiceMeta discovery(String serviceName, String methodName) {
         return services.get(serviceName);
     }
 
