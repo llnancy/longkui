@@ -1,7 +1,6 @@
 package com.sunchaser.rpc.core.serialize;
 
 import com.google.common.collect.Maps;
-import com.sunchaser.rpc.core.serialize.Serializer;
 import com.sunchaser.rpc.core.serialize.impl.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

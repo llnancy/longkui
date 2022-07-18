@@ -1,6 +1,13 @@
 package com.sunchaser.rpc.core.serialize.impl;
 
 import com.sunchaser.rpc.core.serialize.Serializer;
+import lombok.SneakyThrows;
+
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 基于XML的序列化器实现
@@ -16,9 +23,14 @@ public class XmlSerializer implements Serializer {
      * @param obj 待序列化的对象
      * @return 序列化后的byte字节数组
      */
+    @SneakyThrows
     @Override
     public <T> byte[] serialize(T obj) {
-        return new byte[0];
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+             XMLEncoder xmlEncoder = new XMLEncoder(bos, StandardCharsets.UTF_8.name(), true, 0)) {
+            xmlEncoder.writeObject(obj);
+            return bos.toByteArray();
+        }
     }
 
     /**
@@ -28,8 +40,13 @@ public class XmlSerializer implements Serializer {
      * @param clazz 待反序列化的class类型
      * @return 反序列化后的对象
      */
+    @SneakyThrows
     @Override
     public <T> T deserialize(byte[] data, Class<T> clazz) {
-        return null;
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
+             XMLDecoder xmlDecoder = new XMLDecoder(bis)) {
+            Object obj = xmlDecoder.readObject();
+            return clazz.cast(obj);
+        }
     }
 }
