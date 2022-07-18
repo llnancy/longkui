@@ -21,7 +21,13 @@ public class RpcResponse implements Serializable {
 
     private static final long serialVersionUID = -9107303026305544424L;
 
+    /**
+     * 请求成功时返回的数据
+     */
     private Object result;
 
+    /**
+     * 请求失败时返回的错误信息
+     */
     private String errorMsg;
 }
