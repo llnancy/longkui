@@ -22,6 +22,11 @@ public class RpcRequest implements Serializable {
     private static final long serialVersionUID = -4725744482727139470L;
 
     /**
+     * 服务版本号
+     */
+    private String version;
+
+    /**
      * 服务名称
      */
     private String serviceName;
