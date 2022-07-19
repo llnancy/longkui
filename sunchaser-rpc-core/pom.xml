@@ -17,13 +17,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <springboot.version>2.7.0</springboot.version>
-        <hessian.version>4.0.66</hessian.version>
-        <snappy.version>1.1.8.4</snappy.version>
         <guava.version>31.1-jre</guava.version>
         <collection4.version>4.4</collection4.version>
         <curator-x-discovery.version>5.3.0</curator-x-discovery.version>
+        <hessian.version>4.0.66</hessian.version>
         <kryo.version>5.3.0</kryo.version>
         <protostuff.version>1.8.0</protostuff.version>
+        <snappy.version>1.1.8.4</snappy.version>
     </properties>
 
     <dependencyManagement>
@@ -86,7 +86,7 @@
             <artifactId>hessian</artifactId>
             <version>${hessian.version}</version>
         </dependency>
-        <!-- JDK8 LocalDateTime Module -->
+        <!-- jackson-datatype-jsr310 -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
