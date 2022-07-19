@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Serializer Factory
+ * Serializer Factory（简单工厂模式）
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/12
