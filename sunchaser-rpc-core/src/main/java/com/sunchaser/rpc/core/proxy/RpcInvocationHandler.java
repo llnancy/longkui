@@ -6,6 +6,7 @@ import com.sunchaser.rpc.core.handler.RpcResponseHolder;
 import com.sunchaser.rpc.core.protocol.*;
 import com.sunchaser.rpc.core.registry.Registry;
 import com.sunchaser.rpc.core.registry.ServiceMeta;
+import com.sunchaser.rpc.core.serialize.ArrayElement;
 import com.sunchaser.rpc.core.transport.NettyRpcClient;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
@@ -15,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -52,12 +54,19 @@ public class RpcInvocationHandler implements InvocationHandler {
                 .sequenceId(sequenceId)
                 .build();
         String methodName = method.getName();
+        // kryo、protostuff等序列化框架会忽略数组中间索引的null元素，这里用特殊值代替null
+        ArrayElement.wrapArgs(args);
+
         RpcRequest rpcRequest = RpcRequest.builder()
                 .serviceName(serviceName)
                 .methodName(methodName)
                 .argTypes(method.getParameterTypes())
                 .args(args)
                 .build();
+
+        log.info("RpcInvocationHandler.invoke: args: {}", Arrays.toString(args));
+        log.info("RpcInvocationHandler.invoke: argTypes: {}", Arrays.toString(method.getParameterTypes()));
+
         RpcProtocol<RpcRequest> rpcProtocol = RpcProtocol.<RpcRequest>builder()
                 .rpcHeader(rpcHeader)
                 .content(rpcRequest)
