@@ -33,7 +33,7 @@ public class LocalRpc {
 
         // consumer
         HelloService helloService = RpcProxy.newInstance(HelloService.class, registry);
-        String hello = helloService.sayHello("SunChaser");
+        String hello = helloService.sayHi("SunChaser", null, 1L);
         log.info("sayHello result: {}", hello);
     }
 }

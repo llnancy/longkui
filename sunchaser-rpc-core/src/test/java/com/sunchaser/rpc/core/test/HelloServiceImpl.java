@@ -12,4 +12,9 @@ public class HelloServiceImpl implements HelloService {
     public String sayHello(String hi) {
         return "Hello:" + hi;
     }
+
+    @Override
+    public String sayHi(String hi, Integer time, Long ts) {
+        return hi + time + ts;
+    }
 }
