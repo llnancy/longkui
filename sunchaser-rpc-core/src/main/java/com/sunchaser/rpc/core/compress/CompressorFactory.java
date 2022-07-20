@@ -1,7 +1,7 @@
 package com.sunchaser.rpc.core.compress;
 
 import com.google.common.collect.Maps;
-import com.sunchaser.rpc.core.compress.impl.SnappyCompressor;
+import com.sunchaser.rpc.core.compress.impl.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
+ * Compressor Factory（简单工厂模式）
+ *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/14
  */
@@ -16,12 +18,21 @@ public class CompressorFactory {
 
     /**
      * 0000 0000 Snappy
-     * 0000 0001 ...
+     * 0000 0001 DEFLATE
+     * 0000 0010 Gzip
+     * 0000 0011 bzip2
+     * 0000 0100 LZ4
+     * 0000 0110 LZO
      * ......
      * <p>
      * 0000 1111 => 15 => 0xF
      * <p>
      * 0000 0000
+     * 0000 0001
+     * 0000 0010
+     * 0000 0011
+     * 0000 0100
+     * 0000 0101
      * ......
      */
     public static Compressor getCompressor(byte protocolInfo) {
@@ -33,6 +44,16 @@ public class CompressorFactory {
     enum CompressorEnum {
 
         SNAPPY((byte) 0x0, new SnappyCompressor()),
+
+        DEFLATE((byte) 0x1, new DeflateCompressor()),
+
+        GZIP((byte) 0x2, new GzipCompressor()),
+
+        BZIP2((byte) 0x3, new Bzip2Compressor()),
+
+        LZ4((byte) 0x4, new Lz4Compressor()),
+
+        LZO((byte) 0x5, new LzoCompressor()),
         ;
 
         private final byte val;

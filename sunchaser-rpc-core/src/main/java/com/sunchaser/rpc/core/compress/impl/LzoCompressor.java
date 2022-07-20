@@ -37,13 +37,13 @@ public class LzoCompressor extends AbstractCompressor {
      * @param data 压缩的数据
      * @return 原数据
      */
+    @SneakyThrows
     @Override
     protected byte[] doUnCompress(byte[] data) {
-        LzoDecompressor lzoDecompressor = LzoLibrary.getInstance().newDecompressor(LzoAlgorithm.LZO1X, LzoConstraint.SPEED);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ByteArrayInputStream bis = new ByteArrayInputStream(data);
-        LzoInputStream lzoIs = new LzoInputStream(bis, lzoDecompressor);
-        IoUtils.copy(lzoIs, bos);
-        return bos.toByteArray();
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+             LzoInputStream lzoIs = new LzoInputStream(new ByteArrayInputStream(data), LzoLibrary.getInstance().newDecompressor(LzoAlgorithm.LZO1X, LzoConstraint.SPEED))) {
+            IoUtils.copy(lzoIs, bos);
+            return bos.toByteArray();
+        }
     }
 }

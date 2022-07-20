@@ -8,7 +8,7 @@ import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 /**
- * 基于Deflate算法实现的压缩与解压缩
+ * 基于DEFLATE算法实现的压缩与解压缩
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/20
