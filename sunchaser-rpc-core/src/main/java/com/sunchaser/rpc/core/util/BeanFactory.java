@@ -12,6 +12,9 @@ import java.util.Map;
  */
 public final class BeanFactory {
 
+    private BeanFactory() {
+    }
+
     private static final Map<String, Object> BEANS_MAP = Maps.newHashMap();
 
     public static void register(String serviceName, Object service) {
