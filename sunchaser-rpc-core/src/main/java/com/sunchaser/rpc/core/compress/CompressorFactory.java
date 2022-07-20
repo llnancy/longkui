@@ -17,11 +17,12 @@ import java.util.Optional;
 public class CompressorFactory {
 
     /**
-     * 0000 0000 Snappy
-     * 0000 0001 DEFLATE
-     * 0000 0010 Gzip
-     * 0000 0011 bzip2
-     * 0000 0100 LZ4
+     * 0000 0000 None
+     * 0000 0001 Snappy
+     * 0000 0010 DEFLATE
+     * 0000 0011 Gzip
+     * 0000 0100 bzip2
+     * 0000 0101 LZ4
      * 0000 0110 LZO
      * ......
      * <p>
@@ -33,6 +34,7 @@ public class CompressorFactory {
      * 0000 0011
      * 0000 0100
      * 0000 0101
+     * 0000 0110
      * ......
      */
     public static Compressor getCompressor(byte protocolInfo) {
@@ -43,17 +45,19 @@ public class CompressorFactory {
     @AllArgsConstructor
     enum CompressorEnum {
 
-        SNAPPY((byte) 0x0, new SnappyCompressor()),
+        NONE((byte) 0x0, new NoneCompressor()),
 
-        DEFLATE((byte) 0x1, new DeflateCompressor()),
+        SNAPPY((byte) 0x1, new DeflateCompressor()),
 
-        GZIP((byte) 0x2, new GzipCompressor()),
+        DEFLATE((byte) 0x2, new GzipCompressor()),
 
-        BZIP2((byte) 0x3, new Bzip2Compressor()),
+        GZIP((byte) 0x3, new Bzip2Compressor()),
 
-        LZ4((byte) 0x4, new Lz4Compressor()),
+        BZIP2((byte) 0x4, new Lz4Compressor()),
 
-        LZO((byte) 0x5, new LzoCompressor()),
+        LZ4((byte) 0x5, new LzoCompressor()),
+
+        LZO((byte) 0x6, new LzoCompressor()),
         ;
 
         private final byte val;

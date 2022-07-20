@@ -24,6 +24,9 @@
         <kryo.version>5.3.0</kryo.version>
         <protostuff.version>1.8.0</protostuff.version>
         <snappy.version>1.1.8.4</snappy.version>
+        <commons-compress.version>1.21</commons-compress.version>
+        <lz4-java.version>1.8.0</lz4-java.version>
+        <lzo-core.version>1.0.6</lzo-core.version>
     </properties>
 
     <dependencyManagement>
@@ -119,19 +122,19 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.21</version>
+            <version>${commons-compress.version}</version>
         </dependency>
         <!-- lz4-java -->
         <dependency>
             <groupId>org.lz4</groupId>
             <artifactId>lz4-java</artifactId>
-            <version>1.8.0</version>
+            <version>${lz4-java.version}</version>
         </dependency>
         <!-- lzo-core -->
         <dependency>
             <groupId>org.anarres.lzo</groupId>
             <artifactId>lzo-core</artifactId>
-            <version>1.0.6</version>
+            <version>${lzo-core.version}</version>
         </dependency>
     </dependencies>
 </project>
