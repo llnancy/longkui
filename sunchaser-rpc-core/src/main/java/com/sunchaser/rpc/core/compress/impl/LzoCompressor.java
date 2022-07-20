@@ -2,19 +2,18 @@ package com.sunchaser.rpc.core.compress.impl;
 
 import com.sunchaser.rpc.core.util.IoUtils;
 import lombok.SneakyThrows;
+import org.anarres.lzo.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
- * 基于Gzip算法实现的压缩与解压缩
+ * 基于lzo（Lempel-Ziv-Oberhumer）算法实现的压缩与解压缩
  *
  * @author sunchaser admin@lilu.org.cn
- * @since JDK8 2022/7/15
+ * @since JDK8 2022/7/20
  */
-public class GzipCompressor extends AbstractCompressor {
+public class LzoCompressor extends AbstractCompressor {
 
     /**
      * 将数据进行压缩
@@ -26,8 +25,8 @@ public class GzipCompressor extends AbstractCompressor {
     @Override
     protected byte[] doCompress(byte[] data) {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             GZIPOutputStream gzip = new GZIPOutputStream(bos)) {
-            gzip.write(data);
+             LzoOutputStream lzoOs = new LzoOutputStream(bos, LzoLibrary.getInstance().newCompressor(LzoAlgorithm.LZO1X, null))) {
+            lzoOs.write(data);
             return bos.toByteArray();
         }
     }
@@ -38,13 +37,13 @@ public class GzipCompressor extends AbstractCompressor {
      * @param data 压缩的数据
      * @return 原数据
      */
-    @SneakyThrows
     @Override
     protected byte[] doUnCompress(byte[] data) {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             GZIPInputStream unzip = new GZIPInputStream(new ByteArrayInputStream(data))) {
-            IoUtils.copy(unzip, bos);
-            return bos.toByteArray();
-        }
+        LzoDecompressor lzoDecompressor = LzoLibrary.getInstance().newDecompressor(LzoAlgorithm.LZO1X, LzoConstraint.SPEED);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ByteArrayInputStream bis = new ByteArrayInputStream(data);
+        LzoInputStream lzoIs = new LzoInputStream(bis, lzoDecompressor);
+        IoUtils.copy(lzoIs, bos);
+        return bos.toByteArray();
     }
 }

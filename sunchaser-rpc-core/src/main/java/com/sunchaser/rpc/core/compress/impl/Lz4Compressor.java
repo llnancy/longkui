@@ -2,19 +2,20 @@ package com.sunchaser.rpc.core.compress.impl;
 
 import com.sunchaser.rpc.core.util.IoUtils;
 import lombok.SneakyThrows;
+import net.jpountz.lz4.LZ4BlockInputStream;
+import net.jpountz.lz4.LZ4BlockOutputStream;
+import net.jpountz.lz4.LZ4Factory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
- * 基于Gzip算法实现的压缩与解压缩
+ * 基于lz4算法实现的压缩与解压缩
  *
  * @author sunchaser admin@lilu.org.cn
- * @since JDK8 2022/7/15
+ * @since JDK8 2022/7/20
  */
-public class GzipCompressor extends AbstractCompressor {
+public class Lz4Compressor extends AbstractCompressor {
 
     /**
      * 将数据进行压缩
@@ -26,8 +27,8 @@ public class GzipCompressor extends AbstractCompressor {
     @Override
     protected byte[] doCompress(byte[] data) {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             GZIPOutputStream gzip = new GZIPOutputStream(bos)) {
-            gzip.write(data);
+             LZ4BlockOutputStream lz4Bos = new LZ4BlockOutputStream(bos, 2048, LZ4Factory.fastestInstance().fastCompressor())) {
+            lz4Bos.write(data);
             return bos.toByteArray();
         }
     }
@@ -42,8 +43,8 @@ public class GzipCompressor extends AbstractCompressor {
     @Override
     protected byte[] doUnCompress(byte[] data) {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             GZIPInputStream unzip = new GZIPInputStream(new ByteArrayInputStream(data))) {
-            IoUtils.copy(unzip, bos);
+             LZ4BlockInputStream lz4Bis = new LZ4BlockInputStream(new ByteArrayInputStream(data), LZ4Factory.fastestInstance().fastDecompressor())) {
+            IoUtils.copy(lz4Bis, bos);
             return bos.toByteArray();
         }
     }

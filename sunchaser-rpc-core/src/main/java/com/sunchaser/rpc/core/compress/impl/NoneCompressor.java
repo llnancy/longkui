@@ -1,14 +1,12 @@
 package com.sunchaser.rpc.core.compress.impl;
 
-import com.sunchaser.rpc.core.compress.Compressor;
-
 /**
  * 不进行压缩
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/14
  */
-public class NoneCompressor implements Compressor {
+public class NoneCompressor extends AbstractCompressor {
 
     /**
      * 将数据进行压缩
@@ -17,8 +15,8 @@ public class NoneCompressor implements Compressor {
      * @return 压缩后的数据
      */
     @Override
-    public byte[] compress(byte[] data) {
-        return new byte[0];
+    protected byte[] doCompress(byte[] data) {
+        return data;
     }
 
     /**
@@ -28,7 +26,7 @@ public class NoneCompressor implements Compressor {
      * @return 原数据
      */
     @Override
-    public byte[] unCompress(byte[] data) {
-        return new byte[0];
+    protected byte[] doUnCompress(byte[] data) {
+        return data;
     }
 }
