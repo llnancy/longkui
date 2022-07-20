@@ -115,5 +115,23 @@
             <artifactId>snappy-java</artifactId>
             <version>${snappy.version}</version>
         </dependency>
+        <!-- commons-compress -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.21</version>
+        </dependency>
+        <!-- lz4-java -->
+        <dependency>
+            <groupId>org.lz4</groupId>
+            <artifactId>lz4-java</artifactId>
+            <version>1.8.0</version>
+        </dependency>
+        <!-- lzo-core -->
+        <dependency>
+            <groupId>org.anarres.lzo</groupId>
+            <artifactId>lzo-core</artifactId>
+            <version>1.0.6</version>
+        </dependency>
     </dependencies>
 </project>
