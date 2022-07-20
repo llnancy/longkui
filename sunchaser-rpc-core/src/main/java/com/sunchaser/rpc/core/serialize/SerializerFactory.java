@@ -22,6 +22,7 @@ public class SerializerFactory {
      * 0010 0000 XML
      * 0011 0000 PROTOSTUFF
      * 0100 0000 KRYO
+     * ......
      * <p>
      * 1111 0000 => 取反 0000 1111 => 加一 0001 0000 => -16 => 0xF0
      * <p>
@@ -30,6 +31,7 @@ public class SerializerFactory {
      * 0010 0000
      * 0011 0000
      * 0100 0000
+     * ......
      */
     public static Serializer getSerializer(byte protocolInfo) {
         return SerializerEnum.match((byte) (protocolInfo & 0xF0)).getSerializer();
