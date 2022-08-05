@@ -20,31 +20,31 @@ public class RpcContext {
      * version: 0000 01
      * type: 00
      */
-    public static final byte PROTOCOL_HEADER = 0x4;
+    public static final byte DEFAULT_VERSION_AND_TYPE = 0x4;
 
     /**
      * 0000 0000
-     * serialize: Hessian2
      * compress: Snappy
+     * serialize: Hessian2
      */
-    public static final byte PROTOCOL_INFO = 0x0;
+    public static final byte DEFAULT_COMPRESS_SERIALIZE = 0x0;
 
     public static final int HEARTBEAT_CODE = -1;
 
     public static final long DEFAULT_TIMEOUT = 5L;
 
-    public static boolean isHeartbeat(byte protocolHeader) {
-        return (protocolHeader & 3) == 2;
+    public static boolean isHeartbeat(byte versionAndType) {
+        return (versionAndType & 3) == 2;
     }
 
     /**
-     * 转换请求类型协议头为响应类型协议头
+     * 转换请求类型为响应类型
      * 或运算：如果相对应位都是 0，则结果为 0，否则为 1
      *
-     * @param protocolHeader 请求类型协议头
-     * @return 响应类型协议头
+     * @param versionAndType 协议版本号+消息请求类型
+     * @return 转化为响应类型
      */
-    public static byte transformToResponse(byte protocolHeader) {
-        return (byte) (protocolHeader | 1);
+    public static byte transformToResponse(byte versionAndType) {
+        return (byte) (versionAndType | 1);
     }
 }

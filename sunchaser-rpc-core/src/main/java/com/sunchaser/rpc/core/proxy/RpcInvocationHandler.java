@@ -49,8 +49,8 @@ public class RpcInvocationHandler implements InvocationHandler {
         long sequenceId = RpcResponseHolder.generateSequenceId();
         RpcHeader rpcHeader = RpcHeader.builder()
                 .magic(RpcContext.MAGIC)
-                .protocolHeader(RpcContext.PROTOCOL_HEADER)
-                .protocolInfo(RpcContext.PROTOCOL_INFO)
+                .versionAndType(RpcContext.DEFAULT_VERSION_AND_TYPE)
+                .compressAndSerialize(RpcContext.DEFAULT_COMPRESS_SERIALIZE)
                 .sequenceId(sequenceId)
                 .build();
         String methodName = method.getName();

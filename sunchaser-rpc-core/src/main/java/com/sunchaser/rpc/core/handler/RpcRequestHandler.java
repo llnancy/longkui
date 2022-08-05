@@ -34,13 +34,14 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<R
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcRequest> msg) throws Exception {
         RpcHeader rpcHeader = msg.getRpcHeader();
-        if (RpcContext.isHeartbeat(rpcHeader.getProtocolHeader())) {
+        byte versionAndType = rpcHeader.getVersionAndType();
+        if (RpcContext.isHeartbeat(versionAndType)) {
             log.debug("*********** sunchaser-rpc netty RpcRequestHandler read heartbeat.");
             return;
         }
 
         // 将消息类型从请求转为响应
-        rpcHeader.setProtocolHeader(RpcContext.transformToResponse(rpcHeader.getProtocolHeader()));
+        rpcHeader.setVersionAndType(RpcContext.transformToResponse(versionAndType));
 
         Runnable rpc = () -> {
             try {

@@ -18,62 +18,84 @@ public class CompressorFactory {
 
     /**
      * 0000 0000 None
-     * 0000 0001 Snappy
-     * 0000 0010 DEFLATE
-     * 0000 0011 Gzip
-     * 0000 0100 bzip2
-     * 0000 0101 LZ4
-     * 0000 0110 LZO
+     * 0001 0000 Snappy
+     * 0010 0000 DEFLATE
+     * 0011 0000 Gzip
+     * 0100 0000 bzip2
+     * 0101 0000 LZ4
+     * 0110 0000 LZO
      * ......
      * <p>
-     * 0000 1111 => 15 => 0xF
+     * 1111 0000 => 取反 0000 1111 => 加一 0001 0000 => -16 => 0xF0
      * <p>
      * 0000 0000
-     * 0000 0001
-     * 0000 0010
-     * 0000 0011
-     * 0000 0100
-     * 0000 0101
-     * 0000 0110
+     * 0001 0000
+     * 0010 0000
+     * 0011 0000
+     * 0100 0000
+     * 0101 0000
+     * 0110 0000
      * ......
      */
-    public static Compressor getCompressor(byte protocolInfo) {
-        return CompressorEnum.match((byte) (protocolInfo & 0xF)).getCompressor();
+    public static Compressor getCompressor(byte compressAndSerialize) {
+        return CompressorEnum.match((byte) (compressAndSerialize & 0xF)).getCompressor();
     }
 
     @Getter
     @AllArgsConstructor
     enum CompressorEnum {
 
+        /**
+         * None
+         */
         NONE((byte) 0x0, new NoneCompressor()),
 
-        SNAPPY((byte) 0x1, new DeflateCompressor()),
+        /**
+         * Snappy算法
+         */
+        SNAPPY((byte) 0x10, new DeflateCompressor()),
 
-        DEFLATE((byte) 0x2, new GzipCompressor()),
+        /**
+         * DEFLATE算法
+         */
+        DEFLATE((byte) 0x20, new GzipCompressor()),
 
-        GZIP((byte) 0x3, new Bzip2Compressor()),
+        /**
+         * Gzip算法
+         */
+        GZIP((byte) 0x30, new Bzip2Compressor()),
 
-        BZIP2((byte) 0x4, new Lz4Compressor()),
+        /**
+         * bzip2算法
+         */
+        BZIP2((byte) 0x40, new Lz4Compressor()),
 
-        LZ4((byte) 0x5, new LzoCompressor()),
+        /**
+         * LZ4算法
+         */
+        LZ4((byte) 0x50, new LzoCompressor()),
 
-        LZO((byte) 0x6, new LzoCompressor()),
+        /**
+         * LZO算法
+         */
+        LZO((byte) 0x60, new LzoCompressor()),
+
         ;
 
         private final byte val;
 
         private final Compressor compressor;
 
-        private static final Map<Byte, CompressorEnum> enumMap = Maps.newHashMap();
+        private static final Map<Byte, CompressorEnum> ENUM_MAP = Maps.newHashMap();
 
         static {
             for (CompressorEnum compressorEnum : CompressorEnum.values()) {
-                enumMap.put(compressorEnum.val, compressorEnum);
+                ENUM_MAP.put(compressorEnum.val, compressorEnum);
             }
         }
 
-        public static CompressorEnum match(byte protocolInfo) {
-            return Optional.ofNullable(enumMap.get(protocolInfo))
+        public static CompressorEnum match(byte val) {
+            return Optional.ofNullable(ENUM_MAP.get(val))
                     .orElse(SNAPPY);
         }
     }

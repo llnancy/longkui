@@ -17,27 +17,39 @@ import lombok.Getter;
 @Getter
 public enum RpcMessageTypeEnum {
 
+    /**
+     * 请求
+     */
     REQUEST,
 
+    /**
+     * 响应
+     */
     RESPONSE,
 
+    /**
+     * 心跳
+     */
     HEARTBEAT,
+
     ;
+
+    private static final byte MESSAGE_TYPE_FACTOR = 3;
 
     /**
      * 00：REQUEST
      * 01：RESPONSE
      * 11：HEARTBEAT
      */
-    public static RpcMessageTypeEnum match(byte protocolHeader) {
-        if ((protocolHeader & 3) == 0) {
+    public static RpcMessageTypeEnum match(byte versionAndType) {
+        if ((versionAndType & MESSAGE_TYPE_FACTOR) == 0) {
             return REQUEST;
-        } else if ((protocolHeader & 3) == 1) {
+        } else if ((versionAndType & MESSAGE_TYPE_FACTOR) == 1) {
             return RESPONSE;
-        } else if (RpcContext.isHeartbeat(protocolHeader)) {
+        } else if (RpcContext.isHeartbeat(versionAndType)) {
             return HEARTBEAT;
         } else {
-            throw new IllegalArgumentException("protocolHeader " + protocolHeader + " is illegal.");
+            throw new IllegalArgumentException("versionAndType " + versionAndType + " is illegal.");
         }
     }
 }

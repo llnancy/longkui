@@ -18,54 +18,70 @@ public class SerializerFactory {
 
     /**
      * 0000 0000 HESSIAN2
-     * 0001 0000 JSON
-     * 0010 0000 XML
-     * 0011 0000 PROTOSTUFF
-     * 0100 0000 KRYO
+     * 0000 0001 JSON
+     * 0000 0010 XML
+     * 0000 0011 PROTOSTUFF
+     * 0000 0100 KRYO
      * ......
      * <p>
-     * 1111 0000 => 取反 0000 1111 => 加一 0001 0000 => -16 => 0xF0
+     * 0000 1111 => 15 => 0xF
      * <p>
      * 0000 0000
-     * 0001 0000
-     * 0010 0000
-     * 0011 0000
-     * 0100 0000
+     * 0000 0001
+     * 0000 0010
+     * 0000 0011
+     * 0000 0100
      * ......
      */
-    public static Serializer getSerializer(byte protocolInfo) {
-        return SerializerEnum.match((byte) (protocolInfo & 0xF0)).getSerializer();
+    public static Serializer getSerializer(byte compressAndSerialize) {
+        return SerializerEnum.match((byte) (compressAndSerialize & 0xF0)).getSerializer();
     }
 
     @Getter
     @AllArgsConstructor
     enum SerializerEnum {
 
+        /**
+         * hessian2
+         */
         HESSIAN2((byte) 0x0, new Hessian2Serializer()),
 
-        JSON((byte) 0x10, new JsonSerializer()),
+        /**
+         * json
+         */
+        JSON((byte) 0x1, new JsonSerializer()),
 
-        XML((byte) 0x20, new XmlSerializer()),
+        /**
+         * xml
+         */
+        XML((byte) 0x2, new XmlSerializer()),
 
-        PROTOSTUFF((byte) 0x30, new ProtostuffSerializer()),
+        /**
+         * protostuff
+         */
+        PROTOSTUFF((byte) 0x3, new ProtostuffSerializer()),
 
-        KRYO((byte) 0x40, new KryoSerializer()),
+        /**
+         * kryo
+         */
+        KRYO((byte) 0x4, new KryoSerializer()),
+
         ;
 
         private final byte val;
 
         private final Serializer serializer;
 
-        private static final Map<Byte, SerializerEnum> enumMap = Maps.newHashMap();
+        private static final Map<Byte, SerializerEnum> ENUM_MAP = Maps.newHashMap();
 
         static {
             for (SerializerEnum serializerEnum : SerializerEnum.values()) {
-                enumMap.put(serializerEnum.val, serializerEnum);
+                ENUM_MAP.put(serializerEnum.val, serializerEnum);
             }
         }
 
         public static SerializerEnum match(byte val) {
-            return Optional.ofNullable(enumMap.get(val))
+            return Optional.ofNullable(ENUM_MAP.get(val))
                     .orElse(HESSIAN2);
         }
     }
