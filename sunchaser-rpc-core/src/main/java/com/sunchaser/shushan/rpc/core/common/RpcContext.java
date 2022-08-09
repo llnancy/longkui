@@ -34,7 +34,7 @@ public class RpcContext {
     public static final long DEFAULT_TIMEOUT = 5L;
 
     public static boolean isHeartbeat(byte versionAndType) {
-        return (versionAndType & 3) == 2;
+        return (versionAndType & 3) == 3;
     }
 
     /**

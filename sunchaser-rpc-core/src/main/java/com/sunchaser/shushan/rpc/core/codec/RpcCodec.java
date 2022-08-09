@@ -50,6 +50,7 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
         }
         Compressor compressor = CompressorFactory.getCompressor(compressAndSerialize);
         Serializer serializer = SerializerFactory.getSerializer(compressAndSerialize);
+        // 序列化后压缩
         byte[] data = compressor.compress(serializer.serialize(content));
         out.writeInt(data.length);
         out.writeBytes(data);
@@ -61,21 +62,28 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
         if (in.readableBytes() < RpcContext.HEADER_SIZE) {
             return;
         }
+        // 标记读指针位置
         in.markReaderIndex();
         byte magic = in.readByte();
         if (magic != RpcContext.MAGIC) {
+            // 魔数不匹配，重置读指针
             in.resetReaderIndex();
             throw new IllegalArgumentException("magic: " + magic + " is illegal.");
         }
+        // 版本号+消息类型
         byte versionAndType = in.readByte();
+        // 压缩+序列化方式
         byte compressAndSerialize = in.readByte();
+        // 序列ID
         long sequenceId = in.readLong();
+        // 消息体长度
         int bodyLength = in.readInt();
         if (in.readableBytes() < bodyLength) {
             // 可读的数据长度小于消息体长度，丢弃此次读取并重置读指针位置
             in.resetReaderIndex();
             return;
         }
+        // 读取bodyLength个字节
         byte[] data = new byte[bodyLength];
         in.readBytes(data);
         RpcHeader rpcHeader = RpcHeader.builder()
@@ -85,6 +93,7 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
                 .sequenceId(sequenceId)
                 .bodyLength(bodyLength)
                 .build();
+        // 根据消息类型执行不同的解码策略
         RpcMessageDecoderEnum.match(RpcMessageTypeEnum.match(versionAndType))
                 .decode(compressAndSerialize, rpcHeader, data, out);
     }
@@ -154,8 +163,8 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
                                            Class<I> clazz) {
             Compressor compressor = CompressorFactory.getCompressor(compressAndSerialize);
             Serializer serializer = SerializerFactory.getSerializer(compressAndSerialize);
+            // 解压缩后反序列化
             I content = serializer.deserialize(compressor.unCompress(data), clazz);
-            System.out.println("deserialize " + content);
             return RpcProtocol.<I>builder()
                     .rpcHeader(rpcHeader)
                     .content(content)
