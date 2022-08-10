@@ -26,6 +26,6 @@ class KryoSerializerTest {
         Serializer serializer = new KryoSerializer();
         byte[] serialize = serializer.serialize(REQUEST);
         RpcRequest deserialize = serializer.deserialize(serialize, RpcRequest.class);
-        log.info("deserialize: {}", deserialize);
+        LOGGER.info("deserialize: {}", deserialize);
     }
 }

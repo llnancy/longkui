@@ -18,6 +18,6 @@ public class Consumer {
         Registry registry = new ZookeeperRegistry();
         HelloService helloService = RpcProxy.newInstance(HelloService.class, registry);
         String hello = helloService.sayHello("SunChaser");
-        log.info("sayHello result: {}", hello);
+        LOGGER.info("sayHello result: {}", hello);
     }
 }

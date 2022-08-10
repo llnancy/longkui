@@ -28,6 +28,6 @@ class ProtostuffSerializerTest {
         Serializer serializer = new ProtostuffSerializer();
         byte[] serialize = serializer.serialize(REQUEST);
         RpcRequest deserialize = serializer.deserialize(serialize, RpcRequest.class);
-        log.info("deserialize: {}", deserialize);
+        LOGGER.info("deserialize: {}", deserialize);
     }
 }

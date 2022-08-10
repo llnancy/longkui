@@ -50,7 +50,7 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectionTimeout)
                 .option(ChannelOption.SO_KEEPALIVE, true)
-                .option(ChannelOption.TCP_NODELAY, true)// 避免tcp nagle算法的发送延迟
+                .option(ChannelOption.TCP_NODELAY, true)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
@@ -66,7 +66,7 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
             ChannelFuture future = bootstrap.connect(host, port);
             boolean notTimeout = future.awaitUninterruptibly(connectionTimeout, TimeUnit.MILLISECONDS);
             if (!notTimeout) {
-                log.error("Rpc Netty client connect remote address[{}:{}] with timeout of {}ms", host, port, connectionTimeout);
+                LOGGER.error("Rpc Netty client connect remote address[{}:{}] with timeout of {}ms", host, port, connectionTimeout);
             }
             if (notTimeout && future.isSuccess()) {
                 Channel newChannel = future.channel();
@@ -74,7 +74,7 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
                     // close old channel
                     Channel oldChannel = NettyRpcClient.this.channel;
                     if (Objects.nonNull(oldChannel)) {
-                        log.info("Close old netty channel " + oldChannel + " on create new netty channel " + newChannel);
+                        LOGGER.info("Close old netty channel " + oldChannel + " on create new netty channel " + newChannel);
                         oldChannel.close();
                         // todo remove channel cache
                     }
@@ -83,15 +83,15 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
                 }
             }
             if (Objects.nonNull(channel) && channel.isActive()) {
-                log.info("Rpc netty client started. {}", channel);
+                LOGGER.info("Rpc netty client started. {}", channel);
                 return true;
             }
             Throwable cause = future.cause();
             if (Objects.nonNull(cause)) {
-                log.error("Rpc netty client failed to connect server [{}:{}]", host, port, cause);
+                LOGGER.error("Rpc netty client failed to connect server [{}:{}]", host, port, cause);
             }
         } catch (Exception e) {
-            log.error("Rpc netty client failed to connect server [{}:{}] with timeout of {}ms", host, port, connectionTimeout, e);
+            LOGGER.error("Rpc netty client failed to connect server [{}:{}] with timeout of {}ms", host, port, connectionTimeout, e);
         }
         return false;
     }
@@ -101,7 +101,7 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
         channel.writeAndFlush(rpcProtocol)
                 .addListener(promise -> {
                     if (!promise.isSuccess()) {
-                        log.error("Rpc netty client channel writeAndFlush error.", promise.cause());
+                        LOGGER.error("Rpc netty client channel writeAndFlush error.", promise.cause());
                     }
                 });
     }

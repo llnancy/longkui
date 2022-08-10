@@ -3,11 +3,11 @@ package com.sunchaser.shushan.rpc.core.proxy;
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.handler.RpcResponseHolder;
+import com.sunchaser.shushan.rpc.core.protocol.*;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMeta;
 import com.sunchaser.shushan.rpc.core.serialize.ArrayElement;
 import com.sunchaser.shushan.rpc.core.transport.NettyRpcClient;
-import com.sunchaser.shushan.rpc.core.protocol.*;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Promise;
@@ -64,8 +64,10 @@ public class RpcInvocationHandler implements InvocationHandler {
                 .args(args)
                 .build();
 
-        log.info("RpcInvocationHandler.invoke: args: {}", Arrays.toString(args));
-        log.info("RpcInvocationHandler.invoke: argTypes: {}", Arrays.toString(method.getParameterTypes()));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("RpcInvocationHandler.invoke: args: {}", Arrays.toString(args));
+            LOGGER.debug("RpcInvocationHandler.invoke: argTypes: {}", Arrays.toString(method.getParameterTypes()));
+        }
 
         RpcProtocol<RpcRequest> rpcProtocol = RpcProtocol.<RpcRequest>builder()
                 .rpcHeader(rpcHeader)
@@ -87,7 +89,7 @@ public class RpcInvocationHandler implements InvocationHandler {
         RpcResponse rpcResponse = timeout == 0 ? promise.get() : promise.get(timeout, TimeUnit.MILLISECONDS);
         String errorMsg = rpcResponse.getErrorMsg();
         if (StringUtils.isNotBlank(errorMsg)) {
-            log.error("rpc invoke failed, errorMsg: {}", errorMsg);
+            LOGGER.error("rpc invoke failed, errorMsg: {}", errorMsg);
             throw new RpcException(errorMsg);
         }
         return rpcResponse.getResult();

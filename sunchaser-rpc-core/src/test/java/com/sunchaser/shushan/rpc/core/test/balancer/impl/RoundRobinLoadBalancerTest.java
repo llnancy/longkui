@@ -22,7 +22,7 @@ class RoundRobinLoadBalancerTest {
         LoadBalancer loadBalancer = new RoundRobinLoadBalancer();
         for (int i = 0; i < 7; i++) {
             Invoker<String> select = loadBalancer.select(LoadBalancer.wrap(Lists.newArrayList("A", "B", "C"), 5, 1, 1));
-            log.info("select: {}", select.getNode());
+            LOGGER.info("select: {}", select.getNode());
         }
     }
 
@@ -31,7 +31,7 @@ class RoundRobinLoadBalancerTest {
         LoadBalancer loadBalancer = new RoundRobinLoadBalancer();
         for (int i = 0; i < 7; i++) {
             Invoker<String> select = loadBalancer.select(LoadBalancer.wrap(Lists.newArrayList("A", "B", "C"), 1, 1, 1));
-            log.info("select: {}", select.getNode());
+            LOGGER.info("select: {}", select.getNode());
         }
     }
 }

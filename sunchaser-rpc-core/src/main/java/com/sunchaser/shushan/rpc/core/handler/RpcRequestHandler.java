@@ -36,7 +36,9 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<R
         RpcHeader rpcHeader = msg.getRpcHeader();
         byte versionAndType = rpcHeader.getVersionAndType();
         if (RpcContext.isHeartbeat(versionAndType)) {
-            log.debug("*********** sunchaser-rpc netty RpcRequestHandler read heartbeat.");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("*********** sunchaser-rpc netty RpcRequestHandler read heartbeat.");
+            }
             return;
         }
 
@@ -48,19 +50,21 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<R
                 RpcProtocol<RpcResponse> rpcProtocol = invokeService(msg);
                 ctx.writeAndFlush(rpcProtocol);
             } catch (Exception e) {
-                handlerException(ctx, rpcHeader, e);
+                handleException(ctx, rpcHeader, e);
             }
         };
 
         if (Objects.nonNull(requestHandlerPool)) {
+            // 业务线程池中执行
             requestHandlerPool.execute(rpc);
         } else {
+            // 业务线程池未被定义，直接在IO线程执行
             rpc.run();
         }
     }
 
-    private void handlerException(ChannelHandlerContext ctx, RpcHeader rpcHeader, Exception e) {
-        log.error("process request {} error", rpcHeader.getSequenceId(), e);
+    private void handleException(ChannelHandlerContext ctx, RpcHeader rpcHeader, Exception e) {
+        LOGGER.error("process request {} error", rpcHeader.getSequenceId(), e);
         RpcProtocol<RpcResponse> rpcProtocol = RpcProtocol.<RpcResponse>builder()
                 .rpcHeader(rpcHeader)
                 .content(RpcResponse.builder()

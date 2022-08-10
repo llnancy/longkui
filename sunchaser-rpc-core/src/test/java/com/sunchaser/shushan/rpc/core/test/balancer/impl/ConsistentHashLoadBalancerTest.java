@@ -21,7 +21,7 @@ class ConsistentHashLoadBalancerTest {
         LoadBalancer loadBalancer = new ConsistentHashLoadBalancer();
         for (int i = 0; i < 7; i++) {
             Invoker<String> select = loadBalancer.select(LoadBalancer.wrap(Lists.newArrayList("A", "B", "C")), "Abc" + i);
-            log.info("select: {}", select.getNode());
+            LOGGER.info("select: {}", select.getNode());
         }
     }
 }
