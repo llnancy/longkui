@@ -5,9 +5,7 @@ import com.sunchaser.shushan.rpc.core.handler.RpcResponseHandler;
 import com.sunchaser.shushan.rpc.core.protocol.RpcProtocol;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
@@ -30,27 +28,29 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
 
     public static final int DEFAULT_CONNECTION_TIMEOUT = 3000;
 
-    public NettyRpcClient(String host, Integer port) {
-        this(host, port, DEFAULT_CONNECTION_TIMEOUT);
+    private static final int DEFAULT_IO_THREADS = Math.min(Runtime.getRuntime().availableProcessors() + 1, 32);
+
+    public NettyRpcClient() {
+        this(DEFAULT_CONNECTION_TIMEOUT);
     }
 
-    public NettyRpcClient(String host, Integer port, Integer connectionTimeout) {
-        this(host, port, connectionTimeout, 0);
+    public NettyRpcClient(Integer connectionTimeout) {
+        this(connectionTimeout, DEFAULT_IO_THREADS);
     }
 
-    public NettyRpcClient(String host, Integer port, Integer connectionTimeout, int nThreads) {
-        super(host, port, connectionTimeout);
+    public NettyRpcClient(Integer connectionTimeout, int nThreads) {
+        super(connectionTimeout);
         this.bootstrap = new Bootstrap();
-        this.eventLoopGroup = new NioEventLoopGroup(nThreads);
-        configBootstrap();
+        this.eventLoopGroup = NettyEventLoopFactory.eventLoopGroup(nThreads, "NettyClientWorker");
+        initBootstrap();
     }
 
-    private void configBootstrap() {
+    private void initBootstrap() {
         bootstrap.group(eventLoopGroup)
-                .channel(NioSocketChannel.class)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectionTimeout)
+                .channel(NettyEventLoopFactory.socketChannelClass())
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Math.max(DEFAULT_CONNECTION_TIMEOUT, connectionTimeout))
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
@@ -61,7 +61,7 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
                 });
     }
 
-    public boolean connect() {
+    public void connect(String host, Integer port) {
         try {
             ChannelFuture future = bootstrap.connect(host, port);
             boolean notTimeout = future.awaitUninterruptibly(connectionTimeout, TimeUnit.MILLISECONDS);
@@ -84,7 +84,6 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
             }
             if (Objects.nonNull(channel) && channel.isActive()) {
                 LOGGER.info("Rpc netty client started. {}", channel);
-                return true;
             }
             Throwable cause = future.cause();
             if (Objects.nonNull(cause)) {
@@ -93,7 +92,6 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
         } catch (Exception e) {
             LOGGER.error("Rpc netty client failed to connect server [{}:{}] with timeout of {}ms", host, port, connectionTimeout, e);
         }
-        return false;
     }
 
     @Override

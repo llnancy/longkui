@@ -1,6 +1,5 @@
 package com.sunchaser.shushan.rpc.core.test;
 
-import com.sunchaser.shushan.rpc.core.proxy.RpcProxy;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMeta;
 import com.sunchaser.shushan.rpc.core.registry.impl.LocalRegistry;

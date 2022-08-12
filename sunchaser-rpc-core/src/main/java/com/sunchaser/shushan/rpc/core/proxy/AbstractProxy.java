@@ -11,41 +11,43 @@ import com.sunchaser.shushan.rpc.core.transport.NettyRpcClient;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Promise;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 基于JDK的动态代理实现
+ * an abstract proxy impl
  *
  * @author sunchaser admin@lilu.org.cn
- * @since JDK8 2022/7/15
+ * @since JDK8 2022/8/12
  */
+@Getter
 @Slf4j
-public class RpcInvocationHandler implements InvocationHandler {
+public abstract class AbstractProxy {
 
     private final String serviceName;
 
     private final Registry registry;
 
-    private final int timeout;
+    private final Integer timeout;
 
-    public RpcInvocationHandler(String serviceName, Registry registry) {
+    private final NettyRpcClient<RpcRequest> nettyRpcClient = new NettyRpcClient<>();
+
+    public AbstractProxy(String serviceName, Registry registry) {
         this(serviceName, registry, 0);
     }
 
-    public RpcInvocationHandler(String serviceName, Registry registry, int timeout) {
+    public AbstractProxy(String serviceName, Registry registry, Integer timeout) {
         this.serviceName = serviceName;
         this.registry = registry;
         this.timeout = timeout;
     }
 
-    @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    protected Object proxyInvoke(Method method, Object[] args) throws Throwable {
         long sequenceId = RpcResponseHolder.generateSequenceId();
         RpcHeader rpcHeader = RpcHeader.builder()
                 .magic(RpcContext.MAGIC)
@@ -65,22 +67,23 @@ public class RpcInvocationHandler implements InvocationHandler {
                 .build();
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("RpcInvocationHandler.invoke: args: {}", Arrays.toString(args));
-            LOGGER.debug("RpcInvocationHandler.invoke: argTypes: {}", Arrays.toString(method.getParameterTypes()));
+            LOGGER.debug("AbstractProxy#proxyInvoke: args: {}", Arrays.toString(args));
+            LOGGER.debug("AbstractProxy#proxyInvoke: argTypes: {}", Arrays.toString(method.getParameterTypes()));
         }
 
         RpcProtocol<RpcRequest> rpcProtocol = RpcProtocol.<RpcRequest>builder()
                 .rpcHeader(rpcHeader)
                 .content(rpcRequest)
                 .build();
+
         // 服务发现
         ServiceMeta serviceMeta = registry.discovery(serviceName, methodName);
         // rpc调用结果future对象
         RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()));
         RpcResponseHolder.putRpcFuture(sequenceId, rpcFuture);
-        NettyRpcClient<RpcRequest> nettyRpcClient = new NettyRpcClient<>(serviceMeta.getAddress(), serviceMeta.getPort());
+
         // todo 连接复用
-        nettyRpcClient.connect();
+        nettyRpcClient.connect(serviceMeta.getAddress(), serviceMeta.getPort());
         // invoke
         nettyRpcClient.invoke(rpcProtocol);
         // 获取rpc结果

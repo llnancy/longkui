@@ -34,23 +34,32 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<R
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcRequest> msg) throws Exception {
         RpcHeader rpcHeader = msg.getRpcHeader();
+        long sequenceId = rpcHeader.getSequenceId();
         byte versionAndType = rpcHeader.getVersionAndType();
         if (RpcContext.isHeartbeat(versionAndType)) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("*********** sunchaser-rpc netty RpcRequestHandler read heartbeat.");
+                LOGGER.debug("*********** sunchaser-rpc netty RpcRequestHandler read heartbeat. sequenceId={}", sequenceId);
             }
             return;
         }
 
-        // 将消息类型从请求转为响应
-        rpcHeader.setVersionAndType(RpcContext.transformToResponse(versionAndType));
-
         Runnable rpc = () -> {
+            // 将消息类型从请求转为响应
+            rpcHeader.setVersionAndType(RpcContext.transformToResponse(versionAndType));
+            // 构建响应对象
+            RpcProtocol<RpcResponse> rpcProtocol = RpcProtocol.<RpcResponse>builder()
+                    .rpcHeader(rpcHeader)
+                    .build();
+            RpcResponse rpcResponse = null;
             try {
-                RpcProtocol<RpcResponse> rpcProtocol = invokeService(msg);
-                ctx.writeAndFlush(rpcProtocol);
+                // 反射调用
+                RpcRequest rpcRequest = msg.getContent();
+                rpcResponse = invokeService(rpcRequest);
             } catch (Exception e) {
-                handleException(ctx, rpcHeader, e);
+                rpcResponse = handleException(sequenceId, e);
+            } finally {
+                rpcProtocol.setContent(rpcResponse);
+                ctx.writeAndFlush(rpcProtocol);
             }
         };
 
@@ -63,28 +72,18 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<R
         }
     }
 
-    private void handleException(ChannelHandlerContext ctx, RpcHeader rpcHeader, Exception e) {
-        LOGGER.error("process request {} error", rpcHeader.getSequenceId(), e);
-        RpcProtocol<RpcResponse> rpcProtocol = RpcProtocol.<RpcResponse>builder()
-                .rpcHeader(rpcHeader)
-                .content(RpcResponse.builder()
-                        .errorMsg(ThrowableUtils.toString(e))
-                        .build()
-                )
+    private RpcResponse handleException(long sequenceId, Exception e) {
+        LOGGER.error("process request sequenceId[{}] error", sequenceId, e);
+        return RpcResponse.builder()
+                .errorMsg(ThrowableUtils.toString(e))
                 .build();
-        ctx.writeAndFlush(rpcProtocol);
     }
 
-    private RpcProtocol<RpcResponse> invokeService(RpcProtocol<RpcRequest> msg) throws Exception {
-        RpcHeader rpcHeader = msg.getRpcHeader();
-        RpcResponse rpcResponse = new RpcResponse();
-        RpcProtocol<RpcResponse> rpcProtocol = RpcProtocol.<RpcResponse>builder()
-                .rpcHeader(rpcHeader)
-                .content(rpcResponse)
+    private RpcResponse invokeService(RpcRequest rpcRequest) throws Exception {
+        Object result = doInvoke(rpcRequest);
+        return RpcResponse.builder()
+                .result(result)
                 .build();
-        Object result = doInvoke(msg.getContent());
-        rpcResponse.setResult(result);
-        return rpcProtocol;
     }
 
     private Object doInvoke(RpcRequest rpcRequest) throws Exception {

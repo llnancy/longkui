@@ -8,15 +8,9 @@ package com.sunchaser.shushan.rpc.core.transport;
  */
 public abstract class AbstractRpcClient<T> implements RpcClient<T> {
 
-    protected String host;
-
-    protected Integer port;
-
     protected Integer connectionTimeout;
 
-    public AbstractRpcClient(String host, Integer port, Integer connectionTimeout) {
-        this.host = host;
-        this.port = port;
+    public AbstractRpcClient(Integer connectionTimeout) {
         this.connectionTimeout = connectionTimeout;
     }
 }

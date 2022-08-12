@@ -10,5 +10,10 @@ import com.sunchaser.shushan.rpc.core.protocol.RpcProtocol;
  */
 public interface RpcClient<T> {
 
+    /**
+     * invoke
+     *
+     * @param rpcProtocol protocol
+     */
     void invoke(RpcProtocol<T> rpcProtocol);
 }

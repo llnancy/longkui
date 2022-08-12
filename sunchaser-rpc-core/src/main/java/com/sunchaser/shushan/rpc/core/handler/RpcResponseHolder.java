@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import com.sunchaser.shushan.rpc.core.protocol.RpcFuture;
 import com.sunchaser.shushan.rpc.core.protocol.RpcResponse;
 
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -17,14 +17,14 @@ public class RpcResponseHolder {
 
     private static final AtomicLong SEQUENCE_ID_GENERATOR = new AtomicLong(0);
 
-    private static final Map<Long, RpcFuture<RpcResponse>> RPC_FUTURE_MAP = Maps.newHashMap();
+    private static final ConcurrentMap<Long, RpcFuture<RpcResponse>> RPC_FUTURE_MAP = Maps.newConcurrentMap();
 
     public static Long generateSequenceId() {
         return SEQUENCE_ID_GENERATOR.incrementAndGet();
     }
 
-    public static RpcFuture<RpcResponse> putRpcFuture(Long sequenceId, RpcFuture<RpcResponse> rpcFuture) {
-        return RPC_FUTURE_MAP.put(sequenceId, rpcFuture);
+    public static void putRpcFuture(Long sequenceId, RpcFuture<RpcResponse> rpcFuture) {
+        RPC_FUTURE_MAP.put(sequenceId, rpcFuture);
     }
 
     public static RpcFuture<RpcResponse> removeRpcFuture(Long sequenceId) {

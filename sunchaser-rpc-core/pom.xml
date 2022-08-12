@@ -27,6 +27,7 @@
         <commons-compress.version>1.21</commons-compress.version>
         <lz4-java.version>1.8.0</lz4-java.version>
         <lzo-core.version>1.0.6</lzo-core.version>
+        <cglib.version>3.3.0</cglib.version>
     </properties>
 
     <dependencyManagement>
@@ -135,6 +136,12 @@
             <groupId>org.anarres.lzo</groupId>
             <artifactId>lzo-core</artifactId>
             <version>${lzo-core.version}</version>
+        </dependency>
+        <!-- cglib -->
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib</artifactId>
+            <version>${cglib.version}</version>
         </dependency>
     </dependencies>
 </project>
