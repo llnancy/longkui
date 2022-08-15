@@ -2,12 +2,13 @@ package com.sunchaser.shushan.rpc.core.proxy;
 
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
-import com.sunchaser.shushan.rpc.core.handler.RpcResponseHolder;
+import com.sunchaser.shushan.rpc.core.handler.RpcRendingHolder;
 import com.sunchaser.shushan.rpc.core.protocol.*;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMeta;
 import com.sunchaser.shushan.rpc.core.serialize.ArrayElement;
 import com.sunchaser.shushan.rpc.core.transport.NettyRpcClient;
+import com.sunchaser.shushan.rpc.core.transport.RpcClient;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Promise;
@@ -35,7 +36,7 @@ public abstract class AbstractProxy {
 
     private final Integer timeout;
 
-    private final NettyRpcClient<RpcRequest> nettyRpcClient = new NettyRpcClient<>();
+    private final RpcClient<RpcRequest> nettyRpcClient = new NettyRpcClient<>();
 
     public AbstractProxy(String serviceName, Registry registry) {
         this(serviceName, registry, 0);
@@ -48,7 +49,7 @@ public abstract class AbstractProxy {
     }
 
     protected Object proxyInvoke(Method method, Object[] args) throws Throwable {
-        long sequenceId = RpcResponseHolder.generateSequenceId();
+        long sequenceId = RpcRendingHolder.generateSequenceId();
         RpcHeader rpcHeader = RpcHeader.builder()
                 .magic(RpcContext.MAGIC)
                 .versionAndType(RpcContext.DEFAULT_VERSION_AND_TYPE)
@@ -80,10 +81,8 @@ public abstract class AbstractProxy {
         ServiceMeta serviceMeta = registry.discovery(serviceName, methodName);
         // rpc调用结果future对象
         RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()));
-        RpcResponseHolder.putRpcFuture(sequenceId, rpcFuture);
+        RpcRendingHolder.putRpcFuture(sequenceId, rpcFuture);
 
-        // todo 连接复用
-        nettyRpcClient.connect(serviceMeta.getAddress(), serviceMeta.getPort());
         // invoke
         nettyRpcClient.invoke(rpcProtocol);
         // 获取rpc结果

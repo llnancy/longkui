@@ -8,15 +8,18 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Rpc Response Holder
+ * Rpc pending Holder
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/15
  */
-public class RpcResponseHolder {
+public class RpcRendingHolder {
 
     private static final AtomicLong SEQUENCE_ID_GENERATOR = new AtomicLong(0);
 
+    /**
+     * todo 时间轮算法定时清理
+     */
     private static final ConcurrentMap<Long, RpcFuture<RpcResponse>> RPC_FUTURE_MAP = Maps.newConcurrentMap();
 
     public static Long generateSequenceId() {

@@ -1,5 +1,6 @@
 package com.sunchaser.shushan.rpc.core.test;
 
+import com.sunchaser.shushan.rpc.core.proxy.RpcProxyFactory;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.impl.ZookeeperRegistry;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,7 @@ public class Consumer {
 
     public static void main(String[] args) {
         Registry registry = new ZookeeperRegistry();
-        HelloService helloService = RpcProxy.newInstance(HelloService.class, registry);
+        HelloService helloService = RpcProxyFactory.getRpcProxyInstance(HelloService.class, registry);
         String hello = helloService.sayHello("SunChaser");
         LOGGER.info("sayHello result: {}", hello);
     }

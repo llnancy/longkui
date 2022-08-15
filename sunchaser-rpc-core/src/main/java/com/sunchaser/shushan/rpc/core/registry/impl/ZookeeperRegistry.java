@@ -38,7 +38,7 @@ public class ZookeeperRegistry implements Registry {
         this(DEFAULT_ZK_ADDRESS);
     }
 
-    @SneakyThrows
+    @SneakyThrows({Throwable.class, Exception.class})
     public ZookeeperRegistry(String zkAddress) {
         this.loadBalancer = new RandomLoadBalancer();
         CuratorFramework client = CuratorFrameworkFactory.newClient(zkAddress, new ExponentialBackoffRetry(1000, 3));
@@ -57,7 +57,7 @@ public class ZookeeperRegistry implements Registry {
      *
      * @param service ServiceInstance
      */
-    @SneakyThrows
+    @SneakyThrows({Throwable.class, Exception.class})
     @Override
     public void register(ServiceMeta service) {
         ServiceInstance<ServiceMeta> serviceInstance = ServiceInstance.<ServiceMeta>builder()
@@ -74,7 +74,7 @@ public class ZookeeperRegistry implements Registry {
      *
      * @param service ServiceInstance
      */
-    @SneakyThrows
+    @SneakyThrows({Throwable.class, Exception.class})
     @Override
     public void unRegister(ServiceMeta service) {
         ServiceInstance<ServiceMeta> serviceInstance = ServiceInstance.<ServiceMeta>builder()
@@ -92,7 +92,7 @@ public class ZookeeperRegistry implements Registry {
      * @param serviceName serviceName
      * @return ServiceMeta
      */
-    @SneakyThrows
+    @SneakyThrows({Throwable.class, Exception.class})
     @Override
     public ServiceMeta discovery(String serviceName, String methodName) {
         Collection<ServiceInstance<ServiceMeta>> serviceInstances = serviceDiscovery.queryForInstances(serviceName);
@@ -106,7 +106,7 @@ public class ZookeeperRegistry implements Registry {
     /**
      * 注册中心销毁
      */
-    @SneakyThrows
+    @SneakyThrows({Throwable.class, Exception.class})
     @Override
     public void destroy() {
         serviceDiscovery.close();

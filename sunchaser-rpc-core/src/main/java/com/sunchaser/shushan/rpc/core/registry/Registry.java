@@ -26,6 +26,7 @@ public interface Registry {
      * 服务发现
      *
      * @param serviceName serviceName
+     * @param methodName  methodName
      * @return ServiceMeta
      */
     ServiceMeta discovery(String serviceName, String methodName);

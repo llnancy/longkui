@@ -17,6 +17,10 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class RpcProxyFactory {
 
+    public static <T> T getRpcProxyInstance(Class<T> clazz, Registry registry) {
+        return RpcProxyEnum.CGLIB.getRpcProxyInstance(clazz, registry);
+    }
+
     public static <T> T getRpcProxyInstance(String rpcProxyImplType, Class<T> clazz, Registry registry) {
         return RpcProxyEnum.match(rpcProxyImplType)
                 .getRpcProxyInstance(clazz, registry);
@@ -34,6 +38,9 @@ public class RpcProxyFactory {
             @SuppressWarnings("unchecked")
             @Override
             <T> T getRpcProxyInstance(Class<T> clazz, Registry registry) {
+                if (!clazz.isInterface()) {
+                    throw new IllegalArgumentException(clazz.getName() + " is not an interface");
+                }
                 return (T) jdkCache.computeIfAbsent(clazz, proxy -> Proxy.newProxyInstance(
                         Thread.currentThread().getContextClassLoader(),
                         new Class[]{clazz},

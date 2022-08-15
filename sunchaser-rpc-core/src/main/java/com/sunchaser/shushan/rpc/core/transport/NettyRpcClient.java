@@ -1,13 +1,19 @@
 package com.sunchaser.shushan.rpc.core.transport;
 
 import com.sunchaser.shushan.rpc.core.codec.RpcCodec;
+import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.handler.RpcResponseHandler;
 import com.sunchaser.shushan.rpc.core.protocol.RpcProtocol;
+import com.sunchaser.shushan.rpc.core.util.SingletonFactory;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.SocketChannel;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.InetSocketAddress;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -22,7 +28,7 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
 
     private final Bootstrap bootstrap;
 
-    private final EventLoopGroup eventLoopGroup;
+    private final ConnectionPool<Channel> connectionPool;
 
     private volatile Channel channel;
 
@@ -41,12 +47,14 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
     public NettyRpcClient(Integer connectionTimeout, int nThreads) {
         super(connectionTimeout);
         this.bootstrap = new Bootstrap();
-        this.eventLoopGroup = NettyEventLoopFactory.eventLoopGroup(nThreads, "NettyClientWorker");
-        initBootstrap();
+        initBootstrap(nThreads);
+        @SuppressWarnings("unchecked")
+        ConnectionPool<Channel> connectionPoolObject = SingletonFactory.getSingletonObject(ConnectionPool.class);
+        this.connectionPool = connectionPoolObject;
     }
 
-    private void initBootstrap() {
-        bootstrap.group(eventLoopGroup)
+    private void initBootstrap(int nThreads) {
+        bootstrap.group(NettyEventLoopFactory.eventLoopGroup(nThreads, "NettyClientWorker"))
                 .channel(NettyEventLoopFactory.socketChannelClass())
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
@@ -61,9 +69,10 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
                 });
     }
 
-    public void connect(String host, Integer port) {
+    public Channel connect(String host, Integer port) {
         try {
-            ChannelFuture future = bootstrap.connect(host, port);
+            InetSocketAddress connectAddress = getConnectAddress(host, port);
+            ChannelFuture future = bootstrap.connect(connectAddress);
             boolean notTimeout = future.awaitUninterruptibly(connectionTimeout, TimeUnit.MILLISECONDS);
             if (!notTimeout) {
                 LOGGER.error("Rpc Netty client connect remote address[{}:{}] with timeout of {}ms", host, port, connectionTimeout);
@@ -74,12 +83,16 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
                     // close old channel
                     Channel oldChannel = NettyRpcClient.this.channel;
                     if (Objects.nonNull(oldChannel)) {
-                        LOGGER.info("Close old netty channel " + oldChannel + " on create new netty channel " + newChannel);
-                        oldChannel.close();
-                        // todo remove channel cache
+                        try {
+                            LOGGER.info("Close old netty channel " + oldChannel + " on create new netty channel " + newChannel);
+                            oldChannel.close();
+                        } finally {
+                            removeChannelIfDisconnected(oldChannel, connectAddress);
+                        }
                     }
                 } finally {
                     NettyRpcClient.this.channel = newChannel;
+                    connectionPool.put(connectAddress, newChannel);
                 }
             }
             if (Objects.nonNull(channel) && channel.isActive()) {
@@ -87,11 +100,16 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
             }
             Throwable cause = future.cause();
             if (Objects.nonNull(cause)) {
-                LOGGER.error("Rpc netty client failed to connect server [{}:{}]", host, port, cause);
+                throw new RpcException("Rpc netty client failed to connect server [" + connectAddress + "], error message is:" + future.cause().getMessage(), cause);
             }
         } catch (Exception e) {
-            LOGGER.error("Rpc netty client failed to connect server [{}:{}] with timeout of {}ms", host, port, connectionTimeout, e);
+            throw new RpcException("Rpc netty client failed to connect server [" + host + ":" + port + "] with timeout of " + connectionTimeout + "ms", e);
         }
+        return channel;
+    }
+
+    private InetSocketAddress getConnectAddress(String host, Integer port) {
+        return new InetSocketAddress(host, port);
     }
 
     @Override
@@ -102,5 +120,11 @@ public class NettyRpcClient<T> extends AbstractRpcClient<T> {
                         LOGGER.error("Rpc netty client channel writeAndFlush error.", promise.cause());
                     }
                 });
+    }
+
+    void removeChannelIfDisconnected(Channel ch, InetSocketAddress connectAddress) {
+        if (Objects.nonNull(ch) && !ch.isActive()) {
+            connectionPool.remove(connectAddress);
+        }
     }
 }
