@@ -3,7 +3,10 @@ package com.sunchaser.shushan.rpc.core.util;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.*;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -17,7 +20,9 @@ public class ThreadPools {
     private ThreadPools() {
     }
 
-    public static ThreadPoolExecutor createThreadPool(final String source, final int corePoolSize, final int maxPoolSize) {
+    public static ThreadPoolExecutor createThreadPool(final String threadNameIdentifier,
+                                                      final int corePoolSize,
+                                                      final int maxPoolSize) {
         return new ThreadPoolExecutor(
                 corePoolSize,
                 maxPoolSize,
@@ -35,7 +40,7 @@ public class ThreadPools {
                     {
                         SecurityManager s = System.getSecurityManager();
                         group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
-                        namePrefix = "sunchaser-rpc-" + source + "-thread-";
+                        namePrefix = "sunchaser-rpc-" + threadNameIdentifier + "-thread-";
                     }
 
                     @Override
@@ -45,15 +50,17 @@ public class ThreadPools {
                                 r,
                                 namePrefix + threadNumber.getAndIncrement(),
                                 0);
-                        if (!t.isDaemon())
+                        if (!t.isDaemon()) {
                             t.setDaemon(true);
-                        if (t.getPriority() != Thread.NORM_PRIORITY)
+                        }
+                        if (t.getPriority() != Thread.NORM_PRIORITY) {
                             t.setPriority(Thread.NORM_PRIORITY);
+                        }
                         return t;
                     }
                 },
                 (r, executor) -> {
-                    throw new RpcException("sunchaser-rpc-" + source + " Thread pool is EXHAUSTED!");
+                    throw new RpcException("sunchaser-rpc-" + threadNameIdentifier + " Thread pool is EXHAUSTED!");
                 }
         );
     }

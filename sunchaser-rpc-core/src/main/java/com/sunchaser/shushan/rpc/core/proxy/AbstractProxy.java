@@ -2,7 +2,7 @@ package com.sunchaser.shushan.rpc.core.proxy;
 
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
-import com.sunchaser.shushan.rpc.core.handler.RpcRendingHolder;
+import com.sunchaser.shushan.rpc.core.handler.RpcPendingHolder;
 import com.sunchaser.shushan.rpc.core.protocol.*;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMeta;
@@ -36,7 +36,7 @@ public abstract class AbstractProxy {
 
     private final Integer timeout;
 
-    private final RpcClient<RpcRequest> nettyRpcClient = new NettyRpcClient<>();
+    private final RpcClient<RpcRequest> rpcClient;
 
     public AbstractProxy(String serviceName, Registry registry) {
         this(serviceName, registry, 0);
@@ -46,10 +46,11 @@ public abstract class AbstractProxy {
         this.serviceName = serviceName;
         this.registry = registry;
         this.timeout = timeout;
+        this.rpcClient = new NettyRpcClient<>();
     }
 
     protected Object proxyInvoke(Method method, Object[] args) throws Throwable {
-        long sequenceId = RpcRendingHolder.generateSequenceId();
+        long sequenceId = RpcPendingHolder.generateSequenceId();
         RpcHeader rpcHeader = RpcHeader.builder()
                 .magic(RpcContext.MAGIC)
                 .versionAndType(RpcContext.DEFAULT_VERSION_AND_TYPE)
@@ -79,13 +80,21 @@ public abstract class AbstractProxy {
 
         // 服务发现
         ServiceMeta serviceMeta = registry.discovery(serviceName, methodName);
+
         // rpc调用结果future对象
         RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()));
-        RpcRendingHolder.putRpcFuture(sequenceId, rpcFuture);
+        RpcPendingHolder.putRpcFuture(sequenceId, rpcFuture);
 
-        // invoke
-        nettyRpcClient.invoke(rpcProtocol);
-        // 获取rpc结果
+        try {
+            // invoke
+            rpcClient.invoke(rpcProtocol, serviceMeta.getAddress(), serviceMeta.getPort());
+        } catch (Exception e) {
+            // rpc调用异常时删除对应RpcFuture
+            RpcPendingHolder.removeRpcFuture(sequenceId);
+            throw e;
+        }
+
+        // 获取rpc调用结果
         Promise<RpcResponse> promise = rpcFuture.getPromise();
         // todo get(0) => get() ?
         RpcResponse rpcResponse = timeout == 0 ? promise.get() : promise.get(timeout, TimeUnit.MILLISECONDS);

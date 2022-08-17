@@ -2,6 +2,7 @@ package com.sunchaser.shushan.rpc.core.transport;
 
 import com.google.common.collect.Maps;
 
+import javax.annotation.Nonnull;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentMap;
 
@@ -15,28 +16,16 @@ public class ConnectionPool<C> {
 
     private final ConcurrentMap<String, C> CONNECTION_POOL = Maps.newConcurrentMap();
 
-    public void put(String address, C connection) {
-        CONNECTION_POOL.putIfAbsent(address, connection);
+    public void put(@Nonnull InetSocketAddress connectAddress, C connection) {
+        CONNECTION_POOL.putIfAbsent(connectAddress.toString(), connection);
     }
 
-    public void put(InetSocketAddress connectAddress, C connection) {
-        put(connectAddress.toString(), connection);
+    public C get(@Nonnull InetSocketAddress connectAddress) {
+        return CONNECTION_POOL.get(connectAddress.toString());
     }
 
-    public C get(String address) {
-        return CONNECTION_POOL.get(address);
-    }
-
-    public C get(InetSocketAddress connectAddress) {
-        return get(connectAddress.toString());
-    }
-
-    public C remove(String address) {
-        return CONNECTION_POOL.remove(address);
-    }
-
-    public C remove(InetSocketAddress connectAddress) {
-        return remove(connectAddress.toString());
+    public C remove(@Nonnull InetSocketAddress connectAddress) {
+        return CONNECTION_POOL.remove(connectAddress.toString());
     }
 
 }

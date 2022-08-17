@@ -4,7 +4,7 @@ import com.sunchaser.shushan.rpc.core.proxy.RpcProxyFactory;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMeta;
 import com.sunchaser.shushan.rpc.core.registry.impl.LocalRegistry;
-import com.sunchaser.shushan.rpc.core.transport.RpcServer;
+import com.sunchaser.shushan.rpc.core.transport.NettyRpcServer;
 import com.sunchaser.shushan.rpc.core.util.BeanFactory;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,7 +29,7 @@ public class LocalRpc {
                 .build();
         Registry registry = LocalRegistry.getInstance();
         registry.register(serviceMeta);
-        new RpcServer().start();
+        new NettyRpcServer().start();
 
         // consumer
         HelloService helloService = RpcProxyFactory.getRpcProxyInstance(HelloService.class, registry);

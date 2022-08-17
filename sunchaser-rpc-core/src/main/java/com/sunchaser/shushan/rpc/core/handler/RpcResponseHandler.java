@@ -21,7 +21,7 @@ public class RpcResponseHandler extends SimpleChannelInboundHandler<RpcProtocol<
     protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcResponse> msg) throws Exception {
         RpcHeader rpcHeader = msg.getRpcHeader();
         long sequenceId = rpcHeader.getSequenceId();
-        RpcFuture<RpcResponse> rpcFuture = RpcRendingHolder.removeRpcFuture(sequenceId);
+        RpcFuture<RpcResponse> rpcFuture = RpcPendingHolder.removeRpcFuture(sequenceId);
         // todo heartbeat
         rpcFuture.getPromise().setSuccess(msg.getContent());
     }

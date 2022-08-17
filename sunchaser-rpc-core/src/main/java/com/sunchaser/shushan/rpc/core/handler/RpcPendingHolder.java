@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/15
  */
-public class RpcRendingHolder {
+public class RpcPendingHolder {
 
     private static final AtomicLong SEQUENCE_ID_GENERATOR = new AtomicLong(0);
 

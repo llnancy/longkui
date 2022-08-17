@@ -1,7 +1,7 @@
 package com.sunchaser.shushan.rpc.core.transport;
 
 /**
- * an abstract rpc client
+ * an abstract rpc client implementation
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/15

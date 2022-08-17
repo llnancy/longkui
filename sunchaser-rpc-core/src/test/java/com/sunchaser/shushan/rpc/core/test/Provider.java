@@ -3,7 +3,7 @@ package com.sunchaser.shushan.rpc.core.test;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMeta;
 import com.sunchaser.shushan.rpc.core.registry.impl.ZookeeperRegistry;
-import com.sunchaser.shushan.rpc.core.transport.RpcServer;
+import com.sunchaser.shushan.rpc.core.transport.NettyRpcServer;
 import com.sunchaser.shushan.rpc.core.util.BeanFactory;
 
 /**
@@ -24,6 +24,6 @@ public class Provider {
                 .build();
         Registry registry = new ZookeeperRegistry();
         registry.register(serviceMeta);
-        new RpcServer().start();
+        new NettyRpcServer().start();
     }
 }
