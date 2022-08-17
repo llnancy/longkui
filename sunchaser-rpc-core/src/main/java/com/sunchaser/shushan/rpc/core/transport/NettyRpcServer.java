@@ -67,12 +67,12 @@ public class NettyRpcServer implements RpcServer {
         try {
             ChannelFuture channelFuture = bootstrap.bind(localAddress);
             channelFuture.syncUninterruptibly();
-            channelFuture.channel().closeFuture().sync();
+            // channelFuture.channel().closeFuture().sync();
         } finally {
-            if (Objects.nonNull(bootstrap)) {
-                bossGroup.shutdownGracefully().syncUninterruptibly();
-                workerGroup.shutdownGracefully().syncUninterruptibly();
-            }
+            // if (Objects.nonNull(bootstrap)) {
+            //     bossGroup.shutdownGracefully().syncUninterruptibly();
+            //     workerGroup.shutdownGracefully().syncUninterruptibly();
+            // }
         }
     }
 }
