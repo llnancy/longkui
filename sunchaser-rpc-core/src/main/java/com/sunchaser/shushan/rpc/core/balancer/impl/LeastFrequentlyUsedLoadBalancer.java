@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.balancer.impl;
 
-import com.sunchaser.shushan.rpc.core.balancer.Invoker;
+import com.sunchaser.shushan.rpc.core.balancer.Node;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ import java.util.List;
 public class LeastFrequentlyUsedLoadBalancer extends AbstractLoadBalancer {
 
     @Override
-    protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, String routeKey) {
+    protected <T> Node<T> doSelect(List<Node<T>> nodes, String routeKey) {
         return null;
     }
 }

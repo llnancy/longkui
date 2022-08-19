@@ -1,7 +1,7 @@
 package com.sunchaser.shushan.rpc.core.balancer.impl;
 
 import com.google.common.collect.Lists;
-import com.sunchaser.shushan.rpc.core.balancer.Invoker;
+import com.sunchaser.shushan.rpc.core.balancer.Node;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -25,23 +25,23 @@ public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
     private final List<WeightedRoundRobin> wrrList = Lists.newArrayList();
 
     @Override
-    protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, String routeKey) {
+    protected <T> Node<T> doSelect(List<Node<T>> nodes, String routeKey) {
         if (CollectionUtils.isEmpty(wrrList)) {
-            for (Invoker<T> invoker : invokers) {
+            for (Node<T> node : nodes) {
                 WeightedRoundRobin wrr = new WeightedRoundRobin();
-                wrr.setWeight(invoker.getWeight());
+                wrr.setWeight(node.getWeight());
                 wrrList.add(wrr);
             }
         }
         int totalWeight = 0;
         long maxCurrent = Long.MIN_VALUE;
-        Invoker<T> selectedInvoker = null;
+        Node<T> selectedNode = null;
         WeightedRoundRobin selectedWrr = null;
-        for (int i = 0, size = invokers.size(); i < size; i++) {
-            Invoker<T> invoker = invokers.get(i);
-            int weight = invoker.getWeight();
+        for (int i = 0, size = nodes.size(); i < size; i++) {
+            Node<T> node = nodes.get(i);
+            int weight = node.getWeight();
             WeightedRoundRobin wrr = wrrList.get(i);
-            // WeightedRoundRobin wrr = wrrMap.computeIfAbsent(invoker.toString() -> {
+            // WeightedRoundRobin wrr = wrrMap.computeIfAbsent(node.toString() -> {
             //     WeightedRoundRobin w = new WeightedRoundRobin();
             //     w.setWeight(weight);
             //     return w;
@@ -53,18 +53,18 @@ public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
             if (current > maxCurrent) {
                 // 暂存当前权重最大的节点
                 maxCurrent = current;
-                selectedInvoker = invoker;
+                selectedNode = node;
                 selectedWrr = wrr;
             }
             totalWeight += weight;
         }
-        if (Objects.nonNull(selectedInvoker)) {
+        if (Objects.nonNull(selectedNode)) {
             // 被选中的节点权重减去总权重
             selectedWrr.sel(totalWeight);
-            return selectedInvoker;
+            return selectedNode;
         }
         // should not happen here
-        return invokers.get(0);
+        return nodes.get(0);
     }
 
     /**

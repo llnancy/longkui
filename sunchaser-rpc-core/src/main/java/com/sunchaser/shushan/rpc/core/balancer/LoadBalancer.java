@@ -15,16 +15,16 @@ import java.util.stream.IntStream;
  */
 public interface LoadBalancer {
 
-    default <T> Invoker<T> select(List<Invoker<T>> invokers) {
-        return select(invokers, StringUtils.EMPTY);
+    default <T> Node<T> select(List<Node<T>> nodes) {
+        return select(nodes, StringUtils.EMPTY);
     }
 
-    <T> Invoker<T> select(List<Invoker<T>> invokers, String routeKey);
+    <T> Node<T> select(List<Node<T>> nodes, String routeKey);
 
-    static <T> List<Invoker<T>> wrap(Collection<T> sources) {
+    static <T> List<Node<T>> wrap(Collection<T> sources) {
         return Optional.ofNullable(sources)
                 .map(col -> col.stream()
-                        .map(el -> Invoker.<T>builder()
+                        .map(el -> Node.<T>builder()
                                 .node(el)
                                 .build()
                         )
@@ -32,7 +32,7 @@ public interface LoadBalancer {
                 ).orElse(Collections.emptyList());
     }
 
-    static <T> List<Invoker<T>> wrap(List<T> sources, int... weights) {
+    static <T> List<Node<T>> wrap(List<T> sources, int... weights) {
         sources = Optional.ofNullable(sources)
                 .orElse(Collections.emptyList());
         if (weights.length == 0) {
@@ -52,7 +52,7 @@ public interface LoadBalancer {
         final List<T> finalSources = sources;
         final int[] finalWeights = weights;
         return IntStream.range(0, size)
-                .mapToObj(i -> Invoker.<T>builder()
+                .mapToObj(i -> Node.<T>builder()
                         .node(finalSources.get(i))
                         .weight(finalWeights[i])
                         .build()

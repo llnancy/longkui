@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.balancer.impl;
 
-import com.sunchaser.shushan.rpc.core.balancer.Invoker;
+import com.sunchaser.shushan.rpc.core.balancer.Node;
 import com.sunchaser.shushan.rpc.core.balancer.LoadBalancer;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -15,15 +15,15 @@ import java.util.List;
 public abstract class AbstractLoadBalancer implements LoadBalancer {
 
     @Override
-    public <T> Invoker<T> select(List<Invoker<T>> invokers, String routeKey) {
-        if (CollectionUtils.isEmpty(invokers)) {
+    public <T> Node<T> select(List<Node<T>> nodes, String routeKey) {
+        if (CollectionUtils.isEmpty(nodes)) {
             return null;
         }
-        if (invokers.size() == 1) {
-            return invokers.get(0);
+        if (nodes.size() == 1) {
+            return nodes.get(0);
         }
-        return doSelect(invokers, routeKey);
+        return doSelect(nodes, routeKey);
     }
 
-    protected abstract <T> Invoker<T> doSelect(List<Invoker<T>> invokers, String routeKey);
+    protected abstract <T> Node<T> doSelect(List<Node<T>> nodes, String routeKey);
 }

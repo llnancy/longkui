@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Invoker
+ * Node
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/18
@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Invoker<T> {
+public class Node<T> {
 
     /**
      * 节点
