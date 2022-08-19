@@ -1,7 +1,7 @@
 package com.sunchaser.shushan.rpc.core.registry.impl;
 
-import com.sunchaser.shushan.rpc.core.balancer.Invoker;
 import com.sunchaser.shushan.rpc.core.balancer.LoadBalancer;
+import com.sunchaser.shushan.rpc.core.balancer.Node;
 import com.sunchaser.shushan.rpc.core.balancer.impl.RandomLoadBalancer;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
@@ -25,6 +25,12 @@ import java.util.Objects;
  * @since JDK8 2022/7/14
  */
 public class ZookeeperRegistry implements Registry {
+
+    private static final Registry INSTANCE = new ZookeeperRegistry();
+
+    public static Registry getInstance() {
+        return INSTANCE;
+    }
 
     private static final String DEFAULT_ZK_ADDRESS = "127.0.0.1:2181";
 
@@ -96,7 +102,7 @@ public class ZookeeperRegistry implements Registry {
     @Override
     public ServiceMeta discovery(String serviceName, String methodName) {
         Collection<ServiceInstance<ServiceMeta>> serviceInstances = serviceDiscovery.queryForInstances(serviceName);
-        Invoker<ServiceInstance<ServiceMeta>> select = loadBalancer.select(LoadBalancer.wrap(serviceInstances));
+        Node<ServiceInstance<ServiceMeta>> select = loadBalancer.select(LoadBalancer.wrap(serviceInstances));
         if (Objects.isNull(select)) {
             throw new RpcException("no service named " + serviceName + " was discovered");
         }
