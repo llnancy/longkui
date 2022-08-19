@@ -32,7 +32,7 @@ public class LocalRpc {
         new NettyRpcServer().start();
 
         // consumer
-        HelloService helloService = RpcProxyFactory.getRpcProxyInstance(HelloService.class, registry);
+        HelloService helloService = RpcProxyFactory.getRpcProxyInstance(HelloService.class);
         String hello = helloService.sayHi("SunChaser", null, 1L);
         LOGGER.info("sayHello result: {}", hello);
     }
