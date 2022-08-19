@@ -1,6 +1,5 @@
 package com.sunchaser.shushan.rpc.core.proxy;
 
-import com.sunchaser.shushan.rpc.core.registry.Registry;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
@@ -12,14 +11,14 @@ import java.lang.reflect.Method;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/8/11
  */
-public class CglibProxy extends AbstractProxy implements MethodInterceptor {
+public class CglibProxy extends BaseProxy implements MethodInterceptor {
 
-    public CglibProxy(String serviceName, Registry registry) {
-        super(serviceName, registry);
+    public CglibProxy(String serviceName) {
+        super(serviceName);
     }
 
-    public CglibProxy(String serviceName, Registry registry, int timeout) {
-        super(serviceName, registry, timeout);
+    public CglibProxy(String serviceName, int timeout) {
+        super(serviceName, timeout);
     }
 
     @Override

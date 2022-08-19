@@ -1,6 +1,5 @@
 package com.sunchaser.shushan.rpc.core.proxy;
 
-import com.sunchaser.shushan.rpc.core.registry.Registry;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
@@ -13,14 +12,14 @@ import java.lang.reflect.Method;
  * @since JDK8 2022/7/15
  */
 @Slf4j
-public class JdkProxy extends AbstractProxy implements InvocationHandler {
+public class JdkProxy extends BaseProxy implements InvocationHandler {
 
-    public JdkProxy(String serviceName, Registry registry) {
-        super(serviceName, registry);
+    public JdkProxy(String serviceName) {
+        super(serviceName);
     }
 
-    public JdkProxy(String serviceName, Registry registry, int timeout) {
-        super(serviceName, registry, timeout);
+    public JdkProxy(String serviceName, int timeout) {
+        super(serviceName, timeout);
     }
 
     @Override

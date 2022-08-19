@@ -1,7 +1,6 @@
 package com.sunchaser.shushan.rpc.core.proxy;
 
 import com.google.common.collect.Maps;
-import com.sunchaser.shushan.rpc.core.registry.Registry;
 import net.sf.cglib.proxy.Enhancer;
 
 import java.lang.reflect.Proxy;
@@ -17,13 +16,13 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class RpcProxyFactory {
 
-    public static <T> T getRpcProxyInstance(Class<T> clazz, Registry registry) {
-        return RpcProxyEnum.CGLIB.getRpcProxyInstance(clazz, registry);
+    public static <T> T getRpcProxyInstance(Class<T> clazz) {
+        return RpcProxyEnum.CGLIB.getRpcProxyInstance(clazz);
     }
 
-    public static <T> T getRpcProxyInstance(String rpcProxyImplType, Class<T> clazz, Registry registry) {
+    public static <T> T getRpcProxyInstance(String rpcProxyImplType, Class<T> clazz) {
         return RpcProxyEnum.match(rpcProxyImplType)
-                .getRpcProxyInstance(clazz, registry);
+                .getRpcProxyInstance(clazz);
     }
 
     enum RpcProxyEnum {
@@ -37,14 +36,15 @@ public class RpcProxyFactory {
 
             @SuppressWarnings("unchecked")
             @Override
-            <T> T getRpcProxyInstance(Class<T> clazz, Registry registry) {
+            <T> T getRpcProxyInstance(Class<T> clazz) {
                 if (!clazz.isInterface()) {
-                    throw new IllegalArgumentException(clazz.getName() + " is not an interface");
+                    // throw new IllegalArgumentException(clazz.getName() + " is not an interface");
+                    return CGLIB.getRpcProxyInstance(clazz);
                 }
                 return (T) jdkCache.computeIfAbsent(clazz, proxy -> Proxy.newProxyInstance(
                         Thread.currentThread().getContextClassLoader(),
                         new Class[]{clazz},
-                        new JdkProxy(clazz.getName(), registry)
+                        new JdkProxy(clazz.getName())
                 ));
             }
         },
@@ -58,11 +58,11 @@ public class RpcProxyFactory {
 
             @SuppressWarnings("unchecked")
             @Override
-            <T> T getRpcProxyInstance(Class<T> clazz, Registry registry) {
+            <T> T getRpcProxyInstance(Class<T> clazz) {
                 return (T) cglibCache.computeIfAbsent(clazz, proxy -> {
                     Enhancer enhancer = new Enhancer();
                     enhancer.setSuperclass(clazz);
-                    enhancer.setCallback(new CglibProxy(clazz.getName(), registry));
+                    enhancer.setCallback(new CglibProxy(clazz.getName()));
                     return enhancer.create();
                 });
             }
@@ -83,6 +83,6 @@ public class RpcProxyFactory {
                     .orElse(CGLIB);
         }
 
-        abstract <T> T getRpcProxyInstance(Class<T> clazz, Registry registry);
+        abstract <T> T getRpcProxyInstance(Class<T> clazz);
     }
 }

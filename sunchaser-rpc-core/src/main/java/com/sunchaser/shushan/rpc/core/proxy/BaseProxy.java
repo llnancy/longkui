@@ -6,6 +6,7 @@ import com.sunchaser.shushan.rpc.core.handler.RpcPendingHolder;
 import com.sunchaser.shushan.rpc.core.protocol.*;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMeta;
+import com.sunchaser.shushan.rpc.core.registry.impl.ZookeeperRegistry;
 import com.sunchaser.shushan.rpc.core.serialize.ArrayElement;
 import com.sunchaser.shushan.rpc.core.transport.NettyRpcClient;
 import com.sunchaser.shushan.rpc.core.transport.RpcClient;
@@ -28,25 +29,23 @@ import java.util.concurrent.TimeUnit;
  */
 @Getter
 @Slf4j
-public abstract class AbstractProxy {
+public class BaseProxy {
 
     private final String serviceName;
 
-    private final Registry registry;
-
     private final Integer timeout;
 
-    private final RpcClient<RpcRequest> rpcClient;
+    private static final Registry REGISTRY = ZookeeperRegistry.getInstance();
 
-    public AbstractProxy(String serviceName, Registry registry) {
-        this(serviceName, registry, 0);
+    private static final RpcClient RPC_CLIENT = NettyRpcClient.getInstance();
+
+    public BaseProxy(String serviceName) {
+        this(serviceName, 0);
     }
 
-    public AbstractProxy(String serviceName, Registry registry, Integer timeout) {
+    public BaseProxy(String serviceName, Integer timeout) {
         this.serviceName = serviceName;
-        this.registry = registry;
         this.timeout = timeout;
-        this.rpcClient = new NettyRpcClient<>();
     }
 
     protected Object proxyInvoke(Method method, Object[] args) throws Throwable {
@@ -78,16 +77,16 @@ public abstract class AbstractProxy {
                 .content(rpcRequest)
                 .build();
 
-        // 服务发现
-        ServiceMeta serviceMeta = registry.discovery(serviceName, methodName);
-
         // rpc调用结果future对象
         RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()));
         RpcPendingHolder.putRpcFuture(sequenceId, rpcFuture);
 
+        // 服务发现
+        ServiceMeta serviceMeta = REGISTRY.discovery(serviceName, methodName);
+
         try {
             // invoke
-            rpcClient.invoke(rpcProtocol, serviceMeta.getAddress(), serviceMeta.getPort());
+            RPC_CLIENT.invoke(rpcProtocol, serviceMeta.getAddress(), serviceMeta.getPort());
         } catch (Exception e) {
             // rpc调用异常时删除对应RpcFuture
             RpcPendingHolder.removeRpcFuture(sequenceId);
