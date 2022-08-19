@@ -1,7 +1,7 @@
 package com.sunchaser.shushan.rpc.core.test.balancer.impl;
 
 import com.google.common.collect.Lists;
-import com.sunchaser.shushan.rpc.core.balancer.Invoker;
+import com.sunchaser.shushan.rpc.core.balancer.Node;
 import com.sunchaser.shushan.rpc.core.balancer.LoadBalancer;
 import com.sunchaser.shushan.rpc.core.balancer.impl.ConsistentHashLoadBalancer;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ class ConsistentHashLoadBalancerTest {
     public void testSelect() {
         LoadBalancer loadBalancer = new ConsistentHashLoadBalancer();
         for (int i = 0; i < 7; i++) {
-            Invoker<String> select = loadBalancer.select(LoadBalancer.wrap(Lists.newArrayList("A", "B", "C")), "Abc" + i);
+            Node<String> select = loadBalancer.select(LoadBalancer.wrap(Lists.newArrayList("A", "B", "C")), "Abc" + i);
             LOGGER.info("select: {}", select.getNode());
         }
     }

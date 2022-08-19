@@ -1,7 +1,7 @@
 package com.sunchaser.shushan.rpc.core.test.balancer.impl;
 
 import com.google.common.collect.Lists;
-import com.sunchaser.shushan.rpc.core.balancer.Invoker;
+import com.sunchaser.shushan.rpc.core.balancer.Node;
 import com.sunchaser.shushan.rpc.core.balancer.LoadBalancer;
 import com.sunchaser.shushan.rpc.core.balancer.impl.RoundRobinLoadBalancer;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ class RoundRobinLoadBalancerTest {
     public void testWeightedRoundRobin() {
         LoadBalancer loadBalancer = new RoundRobinLoadBalancer();
         for (int i = 0; i < 7; i++) {
-            Invoker<String> select = loadBalancer.select(LoadBalancer.wrap(Lists.newArrayList("A", "B", "C"), 5, 1, 1));
+            Node<String> select = loadBalancer.select(LoadBalancer.wrap(Lists.newArrayList("A", "B", "C"), 5, 1, 1));
             LOGGER.info("select: {}", select.getNode());
         }
     }
@@ -30,7 +30,7 @@ class RoundRobinLoadBalancerTest {
     public void testRoundRobin() {
         LoadBalancer loadBalancer = new RoundRobinLoadBalancer();
         for (int i = 0; i < 7; i++) {
-            Invoker<String> select = loadBalancer.select(LoadBalancer.wrap(Lists.newArrayList("A", "B", "C"), 1, 1, 1));
+            Node<String> select = loadBalancer.select(LoadBalancer.wrap(Lists.newArrayList("A", "B", "C"), 1, 1, 1));
             LOGGER.info("select: {}", select.getNode());
         }
     }
