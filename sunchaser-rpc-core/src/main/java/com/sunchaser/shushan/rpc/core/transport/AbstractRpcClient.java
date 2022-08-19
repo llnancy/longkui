@@ -6,7 +6,7 @@ package com.sunchaser.shushan.rpc.core.transport;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/15
  */
-public abstract class AbstractRpcClient<T> implements RpcClient<T> {
+public abstract class AbstractRpcClient implements RpcClient {
 
     protected Integer connectionTimeout;
 

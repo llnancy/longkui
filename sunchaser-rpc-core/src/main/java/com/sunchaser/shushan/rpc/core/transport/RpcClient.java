@@ -1,6 +1,7 @@
 package com.sunchaser.shushan.rpc.core.transport;
 
 import com.sunchaser.shushan.rpc.core.protocol.RpcProtocol;
+import com.sunchaser.shushan.rpc.core.protocol.RpcRequest;
 
 import java.net.InetSocketAddress;
 
@@ -10,7 +11,7 @@ import java.net.InetSocketAddress;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/15
  */
-public interface RpcClient<T> {
+public interface RpcClient {
 
     /**
      * invoke
@@ -18,7 +19,7 @@ public interface RpcClient<T> {
      * @param rpcProtocol  protocol
      * @param localAddress InetSocketAddress
      */
-    void invoke(RpcProtocol<T> rpcProtocol, InetSocketAddress localAddress);
+    void invoke(RpcProtocol<RpcRequest> rpcProtocol, InetSocketAddress localAddress);
 
     /**
      * invoke
@@ -27,7 +28,7 @@ public interface RpcClient<T> {
      * @param host        host
      * @param port        port
      */
-    default void invoke(RpcProtocol<T> rpcProtocol, String host, int port) {
+    default void invoke(RpcProtocol<RpcRequest> rpcProtocol, String host, int port) {
         invoke(rpcProtocol, new InetSocketAddress(host, port));
     }
 }

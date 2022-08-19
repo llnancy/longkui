@@ -10,10 +10,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import lombok.SneakyThrows;
 
 import java.net.InetSocketAddress;
-import java.util.Objects;
 
 /**
  * a rpc server implementation based on Netty
@@ -25,17 +23,13 @@ public class NettyRpcServer implements RpcServer {
 
     private final ServerBootstrap bootstrap;
 
-    private final EventLoopGroup bossGroup;
-
-    private final EventLoopGroup workerGroup;
-
     public NettyRpcServer() {
         this(Constants.DEFAULT_IO_THREADS);
     }
 
     public NettyRpcServer(int nThreads) {
-        this.bossGroup = NettyEventLoopFactory.eventLoopGroup(1, "NettyServerBoss");
-        this.workerGroup = NettyEventLoopFactory.eventLoopGroup(nThreads, "NettyServerWorker");
+        EventLoopGroup bossGroup = NettyEventLoopFactory.eventLoopGroup(1, "NettyServerBoss");
+        EventLoopGroup workerGroup = NettyEventLoopFactory.eventLoopGroup(nThreads, "NettyServerWorker");
         this.bootstrap = new ServerBootstrap()
                 .group(bossGroup, workerGroup)
                 .channel(NettyEventLoopFactory.serverSocketChannelClass())
@@ -61,18 +55,9 @@ public class NettyRpcServer implements RpcServer {
                 });
     }
 
-    @SneakyThrows({Throwable.class, Exception.class})
     @Override
     public void start(InetSocketAddress localAddress) {
-        try {
-            ChannelFuture channelFuture = bootstrap.bind(localAddress);
-            channelFuture.syncUninterruptibly();
-            // channelFuture.channel().closeFuture().sync();
-        } finally {
-            // if (Objects.nonNull(bootstrap)) {
-            //     bossGroup.shutdownGracefully().syncUninterruptibly();
-            //     workerGroup.shutdownGracefully().syncUninterruptibly();
-            // }
-        }
+        ChannelFuture channelFuture = bootstrap.bind(localAddress);
+        channelFuture.syncUninterruptibly();
     }
 }
