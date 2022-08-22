@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.test;
 
-import com.sunchaser.shushan.rpc.core.proxy.RpcProxyFactory;
+import com.sunchaser.shushan.rpc.core.proxy.RpcDynamicProxyFactory;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 public class Consumer {
 
     public static void main(String[] args) {
-        HelloService helloService = RpcProxyFactory.getRpcProxyInstance(HelloService.class);
+        HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance(HelloService.class);
         String hello = helloService.sayHello("SunChaser");
         LOGGER.info("sayHello result: {}", hello);
     }

@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.test;
 
-import com.sunchaser.shushan.rpc.core.proxy.RpcProxyFactory;
+import com.sunchaser.shushan.rpc.core.proxy.RpcDynamicProxyFactory;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMeta;
 import com.sunchaser.shushan.rpc.core.registry.impl.LocalRegistry;
@@ -32,7 +32,7 @@ public class LocalRpc {
         new NettyRpcServer().start();
 
         // consumer
-        HelloService helloService = RpcProxyFactory.getRpcProxyInstance(HelloService.class);
+        HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance(HelloService.class);
         String hello = helloService.sayHi("SunChaser", null, 1L);
         LOGGER.info("sayHello result: {}", hello);
     }
