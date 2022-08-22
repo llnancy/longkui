@@ -4,12 +4,15 @@ import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.handler.RpcPendingHolder;
 import com.sunchaser.shushan.rpc.core.protocol.*;
+import com.sunchaser.shushan.rpc.core.proxy.RpcDynamicProxyFactory;
 import com.sunchaser.shushan.rpc.core.transport.NettyRpcClient;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Promise;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.concurrent.ExecutionException;
 
 /**
  * 点对点RPC服务消费者
@@ -21,6 +24,13 @@ import org.apache.commons.lang3.StringUtils;
 public class P2PConsumer {
 
     public static void main(String[] args) throws Exception {
+        // p2pConsumer();
+        HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance(HelloService.class);
+        String hello = helloService.sayHello("SunChaser");
+        LOGGER.info("sayHello result: {}", hello);
+    }
+
+    private static void p2pConsumer() throws InterruptedException, ExecutionException {
         // 构建协议头
         long sequenceId = RpcPendingHolder.generateSequenceId();
         RpcHeader rpcHeader = RpcHeader.builder()
