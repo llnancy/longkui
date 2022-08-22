@@ -6,7 +6,7 @@ import com.sunchaser.shushan.rpc.core.handler.RpcPendingHolder;
 import com.sunchaser.shushan.rpc.core.protocol.*;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMeta;
-import com.sunchaser.shushan.rpc.core.registry.impl.ZookeeperRegistry;
+import com.sunchaser.shushan.rpc.core.registry.impl.LocalRegistry;
 import com.sunchaser.shushan.rpc.core.serialize.ArrayElement;
 import com.sunchaser.shushan.rpc.core.transport.NettyRpcClient;
 import com.sunchaser.shushan.rpc.core.transport.RpcClient;
@@ -22,44 +22,47 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
- * an abstract proxy impl
+ * base method interceptor
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/8/12
  */
 @Getter
 @Slf4j
-public class BaseProxy {
+public class BaseMethodInterceptor {
 
-    private final String serviceName;
+    protected Class<?> target;
 
     private final Integer timeout;
 
-    private static final Registry REGISTRY = ZookeeperRegistry.getInstance();
+    private static final Registry REGISTRY = LocalRegistry.getInstance();
 
     private static final RpcClient RPC_CLIENT = NettyRpcClient.getInstance();
 
-    public BaseProxy(String serviceName) {
-        this(serviceName, 0);
+    public BaseMethodInterceptor(Class<?> target) {
+        this(target, 0);
     }
 
-    public BaseProxy(String serviceName, Integer timeout) {
-        this.serviceName = serviceName;
+    public BaseMethodInterceptor(Class<?> target, Integer timeout) {
+        this.target = target;
         this.timeout = timeout;
     }
 
     protected Object proxyInvoke(Method method, Object[] args) throws Throwable {
-        long sequenceId = RpcPendingHolder.generateSequenceId();
-        RpcHeader rpcHeader = RpcHeader.builder()
+        // 构建协议头
+        final long sequenceId = RpcPendingHolder.generateSequenceId();
+        final RpcHeader rpcHeader = RpcHeader.builder()
                 .magic(RpcContext.MAGIC)
                 .versionAndType(RpcContext.DEFAULT_VERSION_AND_TYPE)
                 .compressAndSerialize(RpcContext.DEFAULT_COMPRESS_SERIALIZE)
                 .sequenceId(sequenceId)
                 .build();
-        String methodName = method.getName();
+
+        // 构建协议体
+        final String methodName = method.getName();
         // kryo、protostuff等序列化框架会忽略数组中间索引的null元素，这里用特殊值代替null
         ArrayElement.wrapArgs(args);
-
+        final String serviceName = target.getName();
         RpcRequest rpcRequest = RpcRequest.builder()
                 .serviceName(serviceName)
                 .methodName(methodName)
@@ -72,13 +75,15 @@ public class BaseProxy {
             LOGGER.debug("AbstractProxy#proxyInvoke: argTypes: {}", Arrays.toString(method.getParameterTypes()));
         }
 
+        // 构建一条完整的RPC协议消息
         RpcProtocol<RpcRequest> rpcProtocol = RpcProtocol.<RpcRequest>builder()
                 .rpcHeader(rpcHeader)
                 .content(rpcRequest)
                 .build();
 
-        // rpc调用结果future对象
+        // 创建保存RPC调用结果的RpcFuture对象
         RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()));
+        // 保存协议唯一标识sequenceId与RpcFuture对象的映射关系
         RpcPendingHolder.putRpcFuture(sequenceId, rpcFuture);
 
         // 服务发现

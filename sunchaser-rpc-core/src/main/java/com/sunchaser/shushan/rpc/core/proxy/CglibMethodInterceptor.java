@@ -6,19 +6,19 @@ import net.sf.cglib.proxy.MethodProxy;
 import java.lang.reflect.Method;
 
 /**
- * 基于cglib的动态代理实现
+ * 基于cglib的方法调用拦截实现
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/8/11
  */
-public class CglibProxy extends BaseProxy implements MethodInterceptor {
+public class CglibMethodInterceptor extends BaseMethodInterceptor implements MethodInterceptor {
 
-    public CglibProxy(String serviceName) {
-        super(serviceName);
+    public CglibMethodInterceptor(Class<?> target) {
+        super(target);
     }
 
-    public CglibProxy(String serviceName, int timeout) {
-        super(serviceName, timeout);
+    public CglibMethodInterceptor(Class<?> target, int timeout) {
+        super(target, timeout);
     }
 
     @Override
