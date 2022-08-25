@@ -1,6 +1,14 @@
 package com.sunchaser.shushan.rpc.core.proxy;
 
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
+import javassist.util.proxy.ProxyFactory;
+import javassist.util.proxy.ProxyObject;
+import lombok.SneakyThrows;
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
+import net.bytebuddy.implementation.MethodDelegation;
+import net.bytebuddy.matcher.ElementMatchers;
 import net.sf.cglib.proxy.Enhancer;
 
 import java.lang.reflect.Proxy;
@@ -39,7 +47,7 @@ public class RpcDynamicProxyFactory {
                 return Proxy.newProxyInstance(
                         Thread.currentThread().getContextClassLoader(),
                         new Class[]{clazz},
-                        new JdkMethodInterceptor(clazz)
+                        new ProxyInvokeHandler(clazz)
                 );
             }
         },
@@ -52,10 +60,49 @@ public class RpcDynamicProxyFactory {
             protected <T> Object doCreateProxyInstance(Class<T> clazz) {
                 Enhancer enhancer = new Enhancer();
                 enhancer.setSuperclass(clazz);
-                enhancer.setCallback(new CglibMethodInterceptor(clazz));
+                enhancer.setCallback(new ProxyInvokeHandler(clazz));
                 return enhancer.create();
             }
         },
+
+        /**
+         * javassist
+         */
+        JAVASSIST() {
+            @SneakyThrows({Throwable.class, Exception.class})
+            @Override
+            protected <T> Object doCreateProxyInstance(Class<T> clazz) {
+                ProxyFactory factory = new ProxyFactory();
+                // 设置接口
+                factory.setInterfaces(new Class[]{clazz});
+                // 设置拦截方法过滤器。设置哪些方法调用需要被拦截
+                factory.setFilter(m -> true);
+                Class<?> proxyClass = factory.createClass();
+                ProxyObject proxyObject = (ProxyObject) proxyClass.getDeclaredConstructor()
+                        .newInstance();
+                proxyObject.setHandler(new ProxyInvokeHandler(clazz));
+                return proxyObject;
+            }
+        },
+
+        /**
+         * byteBuddy
+         */
+        BYTE_BUDDY() {
+            @SneakyThrows({Throwable.class, Exception.class})
+            @SuppressWarnings("all")
+            @Override
+            protected <T> Object doCreateProxyInstance(Class<T> clazz) {
+                return new ByteBuddy().subclass(clazz)
+                        .method(ElementMatchers.isDeclaredBy(clazz))
+                        .intercept(MethodDelegation.to(new ProxyInvokeHandler(clazz)))
+                        .make()
+                        .load(clazz.getClassLoader(), ClassLoadingStrategy.Default.INJECTION)
+                        .getLoaded()
+                        .getDeclaredConstructor()
+                        .newInstance();
+            }
+        }
 
         ;
 
@@ -63,7 +110,7 @@ public class RpcDynamicProxyFactory {
 
         static {
             for (RpcDynamicProxyEnum value : RpcDynamicProxyEnum.values()) {
-                ENUM_MAP.put(value.name(), value);
+                ENUM_MAP.put(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, value.name()), value);
             }
         }
 
@@ -75,7 +122,7 @@ public class RpcDynamicProxyFactory {
         private static final ConcurrentMap<Class<?>, Object> PROXY_CACHE = Maps.newConcurrentMap();
 
         @SuppressWarnings("unchecked")
-        <T> T createProxyInstance(Class<T> clazz) {
+        public <T> T createProxyInstance(Class<T> clazz) {
             return (T) PROXY_CACHE.computeIfAbsent(clazz, proxy -> doCreateProxyInstance(clazz));
         }
 

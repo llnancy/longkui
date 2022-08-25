@@ -62,7 +62,7 @@ public interface RpcDynamicProxy {
             return Proxy.newProxyInstance(
                     Thread.currentThread().getContextClassLoader(),
                     new Class[]{clazz},
-                    new JdkMethodInterceptor(clazz)
+                    new ProxyInvokeHandler(clazz)
             );
         }
     }
@@ -79,7 +79,7 @@ public interface RpcDynamicProxy {
         protected <T> Object doCreateProxyInstance(Class<T> clazz) {
             Enhancer enhancer = new Enhancer();
             enhancer.setSuperclass(clazz);
-            enhancer.setCallback(new CglibMethodInterceptor(clazz));
+            enhancer.setCallback(new ProxyInvokeHandler(clazz));
             return enhancer.create();
         }
     }
