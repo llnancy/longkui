@@ -25,7 +25,8 @@ public class P2PConsumer {
 
     public static void main(String[] args) throws Exception {
         // p2pConsumer();
-        HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance(HelloService.class);
+        // HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance(HelloService.class);
+        HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance("javassist", HelloService.class);
         String hello = helloService.sayHello("SunChaser");
         LOGGER.info("sayHello result: {}", hello);
     }
