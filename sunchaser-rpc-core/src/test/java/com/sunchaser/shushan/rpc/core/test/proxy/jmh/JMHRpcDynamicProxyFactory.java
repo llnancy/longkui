@@ -77,7 +77,8 @@ public class JMHRpcDynamicProxyFactory {
                 // 设置拦截方法过滤器。设置哪些方法调用需要被拦截
                 factory.setFilter(m -> true);
                 Class<?> proxyClass = factory.createClass();
-                ProxyObject proxyObject = (ProxyObject) proxyClass.newInstance();
+                ProxyObject proxyObject = (ProxyObject) proxyClass.getDeclaredConstructor()
+                        .newInstance();
                 proxyObject.setHandler(new JMHProxyInvokeHandler(clazz));
                 return proxyObject;
             }
@@ -97,6 +98,7 @@ public class JMHRpcDynamicProxyFactory {
                         .make()
                         .load(clazz.getClassLoader(), ClassLoadingStrategy.Default.INJECTION)
                         .getLoaded()
+                        .getDeclaredConstructor()
                         .newInstance();
             }
         }
