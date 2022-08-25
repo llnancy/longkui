@@ -30,3 +30,8 @@ build/
 ### VS Code ###
 .vscode/
 /logs/
+
+### arthas ###
+/arthas-output/
+create-jmh-result.json
+invoke-jmh-result.json
