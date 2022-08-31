@@ -1,8 +1,12 @@
 package com.sunchaser.shushan.rpc.core.balancer;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -15,16 +19,16 @@ import java.util.stream.IntStream;
  */
 public interface LoadBalancer {
 
-    default <T> Node<T> select(List<Node<T>> nodes) {
+    default <T> Node<T> select(List<? extends Node<T>> nodes) {
         return select(nodes, StringUtils.EMPTY);
     }
 
-    <T> Node<T> select(List<Node<T>> nodes, String routeKey);
+    <T> Node<T> select(List<? extends Node<T>> nodes, String routeKey);
 
-    static <T> List<Node<T>> wrap(Collection<T> sources) {
+    static <T> List<Node<T>> wrap(List<T> sources) {
         return Optional.ofNullable(sources)
                 .map(col -> col.stream()
-                        .map(el -> Node.<T>builder()
+                        .map(el -> (Node<T>) Node.<T>builder()
                                 .node(el)
                                 .build()
                         )
@@ -32,29 +36,14 @@ public interface LoadBalancer {
                 ).orElse(Collections.emptyList());
     }
 
-    static <T> List<Node<T>> wrap(List<T> sources, int... weights) {
-        sources = Optional.ofNullable(sources)
-                .orElse(Collections.emptyList());
-        if (weights.length == 0) {
-            return wrap(sources);
+    static <T> List<? extends Node<T>> weightWrap(List<T> sources, Integer... weights) {
+        if (CollectionUtils.isEmpty(sources)) {
+            return Collections.emptyList();
         }
-        int size = sources.size();
-        if (weights.length < size) {
-            // append
-            int[] original = weights;
-            weights = Arrays.copyOf(original, size);
-            Arrays.fill(weights, original.length, weights.length, 1);
-        }
-        if (weights.length > size && size > 0) {
-            // skip
-            weights = Arrays.copyOf(weights, size);
-        }
-        final List<T> finalSources = sources;
-        final int[] finalWeights = weights;
-        return IntStream.range(0, size)
-                .mapToObj(i -> Node.<T>builder()
-                        .node(finalSources.get(i))
-                        .weight(finalWeights[i])
+        return IntStream.range(0, sources.size())
+                .mapToObj(i -> WeightNode.<T>builder()
+                        .node(sources.get(i))
+                        .weight(ArrayUtils.get(weights, i, WeightNode.DEFAULT_WEIGHT))
                         .build()
                 )
                 .collect(Collectors.toList());

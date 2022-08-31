@@ -2,6 +2,7 @@ package com.sunchaser.shushan.rpc.core.balancer.impl;
 
 import com.google.common.collect.Lists;
 import com.sunchaser.shushan.rpc.core.balancer.Node;
+import com.sunchaser.shushan.rpc.core.balancer.WeightNode;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -25,11 +26,12 @@ public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
     private final List<WeightedRoundRobin> wrrList = Lists.newArrayList();
 
     @Override
-    protected <T> Node<T> doSelect(List<Node<T>> nodes, String routeKey) {
+    protected <T> Node<T> doSelect(List<? extends Node<T>> nodes, String routeKey) {
         if (CollectionUtils.isEmpty(wrrList)) {
             for (Node<T> node : nodes) {
+                WeightNode<T> weightNode = (WeightNode<T>) node;
                 WeightedRoundRobin wrr = new WeightedRoundRobin();
-                wrr.setWeight(node.getWeight());
+                wrr.setWeight(weightNode.getWeight());
                 wrrList.add(wrr);
             }
         }
@@ -38,7 +40,7 @@ public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
         Node<T> selectedNode = null;
         WeightedRoundRobin selectedWrr = null;
         for (int i = 0, size = nodes.size(); i < size; i++) {
-            Node<T> node = nodes.get(i);
+            WeightNode<T> node = (WeightNode<T>) nodes.get(i);
             int weight = node.getWeight();
             WeightedRoundRobin wrr = wrrList.get(i);
             // WeightedRoundRobin wrr = wrrMap.computeIfAbsent(node.toString() -> {

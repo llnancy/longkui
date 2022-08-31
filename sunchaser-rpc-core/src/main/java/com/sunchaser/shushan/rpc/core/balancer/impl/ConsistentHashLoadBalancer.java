@@ -39,20 +39,17 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
         @Getter
         private final int identityHashCode;
 
-        public ConsistentHashSelector(List<Node<T>> nodes, int identityHashCode) {
+        public ConsistentHashSelector(List<? extends Node<T>> nodes, int identityHashCode) {
             this(nodes, identityHashCode, 160);
         }
 
-        public ConsistentHashSelector(List<Node<T>> nodes, int identityHashCode, int replicaNumber) {
+        public ConsistentHashSelector(List<? extends Node<T>> nodes, int identityHashCode, int replicaNumber) {
             this.hashRing = Maps.newTreeMap();
             this.replicaNumber = replicaNumber;
             this.identityHashCode = identityHashCode;
-            StringBuilder build = new StringBuilder();
             // 构建含虚拟节点的哈希环
             for (Node<T> node : nodes) {
-                String address = build.append(node.getNode().toString())
-                        .append(node.getWeight())
-                        .toString();
+                String address = node.getNode().toString();
                 for (int i = 0; i < replicaNumber / 4; i++) {
                     // 对hashCode+i进行sha256运算，得到一个长度为16的字节数组
                     byte[] digest = Hashing.sha256()
@@ -97,7 +94,7 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
 
     @Override
     @SuppressWarnings("unchecked")
-    protected <T> Node<T> doSelect(List<Node<T>> nodes, String routeKey) {
+    protected <T> Node<T> doSelect(List<? extends Node<T>> nodes, String routeKey) {
         int nodesHashCode = nodes.hashCode();
         ConsistentHashSelector<T> selector = (ConsistentHashSelector<T>) selectors.get(routeKey);
         if (Objects.isNull(selector) || selector.getIdentityHashCode() != nodesHashCode) {

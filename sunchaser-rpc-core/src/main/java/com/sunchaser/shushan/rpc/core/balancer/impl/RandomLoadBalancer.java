@@ -1,6 +1,7 @@
 package com.sunchaser.shushan.rpc.core.balancer.impl;
 
 import com.sunchaser.shushan.rpc.core.balancer.Node;
+import com.sunchaser.shushan.rpc.core.balancer.WeightNode;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -15,7 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class RandomLoadBalancer extends AbstractLoadBalancer {
 
     @Override
-    protected <T> Node<T> doSelect(List<Node<T>> nodes, String routeKey) {
+    protected <T> Node<T> doSelect(List<? extends Node<T>> nodes, String routeKey) {
         int length = nodes.size();
         // 每个server的权重是否全部一样，如果一样则退化成简单随机
         boolean sameWeight = true;
@@ -23,7 +24,9 @@ public class RandomLoadBalancer extends AbstractLoadBalancer {
         int totalWeight = 0;
         int lastWeight = -1;
         for (int i = 0; i < length; i++) {
-            int weight = nodes.get(i).getWeight();
+            Node<T> iNode = nodes.get(i);
+            WeightNode<T> node = (WeightNode<T>) iNode;
+            int weight = node.getWeight();
             totalWeight += weight;
             weights[i] = totalWeight;
             // 出现了server权重不一样的情况

@@ -1,7 +1,7 @@
 package com.sunchaser.shushan.rpc.core.balancer.impl;
 
-import com.sunchaser.shushan.rpc.core.balancer.Node;
 import com.sunchaser.shushan.rpc.core.balancer.LoadBalancer;
+import com.sunchaser.shushan.rpc.core.balancer.Node;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
 public abstract class AbstractLoadBalancer implements LoadBalancer {
 
     @Override
-    public <T> Node<T> select(List<Node<T>> nodes, String routeKey) {
+    public <T> Node<T> select(List<? extends Node<T>> nodes, String routeKey) {
         if (CollectionUtils.isEmpty(nodes)) {
             return null;
         }
@@ -25,5 +25,5 @@ public abstract class AbstractLoadBalancer implements LoadBalancer {
         return doSelect(nodes, routeKey);
     }
 
-    protected abstract <T> Node<T> doSelect(List<Node<T>> nodes, String routeKey);
+    protected abstract <T> Node<T> doSelect(List<? extends Node<T>> nodes, String routeKey);
 }

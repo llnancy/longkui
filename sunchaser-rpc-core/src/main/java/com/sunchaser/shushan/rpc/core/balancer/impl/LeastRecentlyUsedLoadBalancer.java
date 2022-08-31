@@ -13,7 +13,7 @@ import java.util.List;
 public class LeastRecentlyUsedLoadBalancer extends AbstractLoadBalancer {
 
     @Override
-    protected <T> Node<T> doSelect(List<Node<T>> nodes, String routeKey) {
+    protected <T> Node<T> doSelect(List<? extends Node<T>> nodes, String routeKey) {
         return null;
     }
 }
