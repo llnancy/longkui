@@ -119,7 +119,10 @@ public class RpcDynamicProxyFactory {
                     .orElse(JDK);
         }
 
-        private static final ConcurrentMap<Class<?>, Object> PROXY_CACHE = Maps.newConcurrentMap();
+        /**
+         * non-static
+         */
+        private final ConcurrentMap<Class<?>, Object> PROXY_CACHE = Maps.newConcurrentMap();
 
         @SuppressWarnings("unchecked")
         public <T> T createProxyInstance(Class<T> clazz) {

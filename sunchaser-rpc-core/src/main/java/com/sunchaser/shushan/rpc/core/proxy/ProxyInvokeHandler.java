@@ -5,7 +5,7 @@ import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.handler.RpcPendingHolder;
 import com.sunchaser.shushan.rpc.core.protocol.*;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
-import com.sunchaser.shushan.rpc.core.registry.ServiceMeta;
+import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
 import com.sunchaser.shushan.rpc.core.registry.impl.LocalRegistry;
 import com.sunchaser.shushan.rpc.core.serialize.ArrayElement;
 import com.sunchaser.shushan.rpc.core.transport.NettyRpcClient;
@@ -99,11 +99,11 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
         RpcPendingHolder.putRpcFuture(sequenceId, rpcFuture);
 
         // 服务发现
-        ServiceMeta serviceMeta = REGISTRY.discovery(serviceName, methodName);
+        ServiceMetaData serviceMetaData = REGISTRY.discovery(serviceName, methodName);
 
         try {
             // invoke
-            RPC_CLIENT.invoke(rpcProtocol, serviceMeta.getAddress(), serviceMeta.getPort());
+            RPC_CLIENT.invoke(rpcProtocol, serviceMetaData.getHost(), serviceMetaData.getPort());
         } catch (Exception e) {
             // rpc调用异常时删除对应RpcFuture
             RpcPendingHolder.removeRpcFuture(sequenceId);

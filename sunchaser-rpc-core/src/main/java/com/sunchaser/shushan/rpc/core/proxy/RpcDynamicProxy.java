@@ -34,7 +34,7 @@ public interface RpcDynamicProxy {
 
     abstract class AbstractRpcDynamicProxy implements RpcDynamicProxy {
 
-        private static final ConcurrentMap<Class<?>, Object> PROXY_CACHE = Maps.newConcurrentMap();
+        private final ConcurrentMap<Class<?>, Object> PROXY_CACHE = Maps.newConcurrentMap();
 
         @Override
         @SuppressWarnings("unchecked")
@@ -102,18 +102,19 @@ public interface RpcDynamicProxy {
         private static final Map<String, RpcDynamicProxy> IMPORT_RDP_MAP = Maps.newHashMap();
 
         static {
-            IMPORT_RDP_MAP.put(RpcDynamicProxyEnum.JDK.name(), JdkRpcDynamicProxy.getInstance());
-            IMPORT_RDP_MAP.put(RpcDynamicProxyEnum.CGLIB.name(), CglibRpcDynamicProxy.getInstance());
+            IMPORT_RDP_MAP.put(RpcDynamicProxyEnum.JDK.name().toLowerCase(), JdkRpcDynamicProxy.getInstance());
+            IMPORT_RDP_MAP.put(RpcDynamicProxyEnum.CGLIB.name().toLowerCase(), CglibRpcDynamicProxy.getInstance());
         }
 
-        public static RpcDynamicProxy getRpcProxyInstance(String proxyType) {
+        public static <T> T getRpcProxyInstance(String proxyType, Class<T> clazz) {
             return Optional.ofNullable(IMPORT_RDP_MAP.get(proxyType))
-                    .orElse(JdkRpcDynamicProxy.getInstance());
+                    .orElse(JdkRpcDynamicProxy.getInstance())
+                    .createProxyInstance(clazz);
         }
 
-        public static RpcDynamicProxy getRpcProxyInstance(RpcDynamicProxyEnum proxyEnum) {
-            return Optional.ofNullable(IMPORT_RDP_MAP.get(proxyEnum.name()))
-                    .orElse(JdkRpcDynamicProxy.getInstance());
+        public static <T> T getRpcProxyInstance(Class<T> clazz) {
+            return JdkRpcDynamicProxy.getInstance()
+                    .createProxyInstance(clazz);
         }
     }
 }
