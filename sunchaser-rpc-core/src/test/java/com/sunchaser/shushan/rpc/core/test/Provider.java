@@ -1,7 +1,7 @@
 package com.sunchaser.shushan.rpc.core.test;
 
 import com.sunchaser.shushan.rpc.core.registry.Registry;
-import com.sunchaser.shushan.rpc.core.registry.ServiceMeta;
+import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
 import com.sunchaser.shushan.rpc.core.registry.impl.ZookeeperRegistry;
 import com.sunchaser.shushan.rpc.core.transport.NettyRpcServer;
 import com.sunchaser.shushan.rpc.core.util.BeanFactory;
@@ -16,14 +16,14 @@ public class Provider {
 
     public static void main(String[] args) {
         BeanFactory.register(HelloService.class.getName(), new HelloServiceImpl());
-        ServiceMeta serviceMeta = ServiceMeta.builder()
+        ServiceMetaData serviceMetaData = ServiceMetaData.builder()
                 .serviceName(HelloService.class.getName())
                 .version("1")
-                .address("127.0.0.1")
+                .host("127.0.0.1")
                 .port(1234)
                 .build();
         Registry registry = new ZookeeperRegistry();
-        registry.register(serviceMeta);
+        registry.register(serviceMetaData);
         new NettyRpcServer().start();
     }
 }
