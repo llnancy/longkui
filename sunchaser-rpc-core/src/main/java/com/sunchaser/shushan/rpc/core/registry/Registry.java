@@ -11,25 +11,25 @@ public interface Registry {
     /**
      * 服务注册
      *
-     * @param service ServiceInstance
+     * @param serviceMetaData ServiceMetaData
      */
-    void register(ServiceMeta service);
+    void register(ServiceMetaData serviceMetaData);
 
     /**
      * 服务注销
      *
-     * @param service ServiceInstance
+     * @param serviceMetaData ServiceMetaData
      */
-    void unRegister(ServiceMeta service);
+    void unRegister(ServiceMetaData serviceMetaData);
 
     /**
      * 服务发现
      *
      * @param serviceName serviceName
      * @param methodName  methodName
-     * @return ServiceMeta
+     * @return ServiceMetaData
      */
-    ServiceMeta discovery(String serviceName, String methodName);
+    ServiceMetaData discovery(String serviceName, String methodName);
 
     /**
      * 注册中心销毁

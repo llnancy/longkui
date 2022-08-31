@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ServiceMeta {
+public class ServiceMetaData {
 
     /**
      * 服务名称
@@ -30,7 +30,7 @@ public class ServiceMeta {
     /**
      * 服务地址
      */
-    private String address;
+    private String host;
 
     /**
      * 端口号

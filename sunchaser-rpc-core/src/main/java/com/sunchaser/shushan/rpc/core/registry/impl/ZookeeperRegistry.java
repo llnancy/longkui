@@ -5,18 +5,22 @@ import com.sunchaser.shushan.rpc.core.balancer.Node;
 import com.sunchaser.shushan.rpc.core.balancer.impl.RandomLoadBalancer;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
-import com.sunchaser.shushan.rpc.core.registry.ServiceMeta;
+import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
 import lombok.SneakyThrows;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.curator.utils.CloseableUtils;
+import org.apache.curator.x.discovery.ServiceCache;
 import org.apache.curator.x.discovery.ServiceDiscovery;
 import org.apache.curator.x.discovery.ServiceDiscoveryBuilder;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.details.JsonInstanceSerializer;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 基于Zookeeper实现的服务注册与发现
@@ -36,7 +40,11 @@ public class ZookeeperRegistry implements Registry {
 
     private static final String ZK_BASE_PATH = "/sunchaser-rpc";
 
-    private final ServiceDiscovery<ServiceMeta> serviceDiscovery;
+    private final CuratorFramework client;
+
+    private final ServiceDiscovery<ServiceMetaData> serviceDiscovery;
+
+    private final ServiceCache<ServiceMetaData> serviceCache;
 
     private final LoadBalancer loadBalancer;
 
@@ -47,30 +55,39 @@ public class ZookeeperRegistry implements Registry {
     @SneakyThrows({Throwable.class, Exception.class})
     public ZookeeperRegistry(String zkAddress) {
         this.loadBalancer = new RandomLoadBalancer();
-        CuratorFramework client = CuratorFrameworkFactory.newClient(zkAddress, new ExponentialBackoffRetry(1000, 3));
+        // 创建Curator客户端并启动
+        client = CuratorFrameworkFactory.newClient(zkAddress, new ExponentialBackoffRetry(1000, 3));
         client.start();
-        JsonInstanceSerializer<ServiceMeta> serializer = new JsonInstanceSerializer<>(ServiceMeta.class);
-        this.serviceDiscovery = ServiceDiscoveryBuilder.builder(ServiceMeta.class)
+        // 序列化器
+        JsonInstanceSerializer<ServiceMetaData> serializer = new JsonInstanceSerializer<>(ServiceMetaData.class);
+        // 创建ServiceDiscovery并启动
+        this.serviceDiscovery = ServiceDiscoveryBuilder.builder(ServiceMetaData.class)
                 .client(client)
                 .serializer(serializer)
                 .basePath(ZK_BASE_PATH)
+                .watchInstances(true)
                 .build();
         this.serviceDiscovery.start();
+        // 创建ServiceCache并启动
+        this.serviceCache = serviceDiscovery.serviceCacheBuilder()
+                .name(ZK_BASE_PATH)
+                .build();
+        this.serviceCache.start();
     }
 
     /**
      * 服务注册
      *
-     * @param service ServiceInstance
+     * @param serviceMetaData ServiceMetaData
      */
     @SneakyThrows({Throwable.class, Exception.class})
     @Override
-    public void register(ServiceMeta service) {
-        ServiceInstance<ServiceMeta> serviceInstance = ServiceInstance.<ServiceMeta>builder()
-                .name(service.getServiceName())
-                .address(service.getAddress())
-                .port(service.getPort())
-                .payload(service)
+    public void register(ServiceMetaData serviceMetaData) {
+        ServiceInstance<ServiceMetaData> serviceInstance = ServiceInstance.<ServiceMetaData>builder()
+                .name(serviceMetaData.getServiceName())
+                .address(serviceMetaData.getHost())
+                .port(serviceMetaData.getPort())
+                .payload(serviceMetaData)
                 .build();
         serviceDiscovery.registerService(serviceInstance);
     }
@@ -78,16 +95,16 @@ public class ZookeeperRegistry implements Registry {
     /**
      * 服务注销
      *
-     * @param service ServiceInstance
+     * @param serviceMetaData ServiceMetaData
      */
     @SneakyThrows({Throwable.class, Exception.class})
     @Override
-    public void unRegister(ServiceMeta service) {
-        ServiceInstance<ServiceMeta> serviceInstance = ServiceInstance.<ServiceMeta>builder()
-                .name(service.getServiceName())
-                .address(service.getAddress())
-                .port(service.getPort())
-                .payload(service)
+    public void unRegister(ServiceMetaData serviceMetaData) {
+        ServiceInstance<ServiceMetaData> serviceInstance = ServiceInstance.<ServiceMetaData>builder()
+                .name(serviceMetaData.getServiceName())
+                .address(serviceMetaData.getHost())
+                .port(serviceMetaData.getPort())
+                .payload(serviceMetaData)
                 .build();
         serviceDiscovery.unregisterService(serviceInstance);
     }
@@ -96,13 +113,27 @@ public class ZookeeperRegistry implements Registry {
      * 服务发现
      *
      * @param serviceName serviceName
-     * @return ServiceMeta
+     * @return ServiceMetaData
      */
     @SneakyThrows({Throwable.class, Exception.class})
     @Override
-    public ServiceMeta discovery(String serviceName, String methodName) {
-        Collection<ServiceInstance<ServiceMeta>> serviceInstances = serviceDiscovery.queryForInstances(serviceName);
-        Node<ServiceInstance<ServiceMeta>> select = loadBalancer.select(LoadBalancer.wrap(serviceInstances));
+    public ServiceMetaData discovery(String serviceName, String methodName) {
+        // 通过ServiceCache从本地缓存中获取服务实例
+        List<ServiceInstance<ServiceMetaData>> serviceInstances = serviceCache.getInstances()
+                .stream()
+                .filter(el -> el.getName().equals(serviceName))
+                .collect(Collectors.toList());
+        // 缓存中不存在，则通过ServiceDiscovery直接从Zookeeper中获取服务实例
+        if (CollectionUtils.isEmpty(serviceInstances)) {
+            serviceInstances = (List<ServiceInstance<ServiceMetaData>>) serviceDiscovery.queryForInstances(serviceName);
+        }
+        if (CollectionUtils.isEmpty(serviceInstances)) {
+            throw new RpcException("no service named " + serviceName + " was discovered");
+        }
+        // 获取第一个服务实例
+        // return serviceInstances.get(0).getPayload();
+        // 使用负载均衡器获取服务实例
+        Node<ServiceInstance<ServiceMetaData>> select = loadBalancer.select(LoadBalancer.wrap(serviceInstances));
         if (Objects.isNull(select)) {
             throw new RpcException("no service named " + serviceName + " was discovered");
         }
@@ -112,9 +143,10 @@ public class ZookeeperRegistry implements Registry {
     /**
      * 注册中心销毁
      */
-    @SneakyThrows({Throwable.class, Exception.class})
     @Override
     public void destroy() {
-        serviceDiscovery.close();
+        CloseableUtils.closeQuietly(serviceDiscovery);
+        CloseableUtils.closeQuietly(serviceCache);
+        CloseableUtils.closeQuietly(client);
     }
 }
