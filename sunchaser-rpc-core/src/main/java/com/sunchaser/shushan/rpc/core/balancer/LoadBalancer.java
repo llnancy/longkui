@@ -2,7 +2,6 @@ package com.sunchaser.shushan.rpc.core.balancer;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,12 +18,32 @@ import java.util.stream.IntStream;
  */
 public interface LoadBalancer {
 
-    default <T> Node<T> select(List<? extends Node<T>> nodes) {
-        return select(nodes, StringUtils.EMPTY);
-    }
+    /**
+     * 负载均衡
+     *
+     * @param nodes Node列表
+     * @param <T>   负载均衡的对象类型
+     * @return 负载均衡算法选出的Node
+     */
+    <T> Node<T> select(List<? extends Node<T>> nodes);
 
-    <T> Node<T> select(List<? extends Node<T>> nodes, String routeKey);
+    /**
+     * 负载均衡：一致性哈希算法
+     *
+     * @param nodes   Node列表
+     * @param hashKey 哈希key（用于一致性哈希算法的key）
+     * @param <T>     负载均衡的对象类型
+     * @return 负载均衡算法选出的Node
+     */
+    <T> Node<T> select(List<? extends Node<T>> nodes, String hashKey);
 
+    /**
+     * 将资源列表包装为Node列表
+     *
+     * @param sources 资源列表
+     * @param <T>     资源类型
+     * @return Node列表
+     */
     static <T> List<Node<T>> wrap(List<T> sources) {
         return Optional.ofNullable(sources)
                 .map(col -> col.stream()
@@ -36,6 +55,14 @@ public interface LoadBalancer {
                 ).orElse(Collections.emptyList());
     }
 
+    /**
+     * 将资源列表sources和权重列表weights包装为WeightNode列表，默认权重为1
+     *
+     * @param sources 资源列表
+     * @param weights 权重列表 可变参数
+     * @param <T>     资源类型
+     * @return WeightNode列表
+     */
     static <T> List<? extends Node<T>> weightWrap(List<T> sources, Integer... weights) {
         if (CollectionUtils.isEmpty(sources)) {
             return Collections.emptyList();
@@ -43,9 +70,21 @@ public interface LoadBalancer {
         return IntStream.range(0, sources.size())
                 .mapToObj(i -> WeightNode.<T>builder()
                         .node(sources.get(i))
-                        .weight(ArrayUtils.get(weights, i, WeightNode.DEFAULT_WEIGHT))
+                        .weight(Math.max(ArrayUtils.get(weights, i, WeightNode.DEFAULT_WEIGHT), WeightNode.DEFAULT_WEIGHT))
                         .build()
                 )
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 将资源列表sources和权重列表weights包装为WeightNode列表，默认权重为1
+     *
+     * @param sources 资源列表
+     * @param weights 权重列表 java.util.List
+     * @param <T>     资源类型
+     * @return WeightNode列表
+     */
+    static <T> List<? extends Node<T>> weightWrap(List<T> sources, List<Integer> weights) {
+        return weightWrap(sources, weights.toArray(new Integer[0]));
     }
 }

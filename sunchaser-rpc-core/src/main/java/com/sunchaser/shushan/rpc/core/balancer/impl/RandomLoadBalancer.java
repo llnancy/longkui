@@ -16,35 +16,42 @@ import java.util.concurrent.ThreadLocalRandom;
 public class RandomLoadBalancer extends AbstractLoadBalancer {
 
     @Override
-    protected <T> Node<T> doSelect(List<? extends Node<T>> nodes, String routeKey) {
+    protected <T> Node<T> doSelect(List<? extends Node<T>> nodes) {
         int length = nodes.size();
-        // 每个server的权重是否全部一样，如果一样则退化成简单随机
+        // 每个Node的权重是否全部相同的标识（如果一样则退化成简单随机）
         boolean sameWeight = true;
+        // 权重区间（存放每次权重累加后的值）
         int[] weights = new int[length];
+        // 总权重
         int totalWeight = 0;
+        // 前一个Node的权重
         int lastWeight = -1;
         for (int i = 0; i < length; i++) {
-            Node<T> iNode = nodes.get(i);
-            WeightNode<T> node = (WeightNode<T>) iNode;
-            int weight = node.getWeight();
+            // 转化为WeightNode后获取权重
+            int weight = ((WeightNode<T>) nodes.get(i)).getWeight();
+            // sum累加
             totalWeight += weight;
+            // 存入weights数组
             weights[i] = totalWeight;
-            // 出现了server权重不一样的情况
+            // 出现了Node权重不一样的情况
             if (sameWeight && i > 0 && weight != lastWeight) {
                 sameWeight = false;
             }
+            // 更新lastWeight
+            lastWeight = weight;
         }
+        // 加权随机
         if (!sameWeight && totalWeight > 0) {
-            // 随机0~totalWeight
+            // 随机生成一个[0, totalWeight)区间内的随机数
             int offset = ThreadLocalRandom.current().nextInt(totalWeight);
             for (int i = 0; i < length; i++) {
-                // 第一个比offset大的
+                // 选中第一个比offset大的
                 if (offset < weights[i]) {
                     return nodes.get(i);
                 }
             }
         }
-        // all servers have the same weight value, 退化成简单随机算法。
+        // all nodes have the same weight value. 退化成普通随机算法。
         return nodes.get(ThreadLocalRandom.current().nextInt(length));
     }
 }

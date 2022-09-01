@@ -9,11 +9,16 @@ package com.sunchaser.shushan.rpc.core.balancer;
 public interface Weightable {
 
     /**
+     * 默认权重值：1
+     */
+    int DEFAULT_WEIGHT = 1;
+
+    /**
      * 获取权重
      *
      * @return 权重值
      */
     default int getWeight() {
-        return 1;
+        return DEFAULT_WEIGHT;
     }
 }

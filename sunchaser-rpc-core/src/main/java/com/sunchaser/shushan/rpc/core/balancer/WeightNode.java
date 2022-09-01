@@ -19,8 +19,6 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class WeightNode<T> extends Node<T> implements Weightable {
 
-    public static final int DEFAULT_WEIGHT = 1;
-
     /**
      * 节点权重，必须大于0，默认为1
      */
