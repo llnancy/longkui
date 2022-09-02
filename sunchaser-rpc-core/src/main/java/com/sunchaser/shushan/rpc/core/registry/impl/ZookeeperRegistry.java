@@ -3,6 +3,7 @@ package com.sunchaser.shushan.rpc.core.registry.impl;
 import com.sunchaser.shushan.rpc.core.balancer.LoadBalancer;
 import com.sunchaser.shushan.rpc.core.balancer.Node;
 import com.sunchaser.shushan.rpc.core.balancer.impl.RandomLoadBalancer;
+import com.sunchaser.shushan.rpc.core.balancer.impl.RoundRobinLoadBalancer;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
@@ -46,7 +47,10 @@ public class ZookeeperRegistry implements Registry {
 
     private final ServiceCache<ServiceMetaData> serviceCache;
 
-    private final LoadBalancer loadBalancer;
+    /**
+     * 默认使用基于加权轮询算法的负载均衡器
+     */
+    private final LoadBalancer loadBalancer = new RoundRobinLoadBalancer();
 
     public ZookeeperRegistry() {
         this(DEFAULT_ZK_ADDRESS);
@@ -54,7 +58,6 @@ public class ZookeeperRegistry implements Registry {
 
     @SneakyThrows({Throwable.class, Exception.class})
     public ZookeeperRegistry(String zkAddress) {
-        this.loadBalancer = new RandomLoadBalancer();
         // 创建Curator客户端并启动
         client = CuratorFrameworkFactory.newClient(zkAddress, new ExponentialBackoffRetry(1000, 3));
         client.start();

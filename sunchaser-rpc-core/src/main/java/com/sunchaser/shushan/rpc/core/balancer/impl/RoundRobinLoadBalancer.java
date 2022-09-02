@@ -26,12 +26,12 @@ public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
     /**
      * 全局线程安全映射表
      */
-    private final ConcurrentMap<String, ConcurrentMap<String, WeightedRoundRobin>> wrrMapMap = Maps.newConcurrentMap();
+    private final ConcurrentMap<String, ConcurrentMap<String, WeightedRoundRobin>> wrrMMap = Maps.newConcurrentMap();
 
     @Override
     protected <T> Node<T> doSelect(List<? extends Node<T>> nodes) {
         // 获取整个nodes对应的WeightedRoundRobin映射表
-        ConcurrentMap<String, WeightedRoundRobin> wrrMap = wrrMapMap.computeIfAbsent(nodes.toString(), v -> Maps.newConcurrentMap());
+        ConcurrentMap<String, WeightedRoundRobin> wrrMap = wrrMMap.computeIfAbsent(nodes.toString(), v -> Maps.newConcurrentMap());
         int totalWeight = 0;
         long maxCurrent = Long.MIN_VALUE;
         Node<T> selectedNode = null;
@@ -46,7 +46,7 @@ public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
                             .weight(weight)
                             .build()
             );
-            // 初始化wrr对象的当前权重为配置的权重weight
+            // current = current + weight
             long current = wrr.increaseCurrent();
             // 利用maxCurrent变量，迭代寻找具有最大权重的Node节点并选中
             if (current > maxCurrent) {
@@ -57,7 +57,7 @@ public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
                 // 选中当前迭代最大权重WeightedRoundRobin
                 selectedWrr = wrr;
             }
-            // 累加总权重
+            // 累加得到总权重
             totalWeight += weight;
         }
         if (Objects.nonNull(selectedNode)) {

@@ -20,7 +20,7 @@ class RandomLoadBalancerTest {
     @Test
     public void testRandom() {
         LoadBalancer loadBalancer = new RandomLoadBalancer();
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 10; i++) {
             Node<String> select = loadBalancer.select(LoadBalancer.weightWrap(Lists.newArrayList("A", "B", "C")));
             LOGGER.info("select: {}", select.getNode());
         }
@@ -29,8 +29,8 @@ class RandomLoadBalancerTest {
     @Test
     public void testWeightedRandom() {
         LoadBalancer loadBalancer = new RandomLoadBalancer();
-        for (int i = 0; i < 7; i++) {
-            Node<String> select = loadBalancer.select(LoadBalancer.weightWrap(Lists.newArrayList("A", "B", "C"), 4, 1, 5));
+        for (int i = 0; i < 10; i++) {
+            Node<String> select = loadBalancer.select(LoadBalancer.weightWrap(Lists.newArrayList("A", "B", "C"), 5, 2, 3));
             LOGGER.info("select: {}", select.getNode());
         }
     }
