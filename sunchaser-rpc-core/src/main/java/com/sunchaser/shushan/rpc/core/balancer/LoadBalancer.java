@@ -31,7 +31,7 @@ public interface LoadBalancer {
      * 负载均衡：一致性哈希算法
      *
      * @param nodes   Node列表
-     * @param hashKey 哈希key（用于一致性哈希算法的key）
+     * @param hashKey 哈希key（一致性哈希算法中用于对请求进行哈希的key）
      * @param <T>     负载均衡的对象类型
      * @return 负载均衡算法选出的Node
      */

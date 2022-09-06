@@ -2,7 +2,6 @@ package com.sunchaser.shushan.rpc.core.registry.impl;
 
 import com.sunchaser.shushan.rpc.core.balancer.LoadBalancer;
 import com.sunchaser.shushan.rpc.core.balancer.Node;
-import com.sunchaser.shushan.rpc.core.balancer.impl.RandomLoadBalancer;
 import com.sunchaser.shushan.rpc.core.balancer.impl.RoundRobinLoadBalancer;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.registry.Registry;

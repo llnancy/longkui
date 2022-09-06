@@ -23,50 +23,71 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
     static class ConsistentHashSelector<T> {
 
         /**
+         * 默认每个真实节点对应的虚拟节点数
+         */
+        private static final int DEFAULT_REPLICA_NUMBER = 160;
+
+        /**
+         * delta值
+         */
+        private static final int DELTA = 4;
+
+        /**
          * 哈希环（包含虚拟节点）
          */
         private final NavigableMap<Long, Node<T>> hashRing;
 
         /**
-         * 每个真实节点包含的虚拟节点个数
+         * 每个真实节点对应的虚拟节点数量
          */
         @Getter
         private final int replicaNumber;
 
         /**
-         * 用于记录Node集合的hashCode，用该hashCode值来判断Provider列表是否发生了变化
+         * 用于记录Node集合的唯一hashCode，用该hashCode值来判断Node列表是否发生了变化
          */
         @Getter
         private final int identityHashCode;
 
         public ConsistentHashSelector(List<? extends Node<T>> nodes, int identityHashCode) {
-            this(nodes, identityHashCode, 160);
+            this(nodes, identityHashCode, DEFAULT_REPLICA_NUMBER);
         }
 
         public ConsistentHashSelector(List<? extends Node<T>> nodes, int identityHashCode, int replicaNumber) {
             this.hashRing = Maps.newTreeMap();
             this.replicaNumber = replicaNumber;
             this.identityHashCode = identityHashCode;
+            this.createHashRing(nodes, replicaNumber);
+        }
+
+        private void createHashRing(List<? extends Node<T>> nodes, int replicaNumber) {
             // 构建含虚拟节点的哈希环
             for (Node<T> node : nodes) {
                 String address = node.getNode().toString();
-                for (int i = 0; i < replicaNumber / 4; i++) {
+                // 默认虚拟节点数replicaNumber=160。
+                // 外层循环40次，内层循环4次，共160次。
+                for (int i = 0; i < replicaNumber / DELTA; i++) {
                     // 对hashCode+i进行sha256运算，得到一个长度为16的字节数组
                     byte[] digest = Hashing.sha256()
                             .hashString("SHARD" + address + "-NODE-" + i, StandardCharsets.UTF_8)
                             .asBytes();
                     // 对digest部分字节进行4次hash运算，得到4个不同的long型正整数
-                    for (int h = 0; h < 4; h++) {
+                    for (int h = 0; h < DELTA; h++) {
+                        // h = 0时，取digest的[0, 3]位字节进行位运算
+                        // h = 1时，取digest的[4, 7]位字节进行位运算
+                        // h = 2时，取digest的[8, 11]位字节进行位运算
+                        // h = 3时，取digest的[12, 15]位字节进行位运算
                         long m = hash(digest, h);
+                        // 放入哈希环
                         hashRing.put(m, node);
                     }
                 }
             }
         }
 
-        public Node<T> select(String routeKey) {
+        public Node<T> select(String hashKey) {
             // 计算key的哈希值
-            byte[] digest = Hashing.sha256().hashString(routeKey, StandardCharsets.UTF_8).asBytes();
+            byte[] digest = Hashing.sha256().hashString(hashKey, StandardCharsets.UTF_8).asBytes();
             // 进行匹配
             return selectForKey(hash(digest, 0));
         }

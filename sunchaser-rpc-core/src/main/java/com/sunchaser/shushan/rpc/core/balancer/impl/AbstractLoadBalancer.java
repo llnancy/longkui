@@ -15,11 +15,24 @@ import java.util.function.Function;
  */
 public abstract class AbstractLoadBalancer implements LoadBalancer {
 
+    /**
+     * 负载均衡
+     *
+     * @param nodes Node列表
+     * @return 负载均衡算法选出的Node
+     */
     @Override
     public <T> Node<T> select(List<? extends Node<T>> nodes) {
         return select(nodes, this::doSelect);
     }
 
+    /**
+     * 负载均衡：一致性哈希算法
+     *
+     * @param nodes   Node列表
+     * @param hashKey 哈希key（用于一致性哈希算法的key）
+     * @return 负载均衡算法选出的Node
+     */
     @Override
     public <T> Node<T> select(List<? extends Node<T>> nodes, String hashKey) {
         return select(nodes, nodeList -> doSelect(nodeList, hashKey));
