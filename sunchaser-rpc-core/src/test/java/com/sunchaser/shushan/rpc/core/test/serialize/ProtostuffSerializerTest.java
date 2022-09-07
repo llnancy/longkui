@@ -1,4 +1,4 @@
-package com.sunchaser.shushan.rpc.core.test.serialize.impl;
+package com.sunchaser.shushan.rpc.core.test.serialize;
 
 import com.sunchaser.shushan.rpc.core.protocol.RpcRequest;
 import com.sunchaser.shushan.rpc.core.serialize.Serializer;
