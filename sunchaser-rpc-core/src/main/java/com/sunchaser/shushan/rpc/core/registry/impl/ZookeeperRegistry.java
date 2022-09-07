@@ -1,5 +1,6 @@
 package com.sunchaser.shushan.rpc.core.registry.impl;
 
+import com.google.common.collect.Maps;
 import com.sunchaser.shushan.rpc.core.balancer.LoadBalancer;
 import com.sunchaser.shushan.rpc.core.balancer.Node;
 import com.sunchaser.shushan.rpc.core.balancer.impl.RoundRobinLoadBalancer;
@@ -7,9 +8,11 @@ import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.curator.utils.CloseableUtils;
 import org.apache.curator.x.discovery.ServiceCache;
@@ -17,10 +20,12 @@ import org.apache.curator.x.discovery.ServiceDiscovery;
 import org.apache.curator.x.discovery.ServiceDiscoveryBuilder;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.details.JsonInstanceSerializer;
+import org.apache.curator.x.discovery.details.ServiceCacheListener;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 基于Zookeeper实现的服务注册与发现
@@ -28,6 +33,7 @@ import java.util.stream.Collectors;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/14
  */
+@Slf4j
 public class ZookeeperRegistry implements Registry {
 
     private static final Registry INSTANCE = new ZookeeperRegistry();
@@ -44,7 +50,7 @@ public class ZookeeperRegistry implements Registry {
 
     private final ServiceDiscovery<ServiceMetaData> serviceDiscovery;
 
-    private final ServiceCache<ServiceMetaData> serviceCache;
+    private final ConcurrentMap<String, ServiceCache<ServiceMetaData>> serviceCacheMap;
 
     /**
      * 默认使用基于加权轮询算法的负载均衡器
@@ -70,11 +76,7 @@ public class ZookeeperRegistry implements Registry {
                 .watchInstances(true)
                 .build();
         this.serviceDiscovery.start();
-        // 创建ServiceCache并启动
-        this.serviceCache = serviceDiscovery.serviceCacheBuilder()
-                .name(ZK_BASE_PATH)
-                .build();
-        this.serviceCache.start();
+        this.serviceCacheMap = Maps.newConcurrentMap();
     }
 
     /**
@@ -120,13 +122,15 @@ public class ZookeeperRegistry implements Registry {
     @SneakyThrows({Throwable.class, Exception.class})
     @Override
     public ServiceMetaData discovery(String serviceName, String methodName) {
+        @SuppressWarnings("all")
+        ServiceCache<ServiceMetaData> serviceCache = this.serviceCacheMap.computeIfAbsent(serviceName, v -> buildAndStartServiceCache(serviceName));
         // 通过ServiceCache从本地缓存中获取服务实例
-        List<ServiceInstance<ServiceMetaData>> serviceInstances = serviceCache.getInstances()
-                .stream()
-                .filter(el -> el.getName().equals(serviceName))
-                .collect(Collectors.toList());
+        List<ServiceInstance<ServiceMetaData>> serviceInstances = serviceCache.getInstances();
         // 缓存中不存在，则通过ServiceDiscovery直接从Zookeeper中获取服务实例
         if (CollectionUtils.isEmpty(serviceInstances)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("serviceCache don't have service named {}, will query from zookeeper", serviceName);
+            }
             serviceInstances = (List<ServiceInstance<ServiceMetaData>>) serviceDiscovery.queryForInstances(serviceName);
         }
         if (CollectionUtils.isEmpty(serviceInstances)) {
@@ -135,11 +139,32 @@ public class ZookeeperRegistry implements Registry {
         // 获取第一个服务实例
         // return serviceInstances.get(0).getPayload();
         // 使用负载均衡器获取服务实例
-        Node<ServiceInstance<ServiceMetaData>> select = loadBalancer.select(LoadBalancer.wrap(serviceInstances));
+        Node<ServiceInstance<ServiceMetaData>> select = loadBalancer.select(LoadBalancer.weightWrap(serviceInstances));
         if (Objects.isNull(select)) {
             throw new RpcException("no service named " + serviceName + " was discovered");
         }
         return select.getNode().getPayload();
+    }
+
+    @SneakyThrows({Throwable.class, Exception.class})
+    private ServiceCache<ServiceMetaData> buildAndStartServiceCache(String serviceName) {
+        ServiceCache<ServiceMetaData> cache = this.serviceDiscovery.serviceCacheBuilder()
+                .name(serviceName)
+                .build();
+        cache.addListener(new ServiceCacheListener() {
+
+            @Override
+            public void cacheChanged() {
+                LOGGER.info("service {} modified, cacheChanged", serviceName);
+            }
+
+            @Override
+            public void stateChanged(CuratorFramework curatorFramework, ConnectionState connectionState) {
+                LOGGER.info("service {} modified, stateChanged, connectionState={}", serviceName, connectionState);
+            }
+        });
+        cache.start();
+        return cache;
     }
 
     /**
@@ -148,7 +173,10 @@ public class ZookeeperRegistry implements Registry {
     @Override
     public void destroy() {
         CloseableUtils.closeQuietly(serviceDiscovery);
-        CloseableUtils.closeQuietly(serviceCache);
         CloseableUtils.closeQuietly(client);
+        for (Map.Entry<String, ServiceCache<ServiceMetaData>> entry : serviceCacheMap.entrySet()) {
+            ServiceCache<ServiceMetaData> serviceCache = entry.getValue();
+            CloseableUtils.closeQuietly(serviceCache);
+        }
     }
 }
