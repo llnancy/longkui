@@ -1,4 +1,4 @@
-package com.sunchaser.shushan.rpc.core.test.balancer.impl;
+package com.sunchaser.shushan.rpc.core.test.balancer;
 
 import com.google.common.collect.Lists;
 import com.sunchaser.shushan.rpc.core.balancer.LoadBalancer;
