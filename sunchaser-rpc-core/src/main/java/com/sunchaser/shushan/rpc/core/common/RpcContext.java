@@ -20,7 +20,14 @@ public class RpcContext {
      * version: 0000 01
      * type: 00
      */
-    public static final byte DEFAULT_VERSION_AND_TYPE = 0x4;
+    public static final byte DEFAULT_VERSION_AND_REQUEST_TYPE = 0x4;
+
+    /**
+     * 0000 0111
+     * version: 0000 01
+     * type: 11
+     */
+    public static final byte DEFAULT_VERSION_AND_HEARTBEAT_TYPE = 0x7;
 
     /**
      * 0000 0000
@@ -28,6 +35,10 @@ public class RpcContext {
      * serialize: Hessian2
      */
     public static final byte DEFAULT_COMPRESS_SERIALIZE = 0x0;
+
+    public static final String PING = "ping";
+
+    public static final String PONG = "pong";
 
     public static final int HEARTBEAT_CODE = -1;
 

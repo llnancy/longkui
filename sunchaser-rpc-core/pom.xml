@@ -97,7 +97,6 @@
             <groupId>com.netflix.eureka</groupId>
             <artifactId>eureka-client</artifactId>
             <version>${eureka-client.version}</version>
-<!--            <scope>runtime</scope>-->
         </dependency>
         <!-- hessian -->
         <dependency>

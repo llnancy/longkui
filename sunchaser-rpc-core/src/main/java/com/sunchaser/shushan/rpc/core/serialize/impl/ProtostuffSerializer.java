@@ -17,8 +17,6 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class ProtostuffSerializer implements Serializer {
 
-    private static final LinkedBuffer BUFFER = LinkedBuffer.allocate();
-
     private static final ConcurrentMap<Class<?>, Schema<?>> SCHEMA_CONCURRENT_MAP = Maps.newConcurrentMap();
 
     @SuppressWarnings("unchecked")
@@ -34,11 +32,13 @@ public class ProtostuffSerializer implements Serializer {
      */
     @Override
     public <T> byte[] serialize(T obj) {
+        // 局部变量保证线程安全
+        LinkedBuffer buffer = LinkedBuffer.allocate();
         try {
             Schema<T> schema = getSchema(obj.getClass());
-            return ProtostuffIOUtil.toByteArray(obj, schema, BUFFER);
+            return ProtostuffIOUtil.toByteArray(obj, schema, buffer);
         } finally {
-            BUFFER.clear();
+            buffer.clear();
         }
     }
 

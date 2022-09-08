@@ -7,6 +7,7 @@ import com.sunchaser.shushan.rpc.core.protocol.*;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
 import com.sunchaser.shushan.rpc.core.registry.impl.LocalRegistry;
+import com.sunchaser.shushan.rpc.core.registry.impl.ZookeeperRegistry;
 import com.sunchaser.shushan.rpc.core.serialize.ArrayElement;
 import com.sunchaser.shushan.rpc.core.transport.NettyRpcClient;
 import com.sunchaser.shushan.rpc.core.transport.RpcClient;
@@ -47,7 +48,7 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
 
     private final Integer timeout;
 
-    private static final Registry REGISTRY = LocalRegistry.getInstance();
+    private static final Registry REGISTRY = ZookeeperRegistry.getInstance();
 
     private static final RpcClient RPC_CLIENT = NettyRpcClient.getInstance();
 
@@ -62,19 +63,19 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
 
     protected Object doInvoke(Method method, Object[] args) throws Throwable {
         // 构建协议头
-        final long sequenceId = RpcPendingHolder.generateSequenceId();
-        final RpcHeader rpcHeader = RpcHeader.builder()
+        long sequenceId = RpcPendingHolder.generateSequenceId();
+        RpcHeader rpcHeader = RpcHeader.builder()
                 .magic(RpcContext.MAGIC)
-                .versionAndType(RpcContext.DEFAULT_VERSION_AND_TYPE)
+                .versionAndType(RpcContext.DEFAULT_VERSION_AND_REQUEST_TYPE)
                 .compressAndSerialize(RpcContext.DEFAULT_COMPRESS_SERIALIZE)
                 .sequenceId(sequenceId)
                 .build();
 
         // 构建协议体
-        final String methodName = method.getName();
+        String methodName = method.getName();
         // kryo、protostuff等序列化框架会忽略数组中间索引的null元素，这里用特殊值代替null
         ArrayElement.wrapArgs(args);
-        final String serviceName = target.getName();
+        String serviceName = target.getName();
         RpcRequest rpcRequest = RpcRequest.builder()
                 .serviceName(serviceName)
                 .methodName(methodName)
@@ -111,10 +112,10 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
         }
 
         // 获取rpc调用结果
-        Promise<RpcResponse> promise = rpcFuture.getPromise();
+        final Promise<RpcResponse> promise = rpcFuture.getPromise();
         // todo get(0) => get() ?
         RpcResponse rpcResponse = timeout == 0 ? promise.get() : promise.get(timeout, TimeUnit.MILLISECONDS);
-        String errorMsg = rpcResponse.getErrorMsg();
+        final String errorMsg = rpcResponse.getErrorMsg();
         if (StringUtils.isNotBlank(errorMsg)) {
             LOGGER.error("rpc invoke failed, errorMsg: {}", errorMsg);
             throw new RpcException(errorMsg);

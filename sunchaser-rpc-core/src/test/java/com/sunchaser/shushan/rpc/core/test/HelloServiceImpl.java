@@ -14,7 +14,7 @@ public class HelloServiceImpl implements HelloService {
     }
 
     @Override
-    public String sayHi(String hi, Integer time, Long ts) {
+    public String sayHello(String hi, Integer time, Long ts) {
         return hi + time + ts;
     }
 }

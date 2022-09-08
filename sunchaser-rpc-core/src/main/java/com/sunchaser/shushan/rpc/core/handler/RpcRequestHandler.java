@@ -36,10 +36,16 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<R
         RpcHeader rpcHeader = msg.getRpcHeader();
         long sequenceId = rpcHeader.getSequenceId();
         byte versionAndType = rpcHeader.getVersionAndType();
+
         if (RpcContext.isHeartbeat(versionAndType)) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("*********** sunchaser-rpc netty RpcRequestHandler read heartbeat. sequenceId={}", sequenceId);
+                LOGGER.debug("*********** sunchaser-rpc netty RpcRequestHandler read heartbeat ping. sequenceId={}", sequenceId);
             }
+            RpcProtocol<String> pong = RpcProtocol.<String>builder()
+                    .rpcHeader(rpcHeader)
+                    .content(RpcContext.PONG)
+                    .build();
+            ctx.writeAndFlush(pong);
             return;
         }
 

@@ -10,6 +10,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 
 import java.net.InetSocketAddress;
 
@@ -41,6 +42,7 @@ public class NettyRpcServer implements RpcServer {
                     protected void initChannel(NioSocketChannel ch) throws Exception {
                         ch.pipeline()
                                 .addLast("rpc-codec", new RpcCodec<>())
+                                .addLast("rpc-server-idle-state-handler", new IdleStateHandler(60, 0, 0))
                                 .addLast(
                                         "rpc-server-handler",
                                         new RpcRequestHandler(

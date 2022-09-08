@@ -13,6 +13,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
@@ -64,6 +65,7 @@ public class NettyRpcClient extends AbstractRpcClient {
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ch.pipeline()
                                 .addLast("rpc-codec", new RpcCodec<>())
+                                .addLast("rpc-client-idle-state-handler", new IdleStateHandler(0, 30, 0))
                                 .addLast("rpc-client-handler", new RpcResponseHandler());
                     }
                 });

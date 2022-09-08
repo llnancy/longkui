@@ -12,9 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Consumer {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance(HelloService.class);
         String hello = helloService.sayHello("SunChaser");
         LOGGER.info("sayHello result: {}", hello);
+        System.in.read();
     }
 }

@@ -14,7 +14,7 @@ import com.sunchaser.shushan.rpc.core.util.BeanFactory;
  */
 public class Provider {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         BeanFactory.register(HelloService.class.getName(), new HelloServiceImpl());
         ServiceMetaData serviceMetaData = ServiceMetaData.builder()
                 .serviceName(HelloService.class.getName())
@@ -25,5 +25,6 @@ public class Provider {
         Registry registry = new ZookeeperRegistry();
         registry.register(serviceMetaData);
         new NettyRpcServer().start();
+        System.in.read();
     }
 }

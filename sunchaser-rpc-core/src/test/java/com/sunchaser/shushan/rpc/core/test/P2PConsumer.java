@@ -36,7 +36,7 @@ public class P2PConsumer {
         long sequenceId = RpcPendingHolder.generateSequenceId();
         RpcHeader rpcHeader = RpcHeader.builder()
                 .magic(RpcContext.MAGIC)
-                .versionAndType(RpcContext.DEFAULT_VERSION_AND_TYPE)
+                .versionAndType(RpcContext.DEFAULT_VERSION_AND_REQUEST_TYPE)
                 .compressAndSerialize(RpcContext.DEFAULT_COMPRESS_SERIALIZE)
                 .sequenceId(sequenceId)
                 .build();

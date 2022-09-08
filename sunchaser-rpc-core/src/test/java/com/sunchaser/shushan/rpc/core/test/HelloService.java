@@ -10,5 +10,5 @@ public interface HelloService {
 
     String sayHello(String hi);
 
-    String sayHi(String hi, Integer time, Long ts);
+    String sayHello(String hi, Integer time, Long ts);
 }

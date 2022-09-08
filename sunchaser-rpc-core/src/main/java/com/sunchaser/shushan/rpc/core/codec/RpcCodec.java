@@ -36,18 +36,12 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
     @Override
     protected void encode(ChannelHandlerContext ctx, RpcProtocol<T> msg, ByteBuf out) {
         RpcHeader rpcHeader = msg.getRpcHeader();
-        byte versionAndType = rpcHeader.getVersionAndType();
         byte compressAndSerialize = rpcHeader.getCompressAndSerialize();
         out.writeByte(rpcHeader.getMagic());
-        out.writeByte(versionAndType);
+        out.writeByte(rpcHeader.getVersionAndType());
         out.writeByte(compressAndSerialize);
         out.writeLong(rpcHeader.getSequenceId());
         T content = msg.getContent();
-        // 心跳消息，无消息体
-        if (RpcContext.isHeartbeat(versionAndType)) {
-            out.writeInt(0);
-            return;
-        }
         Compressor compressor = CompressorFactory.getCompressor(compressAndSerialize);
         Serializer serializer = SerializerFactory.getSerializer(compressAndSerialize);
         // 序列化后压缩
@@ -132,7 +126,8 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
         HEARTBEAT_DECODER(RpcMessageTypeEnum.HEARTBEAT) {
             @Override
             public void decode(byte compressAndSerialize, RpcHeader rpcHeader, byte[] data, List<Object> out) {
-                // TODO
+                RpcProtocol<String> rpcProtocol = buildRpcMessage(compressAndSerialize, rpcHeader, data, String.class);
+                out.add(rpcProtocol);
             }
         }
 
