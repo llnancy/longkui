@@ -1,20 +1,20 @@
 package com.sunchaser.shushan.rpc.core.test.serialize;
 
 import com.sunchaser.shushan.rpc.core.serialize.Serializer;
-import com.sunchaser.shushan.rpc.core.serialize.impl.KryoSerializer;
+import com.sunchaser.shushan.rpc.core.serialize.impl.Hessian2Serializer;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * KryoSerializer Test
+ * Hessian2Serializer Test
  *
  * @author sunchaser admin@lilu.org.cn
- * @since JDK8 2022/7/19
+ * @since JDK8 2022/9/8
  */
 @Slf4j
-class KryoSerializerTest extends AbstractSerializerTest {
+public class Hessian2SerializerTest extends AbstractSerializerTest {
 
     @Override
     protected Serializer getSerializer() {
-        return new KryoSerializer();
+        return new Hessian2Serializer();
     }
 }
