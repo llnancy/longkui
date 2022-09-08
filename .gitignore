@@ -33,5 +33,4 @@ build/
 
 ### arthas ###
 /arthas-output/
-create-jmh-result.json
-invoke-jmh-result.json
+*jmh-result.json
