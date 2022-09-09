@@ -33,9 +33,11 @@ public class XmlSerializerTest {
         XMLEncoder xmlEncoder = new XMLEncoder(bos, StandardCharsets.UTF_8.name(), true, 0);
         xmlEncoder.writeObject("XXXX");
         byte[] serialize = bos.toByteArray();
+        xmlEncoder.close();
         ByteArrayInputStream bis = new ByteArrayInputStream(serialize);
         XMLDecoder xmlDecoder = new XMLDecoder(bis);
         Object obj = xmlDecoder.readObject();
+        xmlDecoder.close();
         String request = (String) obj;
         LOGGER.info("deserialize: {}", request);
     }

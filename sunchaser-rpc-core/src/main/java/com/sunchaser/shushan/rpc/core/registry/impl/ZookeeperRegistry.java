@@ -10,6 +10,7 @@ import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.state.ConnectionState;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 /**
  * 基于Zookeeper实现的服务注册与发现
@@ -91,6 +93,7 @@ public class ZookeeperRegistry implements Registry {
                 .name(serviceMetaData.getServiceName())
                 .address(serviceMetaData.getHost())
                 .port(serviceMetaData.getPort())
+                .registrationTimeUTC(serviceMetaData.getTimestamp())
                 .payload(serviceMetaData)
                 .build();
         serviceDiscovery.registerService(serviceInstance);
@@ -108,6 +111,7 @@ public class ZookeeperRegistry implements Registry {
                 .name(serviceMetaData.getServiceName())
                 .address(serviceMetaData.getHost())
                 .port(serviceMetaData.getPort())
+                .registrationTimeUTC(serviceMetaData.getTimestamp())
                 .payload(serviceMetaData)
                 .build();
         serviceDiscovery.unregisterService(serviceInstance);
@@ -138,8 +142,14 @@ public class ZookeeperRegistry implements Registry {
         }
         // 获取第一个服务实例
         // return serviceInstances.get(0).getPayload();
+        List<ImmutablePair<Integer, Integer>> weightPairList = serviceInstances.stream()
+                .map(ins -> {
+                    ServiceMetaData payload = ins.getPayload();
+                    return ImmutablePair.of(payload.getWeight(), payload.getWarmup());
+                })
+                .collect(Collectors.toList());
         // 使用负载均衡器获取服务实例
-        Node<ServiceInstance<ServiceMetaData>> select = loadBalancer.select(LoadBalancer.weightWrap(serviceInstances));
+        Node<ServiceInstance<ServiceMetaData>> select = loadBalancer.select(LoadBalancer.wrap(serviceInstances, weightPairList));
         if (Objects.isNull(select)) {
             throw new RpcException("no service named " + serviceName + " was discovered");
         }

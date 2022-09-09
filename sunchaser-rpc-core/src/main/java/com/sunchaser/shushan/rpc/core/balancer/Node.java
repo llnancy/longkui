@@ -21,4 +21,9 @@ public class Node<T> {
      * 节点
      */
     private T node;
+
+    /**
+     * 时间戳
+     */
+    private long timestamp;
 }

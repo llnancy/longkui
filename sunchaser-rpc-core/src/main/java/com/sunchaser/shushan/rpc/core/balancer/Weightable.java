@@ -14,11 +14,25 @@ public interface Weightable {
     int DEFAULT_WEIGHT = 1;
 
     /**
+     * 默认预热时间：10分钟
+     */
+    int DEFAULT_WARMUP = 10 * 60 * 1000;
+
+    /**
      * 获取权重
      *
      * @return 权重值
      */
     default int getWeight() {
         return DEFAULT_WEIGHT;
+    }
+
+    /**
+     * 获取预热时间
+     *
+     * @return 预热时间
+     */
+    default int getWarmup() {
+        return DEFAULT_WARMUP;
     }
 }

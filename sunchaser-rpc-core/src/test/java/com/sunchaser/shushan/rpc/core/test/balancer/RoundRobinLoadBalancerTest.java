@@ -21,7 +21,7 @@ class RoundRobinLoadBalancerTest {
     public void testWeightedRoundRobin() {
         LoadBalancer loadBalancer = new RoundRobinLoadBalancer();
         for (int i = 0; i < 10; i++) {
-            Node<String> select = loadBalancer.select(LoadBalancer.weightWrap(Lists.newArrayList("A", "B", "C"), 5, 2, 3));
+            Node<String> select = loadBalancer.select(LoadBalancer.wrapWithWeightList(Lists.newArrayList("A", "B", "C"), Lists.newArrayList(5, 2, 3)));
             LOGGER.info("select: {}", select.getNode());
         }
     }
@@ -30,7 +30,7 @@ class RoundRobinLoadBalancerTest {
     public void testRoundRobin() {
         LoadBalancer loadBalancer = new RoundRobinLoadBalancer();
         for (int i = 0; i < 10; i++) {
-            Node<String> select = loadBalancer.select(LoadBalancer.weightWrap(Lists.newArrayList("A", "B", "C")));
+            Node<String> select = loadBalancer.select(LoadBalancer.wrapWithDefaultWeight(Lists.newArrayList("A", "B", "C")));
             LOGGER.info("select: {}", select.getNode());
         }
     }

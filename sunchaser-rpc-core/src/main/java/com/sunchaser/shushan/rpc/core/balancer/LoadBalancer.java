@@ -1,7 +1,9 @@
 package com.sunchaser.shushan.rpc.core.balancer;
 
+import com.google.common.collect.Lists;
+import com.sunchaser.shushan.rpc.core.util.ListUtils;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.Collections;
 import java.util.List;
@@ -56,35 +58,78 @@ public interface LoadBalancer {
     }
 
     /**
-     * 将资源列表sources和权重列表weights包装为WeightNode列表，默认权重为1
+     * 将资源列表sources、权重&预热时间weightPairList包装为WeightNode列表，默认权重为1，默认预热时间为10分钟
      *
-     * @param sources 资源列表
-     * @param weights 权重列表 可变参数
-     * @param <T>     资源类型
+     * @param sources        资源列表
+     * @param weightPairList 权重&预热时间Pair列表
+     * @param <T>            资源类型
      * @return WeightNode列表
      */
-    static <T> List<? extends Node<T>> weightWrap(List<T> sources, Integer... weights) {
+    static <T> List<? extends Node<T>> wrap(List<T> sources, List<ImmutablePair<Integer, Integer>> weightPairList) {
+        List<Integer> weightList = Lists.newArrayList(weightPairList.size());
+        List<Integer> warmupList = Lists.newArrayList(weightPairList.size());
+        for (ImmutablePair<Integer, Integer> pair : weightPairList) {
+            weightList.add(pair.getLeft());
+            warmupList.add(pair.getRight());
+        }
+        return wrap(sources, weightList, warmupList);
+    }
+
+    /**
+     * 将资源列表sources、权重列表weightList和预热时间列表warmupList包装为WeightNode列表，默认权重为1，默认预热时间为10分钟
+     *
+     * @param sources    资源列表
+     * @param weightList 权重列表
+     * @param warmupList 预热时间列表
+     * @param <T>        资源类型
+     * @return WeightNode列表
+     */
+    static <T> List<? extends Node<T>> wrap(List<T> sources, List<Integer> weightList, List<Integer> warmupList) {
         if (CollectionUtils.isEmpty(sources)) {
             return Collections.emptyList();
         }
         return IntStream.range(0, sources.size())
                 .mapToObj(i -> WeightNode.<T>builder()
                         .node(sources.get(i))
-                        .weight(Math.max(ArrayUtils.get(weights, i, WeightNode.DEFAULT_WEIGHT), WeightNode.DEFAULT_WEIGHT))
+                        .weight(Math.max(ListUtils.get(weightList, i, Weightable.DEFAULT_WEIGHT), Weightable.DEFAULT_WEIGHT))
+                        .warmup(Math.max(ListUtils.get(warmupList, i, Weightable.DEFAULT_WARMUP), Weightable.DEFAULT_WARMUP))
                         .build()
                 )
                 .collect(Collectors.toList());
     }
 
     /**
-     * 将资源列表sources和权重列表weights包装为WeightNode列表，默认权重为1
+     * 将资源列表sources和权重列表weightList包装为WeightNode列表，默认预热时间为10分钟
+     *
+     * @param sources    资源列表
+     * @param weightList 权重列表
+     * @param <T>        资源类型
+     * @return WeightNode列表
+     */
+    static <T> List<? extends Node<T>> wrapWithWeightList(List<T> sources, List<Integer> weightList) {
+        return wrap(sources, weightList, Collections.emptyList());
+    }
+
+    /**
+     * 将资源列表sources和预热时间列表warmupList包装为WeightNode列表，默认预热时间为10分钟
+     *
+     * @param sources    资源列表
+     * @param warmupList 预热时间列表
+     * @param <T>        资源类型
+     * @return WeightNode列表
+     */
+    static <T> List<? extends Node<T>> wrapWithWarmupList(List<T> sources, List<Integer> warmupList) {
+        return wrap(sources, Collections.emptyList(), warmupList);
+    }
+
+    /**
+     * 将资源列表sources包装为WeightNode列表，默认权重为1，默认预热时间为10分钟
      *
      * @param sources 资源列表
-     * @param weights 权重列表 java.util.List
      * @param <T>     资源类型
      * @return WeightNode列表
      */
-    static <T> List<? extends Node<T>> weightWrap(List<T> sources, List<Integer> weights) {
-        return weightWrap(sources, weights.toArray(new Integer[0]));
+    static <T> List<? extends Node<T>> wrapWithDefaultWeight(List<T> sources) {
+        return wrap(sources, Collections.emptyList(), Collections.emptyList());
     }
 }

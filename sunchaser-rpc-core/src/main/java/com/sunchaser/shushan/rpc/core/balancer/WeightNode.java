@@ -21,4 +21,9 @@ public class WeightNode<T> extends Node<T> implements Weightable {
      * 节点权重，必须大于0，默认为1
      */
     private int weight = DEFAULT_WEIGHT;
+
+    /**
+     * 节点预热时间，默认预热10分钟
+     */
+    private int warmup = DEFAULT_WARMUP;
 }

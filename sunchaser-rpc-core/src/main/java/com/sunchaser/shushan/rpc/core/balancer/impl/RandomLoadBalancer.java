@@ -28,7 +28,7 @@ public class RandomLoadBalancer extends AbstractLoadBalancer {
         int lastWeight = -1;
         for (int i = 0; i < length; i++) {
             // 转化为WeightNode后获取权重
-            int weight = ((WeightNode<T>) nodes.get(i)).getWeight();
+            int weight = getWeight((WeightNode<T>) nodes.get(i));
             // sum累加
             totalWeight += weight;
             // 存入weights数组

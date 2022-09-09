@@ -1,7 +1,5 @@
 package com.sunchaser.shushan.rpc.core.transport;
 
-import com.sunchaser.shushan.rpc.core.common.Constants;
-
 import java.net.InetSocketAddress;
 
 /**
@@ -11,6 +9,8 @@ import java.net.InetSocketAddress;
  * @since JDK8 2022/8/16
  */
 public interface RpcServer {
+
+    int DEFAULT_PORT = 1234;
 
     /**
      * 服务端启动
@@ -32,6 +32,6 @@ public interface RpcServer {
      * 服务端启动
      */
     default void start() {
-        start(Constants.DEFAULT_PORT);
+        start(DEFAULT_PORT);
     }
 }

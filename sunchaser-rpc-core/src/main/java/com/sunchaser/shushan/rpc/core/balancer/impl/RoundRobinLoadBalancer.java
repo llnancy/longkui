@@ -38,7 +38,7 @@ public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
         WeightedRoundRobin selectedWrr = null;
         for (Node<T> tNode : nodes) {
             WeightNode<T> node = (WeightNode<T>) tNode;
-            int weight = node.getWeight();
+            int weight = getWeight(node);
             // 给node创建对应的WeightedRoundRobin对象
             WeightedRoundRobin wrr = wrrMap.computeIfAbsent(
                     node.toString(),

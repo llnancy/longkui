@@ -36,4 +36,19 @@ public class ServiceMetaData {
      * 端口号
      */
     private Integer port;
+
+    /**
+     * 权重
+     */
+    private int weight;
+
+    /**
+     * 服务启动时间戳
+     */
+    private long timestamp;
+
+    /**
+     * 服务预热时间
+     */
+    private int warmup;
 }
