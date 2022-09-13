@@ -9,8 +9,8 @@ import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
 import com.sunchaser.shushan.rpc.core.registry.impl.ZookeeperRegistry;
 import com.sunchaser.shushan.rpc.core.serialize.ArrayElement;
-import com.sunchaser.shushan.rpc.core.transport.NettyRpcClient;
-import com.sunchaser.shushan.rpc.core.transport.RpcClient;
+import com.sunchaser.shushan.rpc.core.transport.client.NettyRpcClient;
+import com.sunchaser.shushan.rpc.core.transport.client.RpcClient;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Promise;
@@ -96,10 +96,10 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
         try {
             // invoke
             RPC_CLIENT.invoke(rpcProtocol, serviceMetaData.getHost(), serviceMetaData.getPort());
-        } catch (Exception e) {
+        } catch (Throwable t) {
             // rpc调用异常时删除对应RpcFuture
             RpcPendingHolder.removeRpcFuture(sequenceId);
-            throw e;
+            throw t;
         }
 
         // 获取rpc调用结果

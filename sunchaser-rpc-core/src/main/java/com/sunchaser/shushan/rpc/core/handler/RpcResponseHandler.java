@@ -5,6 +5,7 @@ import com.sunchaser.shushan.rpc.core.protocol.RpcFuture;
 import com.sunchaser.shushan.rpc.core.protocol.RpcHeader;
 import com.sunchaser.shushan.rpc.core.protocol.RpcProtocol;
 import com.sunchaser.shushan.rpc.core.protocol.RpcResponse;
+import com.sunchaser.shushan.rpc.core.transport.client.ChannelProvider;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -59,7 +60,13 @@ public class RpcResponseHandler extends SimpleChannelInboundHandler<RpcProtocol<
                         .rpcHeader(rpcHeader)
                         .rpcBody(RpcContext.PING)
                         .build();
-                ctx.writeAndFlush(ping).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+                ctx.writeAndFlush(ping).addListener((ChannelFutureListener) future -> {
+                    if (!future.isSuccess()) {
+                        future.channel().close();
+                        // 删除对应Channel
+                        ChannelProvider.removeChannel(remoteAddress.toString());
+                    }
+                });
             }
         } else {
             super.userEventTriggered(ctx, evt);

@@ -1,24 +1,20 @@
-package com.sunchaser.shushan.rpc.core.transport;
+package com.sunchaser.shushan.rpc.core.transport.client;
 
-import com.google.common.collect.Maps;
 import com.sunchaser.shushan.rpc.core.codec.RpcCodec;
 import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.handler.RpcResponseHandler;
 import com.sunchaser.shushan.rpc.core.protocol.RpcProtocol;
 import com.sunchaser.shushan.rpc.core.protocol.RpcRequest;
+import com.sunchaser.shushan.rpc.core.transport.NettyEventLoopFactory;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
+import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,8 +33,6 @@ public class NettyRpcClient extends AbstractRpcClient {
     }
 
     private final Bootstrap bootstrap;
-
-    private final ConcurrentMap<String, Channel> CHANNEL_POOL = Maps.newConcurrentMap();
 
     public NettyRpcClient() {
         this(Constants.DEFAULT_CONNECTION_TIMEOUT);
@@ -73,16 +67,19 @@ public class NettyRpcClient extends AbstractRpcClient {
 
     @Override
     public void invoke(RpcProtocol<RpcRequest> rpcProtocol, InetSocketAddress localAddress) {
-        Channel channel = CHANNEL_POOL.get(localAddress.toString());
+        String key = localAddress.toString();
+        Channel channel = ChannelProvider.getChannel(key);
         if (Objects.isNull(channel)) {
             channel = connect(localAddress);
-            CHANNEL_POOL.put(localAddress.toString(), channel);
+            ChannelProvider.putChannel(key, channel);
         }
         if (channel.isActive()) {
             channel.writeAndFlush(rpcProtocol)
-                    .addListener(promise -> {
-                        if (!promise.isSuccess()) {
-                            LOGGER.error("Rpc netty client channel writeAndFlush error.", promise.cause());
+                    .addListener((ChannelFutureListener) future -> {
+                        if (!future.isSuccess()) {
+                            LOGGER.error("Rpc netty client channel writeAndFlush error.", future.cause());
+                            future.channel().close();
+                            ChannelProvider.removeChannel(key);
                         }
                     });
         }

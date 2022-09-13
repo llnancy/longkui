@@ -1,4 +1,4 @@
-package com.sunchaser.shushan.rpc.core.transport;
+package com.sunchaser.shushan.rpc.core.transport.client;
 
 /**
  * an abstract rpc client implementation

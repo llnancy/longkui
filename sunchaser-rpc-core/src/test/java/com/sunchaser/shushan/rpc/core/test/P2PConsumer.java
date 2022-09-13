@@ -6,7 +6,7 @@ import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.handler.RpcPendingHolder;
 import com.sunchaser.shushan.rpc.core.protocol.*;
 import com.sunchaser.shushan.rpc.core.proxy.RpcDynamicProxyFactory;
-import com.sunchaser.shushan.rpc.core.transport.NettyRpcClient;
+import com.sunchaser.shushan.rpc.core.transport.client.NettyRpcClient;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Promise;

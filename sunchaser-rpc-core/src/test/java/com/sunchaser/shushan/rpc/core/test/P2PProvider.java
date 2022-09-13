@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.test;
 
-import com.sunchaser.shushan.rpc.core.transport.NettyRpcServer;
+import com.sunchaser.shushan.rpc.core.transport.server.NettyRpcServer;
 import com.sunchaser.shushan.rpc.core.util.BeanFactory;
 
 /**

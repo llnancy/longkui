@@ -4,7 +4,7 @@ import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
 import com.sunchaser.shushan.rpc.core.registry.impl.ZookeeperRegistry;
-import com.sunchaser.shushan.rpc.core.transport.NettyRpcServer;
+import com.sunchaser.shushan.rpc.core.transport.server.NettyRpcServer;
 import com.sunchaser.shushan.rpc.core.util.BeanFactory;
 
 /**

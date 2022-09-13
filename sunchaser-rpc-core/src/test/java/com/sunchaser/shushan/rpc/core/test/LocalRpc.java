@@ -5,7 +5,7 @@ import com.sunchaser.shushan.rpc.core.proxy.RpcDynamicProxyFactory;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
 import com.sunchaser.shushan.rpc.core.registry.impl.LocalRegistry;
-import com.sunchaser.shushan.rpc.core.transport.NettyRpcServer;
+import com.sunchaser.shushan.rpc.core.transport.server.NettyRpcServer;
 import com.sunchaser.shushan.rpc.core.util.BeanFactory;
 import lombok.extern.slf4j.Slf4j;
 
