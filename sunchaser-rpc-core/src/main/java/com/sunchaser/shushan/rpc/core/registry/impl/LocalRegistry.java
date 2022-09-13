@@ -28,17 +28,17 @@ public class LocalRegistry implements Registry {
 
     @Override
     public void register(ServiceMetaData serviceMetaData) {
-        services.put(serviceMetaData.getServiceName(), serviceMetaData);
+        services.put(serviceMetaData.getServiceKey(), serviceMetaData);
     }
 
     @Override
     public void unRegister(ServiceMetaData serviceMetaData) {
-        services.remove(serviceMetaData.getServiceName());
+        services.remove(serviceMetaData.getServiceKey());
     }
 
     @Override
-    public ServiceMetaData discovery(String serviceName, String methodName) {
-        return services.get(serviceName);
+    public ServiceMetaData discovery(String serviceKey) {
+        return services.get(serviceKey);
     }
 
     @Override

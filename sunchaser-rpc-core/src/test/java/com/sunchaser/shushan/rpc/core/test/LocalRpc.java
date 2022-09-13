@@ -1,5 +1,6 @@
 package com.sunchaser.shushan.rpc.core.test;
 
+import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.proxy.RpcDynamicProxyFactory;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
@@ -21,9 +22,9 @@ public class LocalRpc {
     public static void main(String[] args) {
         // provider
         BeanFactory.register(HelloService.class.getName(), new HelloServiceImpl());
+        RpcServiceConfig rpcServiceConfig = RpcServiceConfig.createDefaultConfig(HelloService.class);
         ServiceMetaData serviceMetaData = ServiceMetaData.builder()
-                .serviceName(HelloService.class.getName())
-                .version("1")
+                .serviceKey(rpcServiceConfig.getRpcServiceKey())
                 .host("127.0.0.1")
                 .port(1234)
                 .build();
@@ -32,7 +33,7 @@ public class LocalRpc {
         new NettyRpcServer().start();
 
         // consumer
-        HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance(HelloService.class);
+        HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance(rpcServiceConfig);
         String hello = helloService.sayHello("SunChaser", null, 1L);
         LOGGER.info("sayHello result: {}", hello);
     }

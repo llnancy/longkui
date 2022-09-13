@@ -90,7 +90,7 @@ public class ZookeeperRegistry implements Registry {
     @Override
     public void register(ServiceMetaData serviceMetaData) {
         ServiceInstance<ServiceMetaData> serviceInstance = ServiceInstance.<ServiceMetaData>builder()
-                .name(serviceMetaData.getServiceName())
+                .name(serviceMetaData.getServiceKey())
                 .address(serviceMetaData.getHost())
                 .port(serviceMetaData.getPort())
                 .registrationTimeUTC(serviceMetaData.getTimestamp())
@@ -108,7 +108,7 @@ public class ZookeeperRegistry implements Registry {
     @Override
     public void unRegister(ServiceMetaData serviceMetaData) {
         ServiceInstance<ServiceMetaData> serviceInstance = ServiceInstance.<ServiceMetaData>builder()
-                .name(serviceMetaData.getServiceName())
+                .name(serviceMetaData.getServiceKey())
                 .address(serviceMetaData.getHost())
                 .port(serviceMetaData.getPort())
                 .registrationTimeUTC(serviceMetaData.getTimestamp())
@@ -120,25 +120,25 @@ public class ZookeeperRegistry implements Registry {
     /**
      * 服务发现
      *
-     * @param serviceName serviceName
+     * @param serviceKey serviceKey
      * @return ServiceMetaData
      */
     @SneakyThrows({Throwable.class, Exception.class})
     @Override
-    public ServiceMetaData discovery(String serviceName, String methodName) {
+    public ServiceMetaData discovery(String serviceKey) {
         @SuppressWarnings("all")
-        ServiceCache<ServiceMetaData> serviceCache = this.serviceCacheMap.computeIfAbsent(serviceName, v -> buildAndStartServiceCache(serviceName));
+        ServiceCache<ServiceMetaData> serviceCache = this.serviceCacheMap.computeIfAbsent(serviceKey, v -> buildAndStartServiceCache(serviceKey));
         // 通过ServiceCache从本地缓存中获取服务实例
         List<ServiceInstance<ServiceMetaData>> serviceInstances = serviceCache.getInstances();
         // 缓存中不存在，则通过ServiceDiscovery直接从Zookeeper中获取服务实例
         if (CollectionUtils.isEmpty(serviceInstances)) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("serviceCache don't have service named {}, will query from zookeeper", serviceName);
+                LOGGER.debug("serviceCache don't have serviceKey named {}, will query from zookeeper", serviceKey);
             }
-            serviceInstances = (List<ServiceInstance<ServiceMetaData>>) serviceDiscovery.queryForInstances(serviceName);
+            serviceInstances = (List<ServiceInstance<ServiceMetaData>>) serviceDiscovery.queryForInstances(serviceKey);
         }
         if (CollectionUtils.isEmpty(serviceInstances)) {
-            throw new RpcException("no service named " + serviceName + " was discovered");
+            throw new RpcException("no serviceKey named " + serviceKey + " was discovered");
         }
         // 获取第一个服务实例
         // return serviceInstances.get(0).getPayload();
@@ -151,26 +151,26 @@ public class ZookeeperRegistry implements Registry {
         // 使用负载均衡器获取服务实例
         Node<ServiceInstance<ServiceMetaData>> select = loadBalancer.select(LoadBalancer.wrap(serviceInstances, weightPairList));
         if (Objects.isNull(select)) {
-            throw new RpcException("no service named " + serviceName + " was discovered");
+            throw new RpcException("no serviceKey named " + serviceKey + " was discovered");
         }
         return select.getNode().getPayload();
     }
 
     @SneakyThrows({Throwable.class, Exception.class})
-    private ServiceCache<ServiceMetaData> buildAndStartServiceCache(String serviceName) {
+    private ServiceCache<ServiceMetaData> buildAndStartServiceCache(String serviceKey) {
         ServiceCache<ServiceMetaData> cache = this.serviceDiscovery.serviceCacheBuilder()
-                .name(serviceName)
+                .name(serviceKey)
                 .build();
         cache.addListener(new ServiceCacheListener() {
 
             @Override
             public void cacheChanged() {
-                LOGGER.info("service {} modified, cacheChanged", serviceName);
+                LOGGER.info("serviceKey {} modified, cacheChanged", serviceKey);
             }
 
             @Override
             public void stateChanged(CuratorFramework curatorFramework, ConnectionState connectionState) {
-                LOGGER.info("service {} modified, stateChanged, connectionState={}", serviceName, connectionState);
+                LOGGER.info("serviceKey {} modified, stateChanged, connectionState={}", serviceKey, connectionState);
             }
         });
         cache.start();

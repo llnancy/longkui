@@ -29,5 +29,5 @@ public class RpcProtocol<T> implements Serializable {
     /**
      * 消息体
      */
-    private T content;
+    private T rpcBody;
 }

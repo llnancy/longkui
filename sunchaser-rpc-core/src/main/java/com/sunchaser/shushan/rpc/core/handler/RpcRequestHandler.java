@@ -43,7 +43,7 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<R
             }
             RpcProtocol<String> pong = RpcProtocol.<String>builder()
                     .rpcHeader(rpcHeader)
-                    .content(RpcContext.PONG)
+                    .rpcBody(RpcContext.PONG)
                     .build();
             ctx.writeAndFlush(pong);
             return;
@@ -59,12 +59,12 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<R
             RpcResponse rpcResponse = null;
             try {
                 // 反射调用
-                RpcRequest rpcRequest = msg.getContent();
+                RpcRequest rpcRequest = msg.getRpcBody();
                 rpcResponse = invokeService(rpcRequest);
             } catch (Exception e) {
                 rpcResponse = handleException(sequenceId, e);
             } finally {
-                rpcProtocol.setContent(rpcResponse);
+                rpcProtocol.setRpcBody(rpcResponse);
                 ctx.writeAndFlush(rpcProtocol);
             }
         };

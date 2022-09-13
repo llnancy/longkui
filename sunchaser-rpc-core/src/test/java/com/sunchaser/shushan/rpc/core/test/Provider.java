@@ -1,5 +1,6 @@
 package com.sunchaser.shushan.rpc.core.test;
 
+import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
 import com.sunchaser.shushan.rpc.core.registry.impl.ZookeeperRegistry;
@@ -16,9 +17,9 @@ public class Provider {
 
     public static void main(String[] args) throws Exception {
         BeanFactory.register(HelloService.class.getName(), new HelloServiceImpl());
+        RpcServiceConfig rpcServiceConfig = RpcServiceConfig.createDefaultConfig(HelloService.class);
         ServiceMetaData serviceMetaData = ServiceMetaData.builder()
-                .serviceName(HelloService.class.getName())
-                .version("1")
+                .serviceKey(rpcServiceConfig.getRpcServiceKey())
                 .host("127.0.0.1")
                 .port(1234)
                 .build();

@@ -41,11 +41,11 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
         out.writeByte(rpcHeader.getVersionAndType());
         out.writeByte(compressAndSerialize);
         out.writeLong(rpcHeader.getSequenceId());
-        T content = msg.getContent();
+        T rpcBody = msg.getRpcBody();
         Compressor compressor = CompressorFactory.getCompressor(compressAndSerialize);
         Serializer serializer = SerializerFactory.getSerializer(compressAndSerialize);
         // 序列化后压缩
-        byte[] data = compressor.compress(serializer.serialize(content));
+        byte[] data = compressor.compress(serializer.serialize(rpcBody));
         out.writeInt(data.length);
         out.writeBytes(data);
     }
@@ -104,7 +104,7 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
             public void decode(byte compressAndSerialize, RpcHeader rpcHeader, byte[] data, List<Object> out) {
                 RpcProtocol<RpcRequest> rpcProtocol = buildRpcMessage(compressAndSerialize, rpcHeader, data, RpcRequest.class);
                 // kryo、protostuff等序列化框架在序列化时为避免错误用特殊值代替了数组中间索引的null，这里将特殊值还原成null。
-                ArrayElement.unwrapArgs(rpcProtocol.getContent().getArgs());
+                ArrayElement.unwrapArgs(rpcProtocol.getRpcBody().getArgs());
                 out.add(rpcProtocol);
             }
         },
@@ -159,10 +159,10 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
             Compressor compressor = CompressorFactory.getCompressor(compressAndSerialize);
             Serializer serializer = SerializerFactory.getSerializer(compressAndSerialize);
             // 解压缩后反序列化
-            I content = serializer.deserialize(compressor.unCompress(data), clazz);
+            I rpcBody = serializer.deserialize(compressor.unCompress(data), clazz);
             return RpcProtocol.<I>builder()
                     .rpcHeader(rpcHeader)
-                    .content(content)
+                    .rpcBody(rpcBody)
                     .build();
         }
     }

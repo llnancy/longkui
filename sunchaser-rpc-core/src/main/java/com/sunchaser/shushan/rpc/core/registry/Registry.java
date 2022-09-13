@@ -25,11 +25,10 @@ public interface Registry {
     /**
      * 服务发现
      *
-     * @param serviceName serviceName
-     * @param methodName  methodName
+     * @param serviceKey serviceKey
      * @return ServiceMetaData
      */
-    ServiceMetaData discovery(String serviceName, String methodName);
+    ServiceMetaData discovery(String serviceKey);
 
     /**
      * 注册中心销毁

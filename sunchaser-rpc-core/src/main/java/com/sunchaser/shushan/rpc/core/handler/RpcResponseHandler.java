@@ -37,7 +37,7 @@ public class RpcResponseHandler extends SimpleChannelInboundHandler<RpcProtocol<
             return;
         }
         RpcFuture<RpcResponse> rpcFuture = RpcPendingHolder.removeRpcFuture(sequenceId);
-        rpcFuture.getPromise().setSuccess(msg.getContent());
+        rpcFuture.getPromise().setSuccess(msg.getRpcBody());
     }
 
     @Override
@@ -57,7 +57,7 @@ public class RpcResponseHandler extends SimpleChannelInboundHandler<RpcProtocol<
                         .build();
                 RpcProtocol<String> ping = RpcProtocol.<String>builder()
                         .rpcHeader(rpcHeader)
-                        .content(RpcContext.PING)
+                        .rpcBody(RpcContext.PING)
                         .build();
                 ctx.writeAndFlush(ping).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
             }

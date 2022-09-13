@@ -2,6 +2,7 @@ package com.sunchaser.shushan.rpc.core.test.proxy.jmh;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
+import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyObject;
 import lombok.SneakyThrows;
@@ -23,13 +24,13 @@ import java.util.Optional;
  */
 public class JMHRpcDynamicProxyFactory {
 
-    public static <T> T getRpcProxyInstance(Class<T> clazz) {
-        return JMHRpcDynamicProxyEnum.JDK.createProxyInstance(clazz);
+    public static <T> T getRpcProxyInstance(RpcServiceConfig rpcServiceConfig) {
+        return JMHRpcDynamicProxyEnum.JDK.createProxyInstance(rpcServiceConfig);
     }
 
-    public static <T> T getRpcProxyInstance(String proxyType, Class<T> clazz) {
+    public static <T> T getRpcProxyInstance(String proxyType, RpcServiceConfig rpcServiceConfig) {
         return JMHRpcDynamicProxyEnum.match(proxyType)
-                .createProxyInstance(clazz);
+                .createProxyInstance(rpcServiceConfig);
     }
 
     public enum JMHRpcDynamicProxyEnum {
@@ -39,14 +40,15 @@ public class JMHRpcDynamicProxyFactory {
          */
         JDK() {
             @Override
-            protected <T> Object doCreateProxyInstance(Class<T> clazz) {
+            Object doCreateProxyInstance(RpcServiceConfig rpcServiceConfig) {
+                Class<?> clazz = rpcServiceConfig.getTargetClass();
                 if (!clazz.isInterface()) {
-                    return CGLIB.createProxyInstance(clazz);
+                    return CGLIB.createProxyInstance(rpcServiceConfig);
                 }
                 return Proxy.newProxyInstance(
                         Thread.currentThread().getContextClassLoader(),
                         new Class[]{clazz},
-                        new JMHProxyInvokeHandler(clazz)
+                        new JMHProxyInvokeHandler(rpcServiceConfig)
                 );
             }
         },
@@ -56,10 +58,10 @@ public class JMHRpcDynamicProxyFactory {
          */
         CGLIB() {
             @Override
-            protected <T> Object doCreateProxyInstance(Class<T> clazz) {
+            Object doCreateProxyInstance(RpcServiceConfig rpcServiceConfig) {
                 Enhancer enhancer = new Enhancer();
-                enhancer.setSuperclass(clazz);
-                enhancer.setCallback(new JMHProxyInvokeHandler(clazz));
+                enhancer.setSuperclass(rpcServiceConfig.getTargetClass());
+                enhancer.setCallback(new JMHProxyInvokeHandler(rpcServiceConfig));
                 return enhancer.create();
             }
         },
@@ -70,16 +72,16 @@ public class JMHRpcDynamicProxyFactory {
         JAVASSIST() {
             @SneakyThrows({Throwable.class, Exception.class})
             @Override
-            protected <T> Object doCreateProxyInstance(Class<T> clazz) {
+            Object doCreateProxyInstance(RpcServiceConfig rpcServiceConfig) {
                 ProxyFactory factory = new ProxyFactory();
                 // 设置接口
-                factory.setInterfaces(new Class[]{clazz});
+                factory.setInterfaces(new Class[]{rpcServiceConfig.getTargetClass()});
                 // 设置拦截方法过滤器。设置哪些方法调用需要被拦截
                 factory.setFilter(m -> true);
                 Class<?> proxyClass = factory.createClass();
                 ProxyObject proxyObject = (ProxyObject) proxyClass.getDeclaredConstructor()
                         .newInstance();
-                proxyObject.setHandler(new JMHProxyInvokeHandler(clazz));
+                proxyObject.setHandler(new JMHProxyInvokeHandler(rpcServiceConfig));
                 return proxyObject;
             }
         },
@@ -91,10 +93,11 @@ public class JMHRpcDynamicProxyFactory {
             @SneakyThrows({Throwable.class, Exception.class})
             @SuppressWarnings("all")
             @Override
-            protected <T> Object doCreateProxyInstance(Class<T> clazz) {
+            Object doCreateProxyInstance(RpcServiceConfig rpcServiceConfig) {
+                Class<?> clazz = rpcServiceConfig.getTargetClass();
                 return new ByteBuddy().subclass(clazz)
                         .method(ElementMatchers.isDeclaredBy(clazz))
-                        .intercept(MethodDelegation.to(new JMHProxyInvokeHandler(clazz)))
+                        .intercept(MethodDelegation.to(new JMHProxyInvokeHandler(rpcServiceConfig)))
                         .make()
                         .load(clazz.getClassLoader(), ClassLoadingStrategy.Default.INJECTION)
                         .getLoaded()
@@ -118,14 +121,14 @@ public class JMHRpcDynamicProxyFactory {
                     .orElse(JDK);
         }
 
-        // private static final ConcurrentMap<Class<?>, Object> PROXY_CACHE = Maps.newConcurrentMap();
+        // private final ConcurrentMap<RpcServiceConfig, Object> PROXY_CACHE = Maps.newConcurrentMap();
 
         @SuppressWarnings("unchecked")
-        public <T> T createProxyInstance(Class<T> clazz) {
+        <T> T createProxyInstance(RpcServiceConfig rpcServiceConfig) {
             // return (T) PROXY_CACHE.computeIfAbsent(clazz, proxy -> doCreateProxyInstance(clazz));
-            return (T) doCreateProxyInstance(clazz);
+            return (T) doCreateProxyInstance(rpcServiceConfig);
         }
 
-        protected abstract <T> Object doCreateProxyInstance(Class<T> clazz);
+        abstract Object doCreateProxyInstance(RpcServiceConfig rpcServiceConfig);
     }
 }

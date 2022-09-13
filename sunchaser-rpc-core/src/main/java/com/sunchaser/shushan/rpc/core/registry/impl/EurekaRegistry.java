@@ -94,7 +94,7 @@ public class EurekaRegistry implements Registry {
 
     private void initApplicationInfoManager(ServiceMetaData serviceMetaData) {
         ConfigurableEurekaInstanceConfig eurekaInstanceConfig = new ConfigurableEurekaInstanceConfig()
-                .setAppname(serviceMetaData.getServiceName())
+                .setAppname(serviceMetaData.getServiceKey())
                 .setIpAddress(serviceMetaData.getHost())
                 .setNonSecurePort(serviceMetaData.getPort())
                 .setMetadataMap(beanToMap(serviceMetaData));
@@ -114,18 +114,18 @@ public class EurekaRegistry implements Registry {
     }
 
     @Override
-    public ServiceMetaData discovery(String serviceName, String methodName) {
-        Application application = this.eurekaClient.getApplication(serviceName);
+    public ServiceMetaData discovery(String serviceKey) {
+        Application application = this.eurekaClient.getApplication(serviceKey);
         if (Objects.isNull(application)) {
             return null;
         }
         List<InstanceInfo> infos = application.getInstances();
         if (CollectionUtils.isNotEmpty(infos)) {
-            throw new RpcException("no service named " + serviceName + " was discovered");
+            throw new RpcException("no service named " + serviceKey + " was discovered");
         }
         Node<InstanceInfo> select = loadBalancer.select(LoadBalancer.wrap(infos));
         if (Objects.isNull(select)) {
-            throw new RpcException("no service named " + serviceName + " was discovered");
+            throw new RpcException("no service named " + serviceKey + " was discovered");
         }
         return BeanUtil.mapToBean(select.getNode().getMetadata(), ServiceMetaData.class, false, null);
     }

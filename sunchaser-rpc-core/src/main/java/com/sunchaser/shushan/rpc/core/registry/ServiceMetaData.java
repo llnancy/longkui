@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 服务元数据
+ * 注册中心服务元数据
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/14
@@ -18,14 +18,9 @@ import lombok.NoArgsConstructor;
 public class ServiceMetaData {
 
     /**
-     * 服务名称
+     * 服务名称（包含接口名+版本号version+分组group）
      */
-    private String serviceName;
-
-    /**
-     * 版本号
-     */
-    private String version;
+    private String serviceKey;
 
     /**
      * 服务地址

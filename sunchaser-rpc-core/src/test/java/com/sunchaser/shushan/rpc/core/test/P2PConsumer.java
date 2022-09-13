@@ -1,6 +1,7 @@
 package com.sunchaser.shushan.rpc.core.test;
 
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
+import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.handler.RpcPendingHolder;
 import com.sunchaser.shushan.rpc.core.protocol.*;
@@ -25,9 +26,10 @@ public class P2PConsumer {
 
     public static void main(String[] args) throws Exception {
         // p2pConsumer();
-        // HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance(HelloService.class);
-        HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance("javassist", HelloService.class);
-        String hello = helloService.sayHello("SunChaser");
+        RpcServiceConfig rpcServiceConfig = RpcServiceConfig.createDefaultConfig(HelloService.class);
+        // HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance(rpcServiceConfig);
+        HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance("javassist", rpcServiceConfig);
+        String hello = helloService.sayHello("SunChaser、");
         LOGGER.info("sayHello result: {}", hello);
     }
 
@@ -43,8 +45,12 @@ public class P2PConsumer {
 
         // 构建协议体：调用HelloService的sayHello方法，传递参数hello
         String methodName = "sayHello";
+        String version = "0.0.1";
+        String group = "default";
         RpcRequest rpcRequest = RpcRequest.builder()
                 .serviceName(HelloService.class.getName())
+                .version(version)
+                .group(group)
                 .methodName(methodName)
                 .argTypes(new Class[]{String.class})
                 .args(new Object[]{"hello"})
@@ -53,7 +59,7 @@ public class P2PConsumer {
         // 构建一条完整的RPC协议消息
         RpcProtocol<RpcRequest> rpcProtocol = RpcProtocol.<RpcRequest>builder()
                 .rpcHeader(rpcHeader)
-                .content(rpcRequest)
+                .rpcBody(rpcRequest)
                 .build();
 
         // 创建保存RPC调用结果的RpcFuture对象

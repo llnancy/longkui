@@ -25,14 +25,14 @@ public abstract class AbstractRegistry<T> implements Registry {
     }
 
     @Override
-    public ServiceMetaData discovery(String serviceName, String methodName) {
-        List<T> originalServiceList = doDiscoveryOriginalServiceList(serviceName, methodName);
+    public ServiceMetaData discovery(String serviceKey) {
+        List<T> originalServiceList = doDiscoveryOriginalServiceList(serviceKey);
         if (CollectionUtils.isNotEmpty(originalServiceList)) {
-            throw new RpcException("no service named " + serviceName + " was discovered");
+            throw new RpcException("no service named " + serviceKey + " was discovered");
         }
         Node<T> select = loadBalancer.select(LoadBalancer.wrap(originalServiceList));
         if (Objects.isNull(select)) {
-            throw new RpcException("no service named " + serviceName + " was discovered");
+            throw new RpcException("no service named " + serviceKey + " was discovered");
         }
         return doConvertToServiceMetaData(select);
     }
@@ -40,11 +40,10 @@ public abstract class AbstractRegistry<T> implements Registry {
     /**
      * 从注册中心获取服务实例列表
      *
-     * @param methodName  methodName
-     * @param serviceName serviceName
+     * @param serviceKey serviceKey
      * @return 具体注册中心实现框架的服务实例对象列表
      */
-    protected abstract List<T> doDiscoveryOriginalServiceList(String serviceName, String methodName);
+    protected abstract List<T> doDiscoveryOriginalServiceList(String serviceKey);
 
     /**
      * 将负载均衡器选择出来的Node节点转化为ServiceMetaData

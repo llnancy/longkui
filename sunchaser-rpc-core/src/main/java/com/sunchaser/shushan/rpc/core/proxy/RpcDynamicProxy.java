@@ -1,6 +1,7 @@
 package com.sunchaser.shushan.rpc.core.proxy;
 
 import com.google.common.collect.Maps;
+import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import net.sf.cglib.proxy.Enhancer;
 
 import java.lang.reflect.Proxy;
@@ -24,25 +25,25 @@ import java.util.concurrent.ConcurrentMap;
 public interface RpcDynamicProxy {
 
     /**
-     * 创建并获取代理对象
+     * 根据RpcServiceConfig创建并获取代理对象
      *
-     * @param clazz 被代理对象
-     * @param <T>   代理对象的类型
+     * @param rpcServiceConfig rpc service config
+     * @param <T>              代理对象的类型
      * @return 代理对象
      */
-    <T> T createProxyInstance(Class<T> clazz);
+    <T> T createProxyInstance(RpcServiceConfig rpcServiceConfig);
 
     abstract class AbstractRpcDynamicProxy implements RpcDynamicProxy {
 
-        private final ConcurrentMap<Class<?>, Object> PROXY_CACHE = Maps.newConcurrentMap();
+        private final ConcurrentMap<RpcServiceConfig, Object> PROXY_CACHE = Maps.newConcurrentMap();
 
         @Override
         @SuppressWarnings("unchecked")
-        public <T> T createProxyInstance(Class<T> clazz) {
-            return (T) PROXY_CACHE.computeIfAbsent(clazz, proxy -> doCreateProxyInstance(clazz));
+        public <T> T createProxyInstance(RpcServiceConfig rpcServiceConfig) {
+            return (T) PROXY_CACHE.computeIfAbsent(rpcServiceConfig, proxy -> doCreateProxyInstance(rpcServiceConfig));
         }
 
-        protected abstract <T> Object doCreateProxyInstance(Class<T> clazz);
+        protected abstract Object doCreateProxyInstance(RpcServiceConfig rpcServiceConfig);
     }
 
     class JdkRpcDynamicProxy extends AbstractRpcDynamicProxy {
@@ -54,15 +55,16 @@ public interface RpcDynamicProxy {
         }
 
         @Override
-        protected <T> Object doCreateProxyInstance(Class<T> clazz) {
+        protected Object doCreateProxyInstance(RpcServiceConfig rpcServiceConfig) {
+            Class<?> clazz = rpcServiceConfig.getTargetClass();
             if (!clazz.isInterface()) {
                 // throw new IllegalArgumentException(clazz.getName() + " is not an interface");
-                return CglibRpcDynamicProxy.getInstance().createProxyInstance(clazz);
+                return CglibRpcDynamicProxy.getInstance().createProxyInstance(rpcServiceConfig);
             }
             return Proxy.newProxyInstance(
                     Thread.currentThread().getContextClassLoader(),
                     new Class[]{clazz},
-                    new ProxyInvokeHandler(clazz)
+                    new ProxyInvokeHandler(rpcServiceConfig)
             );
         }
     }
@@ -76,10 +78,10 @@ public interface RpcDynamicProxy {
         }
 
         @Override
-        protected <T> Object doCreateProxyInstance(Class<T> clazz) {
+        protected Object doCreateProxyInstance(RpcServiceConfig rpcServiceConfig) {
             Enhancer enhancer = new Enhancer();
-            enhancer.setSuperclass(clazz);
-            enhancer.setCallback(new ProxyInvokeHandler(clazz));
+            enhancer.setSuperclass(rpcServiceConfig.getTargetClass());
+            enhancer.setCallback(new ProxyInvokeHandler(rpcServiceConfig));
             return enhancer.create();
         }
     }
@@ -106,15 +108,15 @@ public interface RpcDynamicProxy {
             IMPORT_RDP_MAP.put(RpcDynamicProxyEnum.CGLIB.name().toLowerCase(), CglibRpcDynamicProxy.getInstance());
         }
 
-        public static <T> T getRpcProxyInstance(String proxyType, Class<T> clazz) {
+        public static <T> T getRpcProxyInstance(String proxyType, RpcServiceConfig rpcServiceConfig) {
             return Optional.ofNullable(IMPORT_RDP_MAP.get(proxyType))
                     .orElse(JdkRpcDynamicProxy.getInstance())
-                    .createProxyInstance(clazz);
+                    .createProxyInstance(rpcServiceConfig);
         }
 
-        public static <T> T getRpcProxyInstance(Class<T> clazz) {
+        public static <T> T getRpcProxyInstance(RpcServiceConfig rpcServiceConfig) {
             return JdkRpcDynamicProxy.getInstance()
-                    .createProxyInstance(clazz);
+                    .createProxyInstance(rpcServiceConfig);
         }
     }
 }

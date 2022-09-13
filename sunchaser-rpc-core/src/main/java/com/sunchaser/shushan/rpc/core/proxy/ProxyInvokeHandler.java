@@ -1,12 +1,12 @@
 package com.sunchaser.shushan.rpc.core.proxy;
 
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
+import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.handler.RpcPendingHolder;
 import com.sunchaser.shushan.rpc.core.protocol.*;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
-import com.sunchaser.shushan.rpc.core.registry.impl.LocalRegistry;
 import com.sunchaser.shushan.rpc.core.registry.impl.ZookeeperRegistry;
 import com.sunchaser.shushan.rpc.core.serialize.ArrayElement;
 import com.sunchaser.shushan.rpc.core.transport.NettyRpcClient;
@@ -15,7 +15,6 @@ import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Promise;
 import javassist.util.proxy.MethodHandler;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.implementation.bind.annotation.AllArguments;
 import net.bytebuddy.implementation.bind.annotation.Origin;
@@ -40,25 +39,17 @@ import java.util.concurrent.TimeUnit;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/8/12
  */
-@Getter
 @Slf4j
 public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor, MethodHandler {
 
-    private final Class<?> target;
-
-    private final Integer timeout;
+    private final RpcServiceConfig rpcServiceConfig;
 
     private static final Registry REGISTRY = ZookeeperRegistry.getInstance();
 
     private static final RpcClient RPC_CLIENT = NettyRpcClient.getInstance();
 
-    public ProxyInvokeHandler(Class<?> target) {
-        this(target, 0);
-    }
-
-    public ProxyInvokeHandler(Class<?> target, Integer timeout) {
-        this.target = target;
-        this.timeout = timeout;
+    public ProxyInvokeHandler(RpcServiceConfig rpcServiceConfig) {
+        this.rpcServiceConfig = rpcServiceConfig;
     }
 
     protected Object doInvoke(Method method, Object[] args) throws Throwable {
@@ -71,14 +62,14 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
                 .sequenceId(sequenceId)
                 .build();
 
-        // 构建协议体
-        String methodName = method.getName();
         // kryo、protostuff等序列化框架会忽略数组中间索引的null元素，这里用特殊值代替null
         ArrayElement.wrapArgs(args);
-        String serviceName = target.getName();
+        // 构建协议体
         RpcRequest rpcRequest = RpcRequest.builder()
-                .serviceName(serviceName)
-                .methodName(methodName)
+                .serviceName(rpcServiceConfig.getClassName())
+                .version(rpcServiceConfig.getVersion())
+                .group(rpcServiceConfig.getGroup())
+                .methodName(method.getName())
                 .argTypes(method.getParameterTypes())
                 .args(args)
                 .build();
@@ -91,7 +82,7 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
         // 构建一条完整的RPC协议消息
         RpcProtocol<RpcRequest> rpcProtocol = RpcProtocol.<RpcRequest>builder()
                 .rpcHeader(rpcHeader)
-                .content(rpcRequest)
+                .rpcBody(rpcRequest)
                 .build();
 
         // 创建保存RPC调用结果的RpcFuture对象
@@ -100,7 +91,7 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
         RpcPendingHolder.putRpcFuture(sequenceId, rpcFuture);
 
         // 服务发现
-        ServiceMetaData serviceMetaData = REGISTRY.discovery(serviceName, methodName);
+        ServiceMetaData serviceMetaData = REGISTRY.discovery(rpcServiceConfig.getRpcServiceKey());
 
         try {
             // invoke
@@ -112,10 +103,11 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
         }
 
         // 获取rpc调用结果
-        final Promise<RpcResponse> promise = rpcFuture.getPromise();
+        Promise<RpcResponse> promise = rpcFuture.getPromise();
+        long timeout = rpcServiceConfig.getTimeout();
         // todo get(0) => get() ?
         RpcResponse rpcResponse = timeout == 0 ? promise.get() : promise.get(timeout, TimeUnit.MILLISECONDS);
-        final String errorMsg = rpcResponse.getErrorMsg();
+        String errorMsg = rpcResponse.getErrorMsg();
         if (StringUtils.isNotBlank(errorMsg)) {
             LOGGER.error("rpc invoke failed, errorMsg: {}", errorMsg);
             throw new RpcException(errorMsg);

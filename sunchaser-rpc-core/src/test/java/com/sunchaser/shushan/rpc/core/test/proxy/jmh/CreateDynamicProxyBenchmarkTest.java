@@ -1,5 +1,6 @@
 package com.sunchaser.shushan.rpc.core.test.proxy.jmh;
 
+import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.test.HelloService;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.results.format.ResultFormatType;
@@ -29,7 +30,7 @@ public class CreateDynamicProxyBenchmarkTest {
 
     @Benchmark
     public HelloService create() {
-        return JMHRpcDynamicProxyFactory.getRpcProxyInstance(proxyType, HelloService.class);
+        return JMHRpcDynamicProxyFactory.getRpcProxyInstance(proxyType, RpcServiceConfig.createDefaultConfig(HelloService.class));
     }
 
     public static void main(String[] args) throws RunnerException {

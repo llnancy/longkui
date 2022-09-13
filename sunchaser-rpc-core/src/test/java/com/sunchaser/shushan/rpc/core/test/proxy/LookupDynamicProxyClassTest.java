@@ -1,5 +1,6 @@
 package com.sunchaser.shushan.rpc.core.test.proxy;
 
+import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.proxy.RpcDynamicProxyFactory;
 import com.sunchaser.shushan.rpc.core.test.HelloService;
 
@@ -12,10 +13,11 @@ import com.sunchaser.shushan.rpc.core.test.HelloService;
 public class LookupDynamicProxyClassTest {
 
     public static void main(String[] args) throws Exception {
-        HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance("jdk", HelloService.class);
-        HelloService cglib = RpcDynamicProxyFactory.getRpcProxyInstance("cglib", HelloService.class);
-        HelloService javassist = RpcDynamicProxyFactory.getRpcProxyInstance("javassist", HelloService.class);
-        HelloService byteBuddy = RpcDynamicProxyFactory.getRpcProxyInstance("byteBuddy", HelloService.class);
+        RpcServiceConfig rpcServiceConfig = RpcServiceConfig.createDefaultConfig(HelloService.class);
+        HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance("jdk", rpcServiceConfig);
+        HelloService cglib = RpcDynamicProxyFactory.getRpcProxyInstance("cglib", rpcServiceConfig);
+        HelloService javassist = RpcDynamicProxyFactory.getRpcProxyInstance("javassist", rpcServiceConfig);
+        HelloService byteBuddy = RpcDynamicProxyFactory.getRpcProxyInstance("byteBuddy", rpcServiceConfig);
         System.in.read();
     }
 }
