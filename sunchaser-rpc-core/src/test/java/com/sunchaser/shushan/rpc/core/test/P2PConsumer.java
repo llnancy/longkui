@@ -1,6 +1,8 @@
 package com.sunchaser.shushan.rpc.core.test;
 
+import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
+import com.sunchaser.shushan.rpc.core.common.RpcMessageTypeEnum;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.handler.RpcPendingHolder;
@@ -40,8 +42,10 @@ public class P2PConsumer {
         long sequenceId = RpcPendingHolder.generateSequenceId();
         RpcHeader rpcHeader = RpcHeader.builder()
                 .magic(RpcContext.MAGIC)
-                .versionAndType(RpcContext.DEFAULT_VERSION_AND_REQUEST_TYPE)
-                .compressAndSerialize(RpcContext.DEFAULT_COMPRESS_SERIALIZE)
+                .version(Constants.DEFAULT_PROTOCOL_VERSION)
+                .type(RpcMessageTypeEnum.REQUEST.getCode())
+                .serialize(Constants.DEFAULT_SERIALIZE)
+                .compress(Constants.DEFAULT_COMPRESS)
                 .sequenceId(sequenceId)
                 .build();
 

@@ -2,6 +2,7 @@ package com.sunchaser.shushan.rpc.core.proxy;
 
 import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
+import com.sunchaser.shushan.rpc.core.common.RpcMessageTypeEnum;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.extension.ExtensionLoader;
@@ -59,9 +60,9 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
         RpcHeader rpcHeader = RpcHeader.builder()
                 .magic(RpcContext.MAGIC)
                 .version(rpcServiceConfig.getProtocolVersion())
-                .type((byte) 1)
-                .serialize((byte) 1)
-                .compress((byte) 1)
+                .type(RpcMessageTypeEnum.REQUEST.getCode())
+                .serialize(Constants.DEFAULT_SERIALIZE)
+                .compress(Constants.DEFAULT_COMPRESS)
                 .sequenceId(sequenceId)
                 .build();
 
