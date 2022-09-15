@@ -9,6 +9,16 @@ package com.sunchaser.shushan.rpc.core.compress.impl;
 public class NoneCompressor extends AbstractCompressor {
 
     /**
+     * Get content type unique id
+     *
+     * @return content type id
+     */
+    @Override
+    public byte getContentTypeId() {
+        return (byte) 0;
+    }
+
+    /**
      * 将数据进行压缩
      *
      * @param data 原比特数组

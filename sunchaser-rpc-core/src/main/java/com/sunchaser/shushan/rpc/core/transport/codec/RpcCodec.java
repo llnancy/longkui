@@ -1,16 +1,16 @@
-package com.sunchaser.shushan.rpc.core.codec;
+package com.sunchaser.shushan.rpc.core.transport.codec;
 
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.common.RpcMessageTypeEnum;
+import com.sunchaser.shushan.rpc.core.compress.CompressSupport;
 import com.sunchaser.shushan.rpc.core.compress.Compressor;
-import com.sunchaser.shushan.rpc.core.compress.CompressorFactory;
 import com.sunchaser.shushan.rpc.core.protocol.RpcHeader;
 import com.sunchaser.shushan.rpc.core.protocol.RpcProtocol;
 import com.sunchaser.shushan.rpc.core.protocol.RpcRequest;
 import com.sunchaser.shushan.rpc.core.protocol.RpcResponse;
 import com.sunchaser.shushan.rpc.core.serialize.ArrayElement;
+import com.sunchaser.shushan.rpc.core.serialize.SerializeSupport;
 import com.sunchaser.shushan.rpc.core.serialize.Serializer;
-import com.sunchaser.shushan.rpc.core.serialize.SerializerFactory;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
@@ -36,14 +36,17 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
     @Override
     protected void encode(ChannelHandlerContext ctx, RpcProtocol<T> msg, ByteBuf out) {
         RpcHeader rpcHeader = msg.getRpcHeader();
-        byte compressAndSerialize = rpcHeader.getCompressAndSerialize();
+        byte serialize = rpcHeader.getSerialize();
+        byte compress = rpcHeader.getCompress();
         out.writeByte(rpcHeader.getMagic());
-        out.writeByte(rpcHeader.getVersionAndType());
-        out.writeByte(compressAndSerialize);
+        out.writeByte(rpcHeader.getVersion());
+        out.writeByte(rpcHeader.getType());
+        out.writeByte(serialize);
+        out.writeByte(compress);
         out.writeLong(rpcHeader.getSequenceId());
         T rpcBody = msg.getRpcBody();
-        Compressor compressor = CompressorFactory.getCompressor(compressAndSerialize);
-        Serializer serializer = SerializerFactory.getSerializer(compressAndSerialize);
+        Serializer serializer = SerializeSupport.getSerializer(serialize);
+        Compressor compressor = CompressSupport.getCompressor(compress);
         // 序列化后压缩
         byte[] data = compressor.compress(serializer.serialize(rpcBody));
         out.writeInt(data.length);
@@ -64,10 +67,14 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
             in.resetReaderIndex();
             throw new IllegalArgumentException("magic: " + magic + " is illegal.");
         }
-        // 版本号+消息类型
-        byte versionAndType = in.readByte();
-        // 压缩+序列化方式
-        byte compressAndSerialize = in.readByte();
+        // 版本号
+        byte version = in.readByte();
+        // 消息类型
+        byte type = in.readByte();
+        // 序列化方式
+        byte serialize = in.readByte();
+        // 压缩方式
+        byte compress = in.readByte();
         // 序列ID
         long sequenceId = in.readLong();
         // 消息体长度
@@ -82,14 +89,16 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
         in.readBytes(data);
         RpcHeader rpcHeader = RpcHeader.builder()
                 .magic(magic)
-                .versionAndType(versionAndType)
-                .compressAndSerialize(compressAndSerialize)
+                .version(version)
+                .type(type)
+                .serialize(serialize)
+                .compress(compress)
                 .sequenceId(sequenceId)
                 .bodyLength(bodyLength)
                 .build();
         // 根据消息类型执行不同的解码策略
-        RpcMessageDecoderEnum.match(RpcMessageTypeEnum.match(versionAndType))
-                .decode(compressAndSerialize, rpcHeader, data, out);
+        RpcMessageDecoderEnum.match(RpcMessageTypeEnum.match(type))
+                .decode(rpcHeader, data, out);
     }
 
     @AllArgsConstructor
@@ -101,8 +110,8 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
          */
         REQUEST_DECODER(RpcMessageTypeEnum.REQUEST) {
             @Override
-            public void decode(byte compressAndSerialize, RpcHeader rpcHeader, byte[] data, List<Object> out) {
-                RpcProtocol<RpcRequest> rpcProtocol = buildRpcMessage(compressAndSerialize, rpcHeader, data, RpcRequest.class);
+            public void decode(RpcHeader rpcHeader, byte[] data, List<Object> out) {
+                RpcProtocol<RpcRequest> rpcProtocol = buildRpcMessage(rpcHeader, data, RpcRequest.class);
                 // kryo、protostuff等序列化框架在序列化时为避免错误用特殊值代替了数组中间索引的null，这里将特殊值还原成null。
                 ArrayElement.unwrapArgs(rpcProtocol.getRpcBody().getArgs());
                 out.add(rpcProtocol);
@@ -114,8 +123,8 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
          */
         RESPONSE_DECODER(RpcMessageTypeEnum.RESPONSE) {
             @Override
-            public void decode(byte compressAndSerialize, RpcHeader rpcHeader, byte[] data, List<Object> out) {
-                RpcProtocol<RpcResponse> rpcProtocol = buildRpcMessage(compressAndSerialize, rpcHeader, data, RpcResponse.class);
+            public void decode(RpcHeader rpcHeader, byte[] data, List<Object> out) {
+                RpcProtocol<RpcResponse> rpcProtocol = buildRpcMessage(rpcHeader, data, RpcResponse.class);
                 out.add(rpcProtocol);
             }
         },
@@ -125,8 +134,8 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
          */
         HEARTBEAT_DECODER(RpcMessageTypeEnum.HEARTBEAT) {
             @Override
-            public void decode(byte compressAndSerialize, RpcHeader rpcHeader, byte[] data, List<Object> out) {
-                RpcProtocol<String> rpcProtocol = buildRpcMessage(compressAndSerialize, rpcHeader, data, String.class);
+            public void decode(RpcHeader rpcHeader, byte[] data, List<Object> out) {
+                RpcProtocol<String> rpcProtocol = buildRpcMessage(rpcHeader, data, String.class);
                 out.add(rpcProtocol);
             }
         }
@@ -147,17 +156,15 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
                     .orElse(HEARTBEAT_DECODER);
         }
 
-        public abstract void decode(byte compressAndSerialize,
-                                    RpcHeader rpcHeader,
+        public abstract void decode(RpcHeader rpcHeader,
                                     byte[] data,
                                     List<Object> out);
 
-        <I> RpcProtocol<I> buildRpcMessage(byte compressAndSerialize,
-                                           RpcHeader rpcHeader,
+        <I> RpcProtocol<I> buildRpcMessage(RpcHeader rpcHeader,
                                            byte[] data,
                                            Class<I> clazz) {
-            Compressor compressor = CompressorFactory.getCompressor(compressAndSerialize);
-            Serializer serializer = SerializerFactory.getSerializer(compressAndSerialize);
+            Serializer serializer = SerializeSupport.getSerializer(rpcHeader.getSerialize());
+            Compressor compressor = CompressSupport.getCompressor(rpcHeader.getCompress());
             // 解压缩后反序列化
             I rpcBody = serializer.deserialize(compressor.unCompress(data), clazz);
             return RpcProtocol.<I>builder()

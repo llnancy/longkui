@@ -1,5 +1,7 @@
 package com.sunchaser.shushan.rpc.core.transport.server;
 
+import com.sunchaser.shushan.rpc.core.extension.SPI;
+
 import java.net.InetSocketAddress;
 
 /**
@@ -8,6 +10,7 @@ import java.net.InetSocketAddress;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/8/16
  */
+@SPI
 public interface RpcServer {
 
     int DEFAULT_PORT = 1234;

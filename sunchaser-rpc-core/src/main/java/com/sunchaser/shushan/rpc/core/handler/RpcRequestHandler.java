@@ -1,6 +1,7 @@
 package com.sunchaser.shushan.rpc.core.handler;
 
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
+import com.sunchaser.shushan.rpc.core.common.RpcMessageTypeEnum;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.protocol.RpcHeader;
 import com.sunchaser.shushan.rpc.core.protocol.RpcProtocol;
@@ -35,9 +36,9 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<R
     protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcRequest> msg) throws Exception {
         RpcHeader rpcHeader = msg.getRpcHeader();
         long sequenceId = rpcHeader.getSequenceId();
-        byte versionAndType = rpcHeader.getVersionAndType();
+        byte type = rpcHeader.getType();
 
-        if (RpcContext.isHeartbeat(versionAndType)) {
+        if (RpcMessageTypeEnum.isHeartbeat(type)) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("*********** sunchaser-rpc netty RpcRequestHandler read heartbeat ping. sequenceId={}", sequenceId);
             }
@@ -51,7 +52,7 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<R
 
         Runnable rpc = () -> {
             // 将消息类型从请求转为响应
-            rpcHeader.setVersionAndType(RpcContext.transformToResponse(versionAndType));
+            rpcHeader.setType(RpcMessageTypeEnum.RESPONSE.getCode());
             // 构建响应对象
             RpcProtocol<RpcResponse> rpcProtocol = RpcProtocol.<RpcResponse>builder()
                     .rpcHeader(rpcHeader)

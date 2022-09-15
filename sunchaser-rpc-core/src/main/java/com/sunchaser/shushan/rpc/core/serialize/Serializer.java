@@ -1,12 +1,22 @@
 package com.sunchaser.shushan.rpc.core.serialize;
 
+import com.sunchaser.shushan.rpc.core.extension.SPI;
+
 /**
  * 序列化器
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/12
  */
+@SPI
 public interface Serializer {
+
+    /**
+     * Get content type unique id
+     *
+     * @return content type id
+     */
+    byte getContentTypeId();
 
     /**
      * 将对象进行序列化

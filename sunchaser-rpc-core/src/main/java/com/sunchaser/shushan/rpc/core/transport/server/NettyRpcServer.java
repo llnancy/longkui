@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.transport.server;
 
-import com.sunchaser.shushan.rpc.core.codec.RpcCodec;
+import com.sunchaser.shushan.rpc.core.transport.codec.RpcCodec;
 import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.handler.RpcRequestHandler;
 import com.sunchaser.shushan.rpc.core.transport.NettyEventLoopFactory;

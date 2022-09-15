@@ -5,7 +5,8 @@ import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.handler.RpcPendingHolder;
 import com.sunchaser.shushan.rpc.core.protocol.*;
-import com.sunchaser.shushan.rpc.core.proxy.RpcDynamicProxyFactory;
+import com.sunchaser.shushan.rpc.core.proxy.RpcDynamicProxy;
+import com.sunchaser.shushan.rpc.core.proxy.impl.JavassistRpcDynamicProxy;
 import com.sunchaser.shushan.rpc.core.transport.client.NettyRpcClient;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
@@ -28,8 +29,9 @@ public class P2PConsumer {
         // p2pConsumer();
         RpcServiceConfig rpcServiceConfig = RpcServiceConfig.createDefaultConfig(HelloService.class);
         // HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance(rpcServiceConfig);
-        HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance("javassist", rpcServiceConfig);
-        String hello = helloService.sayHello("SunChaser、");
+        RpcDynamicProxy rpcDynamicProxy = JavassistRpcDynamicProxy.getInstance();
+        HelloService helloService = rpcDynamicProxy.createProxyInstance(rpcServiceConfig);
+        String hello = helloService.sayHello("SunChaser");
         LOGGER.info("sayHello result: {}", hello);
     }
 

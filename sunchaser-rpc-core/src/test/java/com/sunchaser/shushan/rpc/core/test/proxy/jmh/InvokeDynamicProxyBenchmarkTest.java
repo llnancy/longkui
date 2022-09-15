@@ -2,6 +2,10 @@ package com.sunchaser.shushan.rpc.core.test.proxy.jmh;
 
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.test.HelloService;
+import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHByteBuddyRpcDynamicProxy;
+import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHCglibRpcDynamicProxy;
+import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHJavassistRpcDynamicProxy;
+import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHJdkRpcDynamicProxy;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.Runner;
@@ -35,13 +39,13 @@ public class InvokeDynamicProxyBenchmarkTest {
 
     private static final RpcServiceConfig RPC_SERVICE_CONFIG = RpcServiceConfig.createDefaultConfig(HelloService.class);
 
-    private static final HelloService JDK_PROXY_INSTANCE = JMHRpcDynamicProxyFactory.getRpcProxyInstance(JDK, RPC_SERVICE_CONFIG);
+    private static final HelloService JDK_PROXY_INSTANCE = JMHJdkRpcDynamicProxy.getInstance().createProxyInstance(RPC_SERVICE_CONFIG);
 
-    private static final HelloService CGLIB_PROXY_INSTANCE = JMHRpcDynamicProxyFactory.getRpcProxyInstance(CGLIB, RPC_SERVICE_CONFIG);
+    private static final HelloService CGLIB_PROXY_INSTANCE = JMHCglibRpcDynamicProxy.getInstance().createProxyInstance(RPC_SERVICE_CONFIG);
 
-    private static final HelloService JAVASSIST_PROXY_INSTANCE = JMHRpcDynamicProxyFactory.getRpcProxyInstance(JAVASSIST, RPC_SERVICE_CONFIG);
+    private static final HelloService JAVASSIST_PROXY_INSTANCE = JMHJavassistRpcDynamicProxy.getInstance().createProxyInstance(RPC_SERVICE_CONFIG);
 
-    private static final HelloService BYTE_BUDDY_PROXY_INSTANCE = JMHRpcDynamicProxyFactory.getRpcProxyInstance(BYTE_BUDDY, RPC_SERVICE_CONFIG);
+    private static final HelloService BYTE_BUDDY_PROXY_INSTANCE = JMHByteBuddyRpcDynamicProxy.getInstance().createProxyInstance(RPC_SERVICE_CONFIG);
 
     @Benchmark
     public String jdk() {

@@ -1,10 +1,12 @@
 package com.sunchaser.shushan.rpc.core.test;
 
+import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
+import com.sunchaser.shushan.rpc.core.extension.ExtensionLoader;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
+import com.sunchaser.shushan.rpc.core.registry.RegistryEnum;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
-import com.sunchaser.shushan.rpc.core.registry.impl.ZookeeperRegistry;
-import com.sunchaser.shushan.rpc.core.transport.server.NettyRpcServer;
+import com.sunchaser.shushan.rpc.core.transport.server.RpcServer;
 import com.sunchaser.shushan.rpc.core.util.BeanFactory;
 
 /**
@@ -23,9 +25,10 @@ public class Provider {
                 .host("127.0.0.1")
                 .port(1234)
                 .build();
-        Registry registry = new ZookeeperRegistry();
+        Registry registry = ExtensionLoader.getExtensionLoader(Registry.class).getExtension(RegistryEnum.ZOOKEEPER);
         registry.register(serviceMetaData);
-        new NettyRpcServer().start();
+        RpcServer rpcServer = ExtensionLoader.getExtensionLoader(RpcServer.class).getExtension(Constants.NETTY);
+        rpcServer.start();
         System.in.read();
     }
 }

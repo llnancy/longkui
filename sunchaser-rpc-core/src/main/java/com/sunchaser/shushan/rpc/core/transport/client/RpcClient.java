@@ -1,5 +1,6 @@
 package com.sunchaser.shushan.rpc.core.transport.client;
 
+import com.sunchaser.shushan.rpc.core.extension.SPI;
 import com.sunchaser.shushan.rpc.core.protocol.RpcProtocol;
 import com.sunchaser.shushan.rpc.core.protocol.RpcRequest;
 
@@ -11,6 +12,7 @@ import java.net.InetSocketAddress;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/15
  */
+@SPI
 public interface RpcClient {
 
     /**

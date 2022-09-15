@@ -25,6 +25,16 @@ public class ProtostuffSerializer implements Serializer {
     }
 
     /**
+     * Get content type unique id
+     *
+     * @return content type id
+     */
+    @Override
+    public byte getContentTypeId() {
+        return (byte) 3;
+    }
+
+    /**
      * 将对象进行序列化
      *
      * @param obj 待序列化的对象

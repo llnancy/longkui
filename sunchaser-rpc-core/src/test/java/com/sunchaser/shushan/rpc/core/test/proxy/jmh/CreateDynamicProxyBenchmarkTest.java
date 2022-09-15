@@ -2,6 +2,10 @@ package com.sunchaser.shushan.rpc.core.test.proxy.jmh;
 
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.test.HelloService;
+import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHByteBuddyRpcDynamicProxy;
+import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHCglibRpcDynamicProxy;
+import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHJavassistRpcDynamicProxy;
+import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHJdkRpcDynamicProxy;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.Runner;
@@ -25,12 +29,26 @@ import java.util.concurrent.TimeUnit;
 @Fork(1)
 public class CreateDynamicProxyBenchmarkTest {
 
-    @Param({"jdk", "cglib", "javassist", "byteBuddy"})
-    private String proxyType;
+    private static final RpcServiceConfig RPC_SERVICE_CONFIG = RpcServiceConfig.createDefaultConfig(HelloService.class);
 
     @Benchmark
-    public HelloService create() {
-        return JMHRpcDynamicProxyFactory.getRpcProxyInstance(proxyType, RpcServiceConfig.createDefaultConfig(HelloService.class));
+    public HelloService jdkCreate() {
+        return JMHJdkRpcDynamicProxy.getInstance().createProxyInstance(RPC_SERVICE_CONFIG);
+    }
+
+    @Benchmark
+    public HelloService cglibCreate() {
+        return JMHCglibRpcDynamicProxy.getInstance().createProxyInstance(RPC_SERVICE_CONFIG);
+    }
+
+    @Benchmark
+    public HelloService javassistCreate() {
+        return JMHJavassistRpcDynamicProxy.getInstance().createProxyInstance(RPC_SERVICE_CONFIG);
+    }
+
+    @Benchmark
+    public HelloService byteBuddyCreate() {
+        return JMHByteBuddyRpcDynamicProxy.getInstance().createProxyInstance(RPC_SERVICE_CONFIG);
     }
 
     public static void main(String[] args) throws RunnerException {

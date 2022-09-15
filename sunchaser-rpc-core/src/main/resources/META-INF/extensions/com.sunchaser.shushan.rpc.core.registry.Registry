@@ -1,0 +1,1 @@
+zookeeper=com.sunchaser.shushan.rpc.core.registry.impl.ZookeeperRegistry

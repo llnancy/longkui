@@ -63,7 +63,7 @@ public class ZookeeperRegistry implements Registry {
         this(DEFAULT_ZK_ADDRESS);
     }
 
-    @SneakyThrows({Throwable.class, Exception.class})
+    @SneakyThrows
     public ZookeeperRegistry(String zkAddress) {
         // 创建Curator客户端并启动
         client = CuratorFrameworkFactory.newClient(zkAddress, new ExponentialBackoffRetry(1000, 3));
@@ -86,7 +86,7 @@ public class ZookeeperRegistry implements Registry {
      *
      * @param serviceMetaData ServiceMetaData
      */
-    @SneakyThrows({Throwable.class, Exception.class})
+    @SneakyThrows
     @Override
     public void register(ServiceMetaData serviceMetaData) {
         ServiceInstance<ServiceMetaData> serviceInstance = ServiceInstance.<ServiceMetaData>builder()
@@ -104,7 +104,7 @@ public class ZookeeperRegistry implements Registry {
      *
      * @param serviceMetaData ServiceMetaData
      */
-    @SneakyThrows({Throwable.class, Exception.class})
+    @SneakyThrows
     @Override
     public void unRegister(ServiceMetaData serviceMetaData) {
         ServiceInstance<ServiceMetaData> serviceInstance = ServiceInstance.<ServiceMetaData>builder()
@@ -123,7 +123,7 @@ public class ZookeeperRegistry implements Registry {
      * @param serviceKey serviceKey
      * @return ServiceMetaData
      */
-    @SneakyThrows({Throwable.class, Exception.class})
+    @SneakyThrows
     @Override
     public ServiceMetaData discovery(String serviceKey) {
         @SuppressWarnings("all")
@@ -156,7 +156,7 @@ public class ZookeeperRegistry implements Registry {
         return select.getNode().getPayload();
     }
 
-    @SneakyThrows({Throwable.class, Exception.class})
+    @SneakyThrows
     private ServiceCache<ServiceMetaData> buildAndStartServiceCache(String serviceKey) {
         ServiceCache<ServiceMetaData> cache = this.serviceDiscovery.serviceCacheBuilder()
                 .name(serviceKey)

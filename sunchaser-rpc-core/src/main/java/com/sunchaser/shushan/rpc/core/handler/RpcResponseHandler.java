@@ -1,11 +1,13 @@
 package com.sunchaser.shushan.rpc.core.handler;
 
+import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
+import com.sunchaser.shushan.rpc.core.common.RpcMessageTypeEnum;
 import com.sunchaser.shushan.rpc.core.protocol.RpcFuture;
 import com.sunchaser.shushan.rpc.core.protocol.RpcHeader;
 import com.sunchaser.shushan.rpc.core.protocol.RpcProtocol;
 import com.sunchaser.shushan.rpc.core.protocol.RpcResponse;
-import com.sunchaser.shushan.rpc.core.transport.client.ChannelProvider;
+import com.sunchaser.shushan.rpc.core.transport.client.ChannelContainer;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -30,8 +32,8 @@ public class RpcResponseHandler extends SimpleChannelInboundHandler<RpcProtocol<
     protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcResponse> msg) throws Exception {
         RpcHeader rpcHeader = msg.getRpcHeader();
         long sequenceId = rpcHeader.getSequenceId();
-        byte versionAndType = rpcHeader.getVersionAndType();
-        if (RpcContext.isHeartbeat(versionAndType)) {
+        byte type = rpcHeader.getType();
+        if (RpcMessageTypeEnum.isHeartbeat(type)) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("*********** sunchaser-rpc netty RpcResponseHandler read heartbeat pong. sequenceId={}", sequenceId);
             }
@@ -52,8 +54,10 @@ public class RpcResponseHandler extends SimpleChannelInboundHandler<RpcProtocol<
                 long sequenceId = RpcPendingHolder.generateSequenceId();
                 RpcHeader rpcHeader = RpcHeader.builder()
                         .magic(RpcContext.MAGIC)
-                        .versionAndType(RpcContext.DEFAULT_VERSION_AND_HEARTBEAT_TYPE)
-                        .compressAndSerialize(RpcContext.DEFAULT_COMPRESS_SERIALIZE)
+                        .version(Constants.DEFAULT_PROTOCOL_VERSION)
+                        .type(RpcMessageTypeEnum.HEARTBEAT.getCode())
+                        .serialize(Constants.DEFAULT_SERIALIZE)
+                        .compress(Constants.DEFAULT_COMPRESS)
                         .sequenceId(sequenceId)
                         .build();
                 RpcProtocol<String> ping = RpcProtocol.<String>builder()
@@ -64,7 +68,7 @@ public class RpcResponseHandler extends SimpleChannelInboundHandler<RpcProtocol<
                     if (!future.isSuccess()) {
                         future.channel().close();
                         // 删除对应Channel
-                        ChannelProvider.removeChannel(remoteAddress.toString());
+                        ChannelContainer.removeChannel(remoteAddress.toString());
                     }
                 });
             }

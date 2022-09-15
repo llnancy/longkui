@@ -8,6 +8,25 @@ package com.sunchaser.shushan.rpc.core.common;
  */
 public interface Constants {
 
+    String NETTY = "netty";
+
+    /**
+     * 0000 0100
+     * version: 0000 01
+     * type: 00
+     */
+    byte DEFAULT_PROTOCOL_VERSION = 0x4;
+
+    /**
+     * Hessian2
+     */
+    byte DEFAULT_SERIALIZE = (byte) 0;
+
+    /**
+     * Snappy
+     */
+    byte DEFAULT_COMPRESS = (byte) 1;
+
     int DEFAULT_CONNECTION_TIMEOUT = 3000;
 
     int DEFAULT_IO_THREADS = Math.min(Runtime.getRuntime().availableProcessors() + 1, 32);

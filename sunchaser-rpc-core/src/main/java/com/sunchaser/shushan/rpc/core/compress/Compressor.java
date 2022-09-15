@@ -1,12 +1,22 @@
 package com.sunchaser.shushan.rpc.core.compress;
 
+import com.sunchaser.shushan.rpc.core.extension.SPI;
+
 /**
  * 压缩器
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/12
  */
+@SPI
 public interface Compressor {
+
+    /**
+     * Get content type unique id
+     *
+     * @return content type id
+     */
+    byte getContentTypeId();
 
     /**
      * 将数据进行压缩

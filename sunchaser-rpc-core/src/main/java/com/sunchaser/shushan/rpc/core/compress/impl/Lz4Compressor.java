@@ -18,12 +18,22 @@ import java.io.ByteArrayOutputStream;
 public class Lz4Compressor extends AbstractCompressor {
 
     /**
+     * Get content type unique id
+     *
+     * @return content type id
+     */
+    @Override
+    public byte getContentTypeId() {
+        return (byte) 5;
+    }
+
+    /**
      * 将数据进行压缩
      *
      * @param data 原比特数组
      * @return 压缩后的数据
      */
-    @SneakyThrows({Throwable.class, Exception.class})
+    @SneakyThrows
     @Override
     protected byte[] doCompress(byte[] data) {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -39,7 +49,7 @@ public class Lz4Compressor extends AbstractCompressor {
      * @param data 压缩的数据
      * @return 原数据
      */
-    @SneakyThrows({Throwable.class, Exception.class})
+    @SneakyThrows
     @Override
     protected byte[] doUnCompress(byte[] data) {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();

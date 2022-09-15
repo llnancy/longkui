@@ -53,12 +53,22 @@ public class KryoSerializer implements Serializer {
     };
 
     /**
+     * Get content type unique id
+     *
+     * @return content type id
+     */
+    @Override
+    public byte getContentTypeId() {
+        return (byte) 4;
+    }
+
+    /**
      * 将对象进行序列化
      *
      * @param obj 待序列化的对象
      * @return 序列化后的byte字节数组
      */
-    @SneakyThrows({Throwable.class, Exception.class})
+    @SneakyThrows
     @Override
     public <T> byte[] serialize(T obj) {
         Kryo kryo = null;
@@ -87,7 +97,7 @@ public class KryoSerializer implements Serializer {
      * @param clazz 待反序列化的class类型
      * @return 反序列化后的对象
      */
-    @SneakyThrows({Throwable.class, Exception.class})
+    @SneakyThrows
     @Override
     public <T> T deserialize(byte[] data, Class<T> clazz) {
         Kryo kryo = null;

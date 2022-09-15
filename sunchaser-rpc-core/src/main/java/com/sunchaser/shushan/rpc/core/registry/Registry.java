@@ -1,11 +1,14 @@
 package com.sunchaser.shushan.rpc.core.registry;
 
+import com.sunchaser.shushan.rpc.core.extension.SPI;
+
 /**
  * 服务注册与发现接口
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/14
  */
+@SPI
 public interface Registry {
 
     /**

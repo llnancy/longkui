@@ -1,7 +1,11 @@
 package com.sunchaser.shushan.rpc.core.common;
 
+import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * RPC 消息类型枚举
@@ -20,36 +24,35 @@ public enum RpcMessageTypeEnum {
     /**
      * 请求
      */
-    REQUEST,
+    REQUEST((byte) 0),
 
     /**
      * 响应
      */
-    RESPONSE,
+    RESPONSE((byte) 1),
 
     /**
      * 心跳
      */
-    HEARTBEAT,
+    HEARTBEAT((byte) 2),
 
     ;
 
-    private static final byte MESSAGE_TYPE_FACTOR = 3;
+    private final byte code;
 
-    /**
-     * 00：REQUEST
-     * 01：RESPONSE
-     * 11：HEARTBEAT
-     */
-    public static RpcMessageTypeEnum match(byte versionAndType) {
-        if ((versionAndType & MESSAGE_TYPE_FACTOR) == 0) {
-            return REQUEST;
-        } else if ((versionAndType & MESSAGE_TYPE_FACTOR) == 1) {
-            return RESPONSE;
-        } else if (RpcContext.isHeartbeat(versionAndType)) {
-            return HEARTBEAT;
-        } else {
-            throw new IllegalArgumentException("versionAndType " + versionAndType + " is illegal.");
+    private static final Map<Byte, RpcMessageTypeEnum> ENUM_MAP = Maps.newHashMap();
+
+    static {
+        for (RpcMessageTypeEnum rpcMessageTypeEnum : RpcMessageTypeEnum.values()) {
+            ENUM_MAP.put(rpcMessageTypeEnum.code, rpcMessageTypeEnum);
         }
+    }
+
+    public static RpcMessageTypeEnum match(byte code) {
+        return Optional.ofNullable(ENUM_MAP.get(code)).orElse(HEARTBEAT);
+    }
+
+    public static boolean isHeartbeat(byte code) {
+        return code == HEARTBEAT.code;
     }
 }

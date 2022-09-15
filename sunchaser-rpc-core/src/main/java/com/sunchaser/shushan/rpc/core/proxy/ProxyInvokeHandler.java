@@ -1,15 +1,16 @@
 package com.sunchaser.shushan.rpc.core.proxy;
 
+import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
+import com.sunchaser.shushan.rpc.core.extension.ExtensionLoader;
 import com.sunchaser.shushan.rpc.core.handler.RpcPendingHolder;
 import com.sunchaser.shushan.rpc.core.protocol.*;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
+import com.sunchaser.shushan.rpc.core.registry.RegistryEnum;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
-import com.sunchaser.shushan.rpc.core.registry.impl.ZookeeperRegistry;
 import com.sunchaser.shushan.rpc.core.serialize.ArrayElement;
-import com.sunchaser.shushan.rpc.core.transport.client.NettyRpcClient;
 import com.sunchaser.shushan.rpc.core.transport.client.RpcClient;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
@@ -44,9 +45,9 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
 
     private final RpcServiceConfig rpcServiceConfig;
 
-    private static final Registry REGISTRY = ZookeeperRegistry.getInstance();
+    private static final Registry REGISTRY = ExtensionLoader.getExtensionLoader(Registry.class).getExtension(RegistryEnum.ZOOKEEPER);
 
-    private static final RpcClient RPC_CLIENT = NettyRpcClient.getInstance();
+    private static final RpcClient RPC_CLIENT = ExtensionLoader.getExtensionLoader(RpcClient.class).getExtension(Constants.NETTY);
 
     public ProxyInvokeHandler(RpcServiceConfig rpcServiceConfig) {
         this.rpcServiceConfig = rpcServiceConfig;
@@ -57,8 +58,10 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
         long sequenceId = RpcPendingHolder.generateSequenceId();
         RpcHeader rpcHeader = RpcHeader.builder()
                 .magic(RpcContext.MAGIC)
-                .versionAndType(RpcContext.DEFAULT_VERSION_AND_REQUEST_TYPE)
-                .compressAndSerialize(RpcContext.DEFAULT_COMPRESS_SERIALIZE)
+                .version(rpcServiceConfig.getProtocolVersion())
+                .type((byte) 1)
+                .serialize((byte) 1)
+                .compress((byte) 1)
                 .sequenceId(sequenceId)
                 .build();
 

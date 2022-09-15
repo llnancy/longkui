@@ -1,9 +1,7 @@
 package com.sunchaser.shushan.rpc.core.config;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 /**
  * rpc service config
@@ -12,10 +10,12 @@ import lombok.NoArgsConstructor;
  * @since JDK8 2022/9/13
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class RpcServiceConfig {
+@SuperBuilder
+@ToString(callSuper = true)
+public class RpcServiceConfig extends RpcProtocolConfig {
 
     /**
      * 默认版本号

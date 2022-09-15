@@ -1,6 +1,7 @@
 package com.sunchaser.shushan.rpc.core.balancer;
 
 import com.google.common.collect.Lists;
+import com.sunchaser.shushan.rpc.core.extension.SPI;
 import com.sunchaser.shushan.rpc.core.util.ListUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -18,6 +19,7 @@ import java.util.stream.IntStream;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/14
  */
+@SPI
 public interface LoadBalancer {
 
     /**

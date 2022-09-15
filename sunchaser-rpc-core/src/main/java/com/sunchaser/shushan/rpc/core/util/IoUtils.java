@@ -44,7 +44,7 @@ public class IoUtils {
      * @param out        输出流
      * @param bufferSize 缓存大小
      */
-    @SneakyThrows({Throwable.class, Exception.class})
+    @SneakyThrows
     public static void copy(InputStream in, OutputStream out, int bufferSize) {
         Objects.requireNonNull(in, "InputStream is null !");
         Objects.requireNonNull(out, "OutputStream is null !");

@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentMap;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/9/13
  */
-public class ChannelProvider {
+public class ChannelContainer {
 
     private static final ConcurrentMap<String, Channel> CHANNEL_POOL = Maps.newConcurrentMap();
 

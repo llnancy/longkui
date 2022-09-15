@@ -1,0 +1,3 @@
+random=com.sunchaser.shushan.rpc.core.balancer.impl.RandomLoadBalancer
+roundrobin=com.sunchaser.shushan.rpc.core.balancer.impl.RoundRobinLoadBalancer
+consistenthash=com.sunchaser.shushan.rpc.core.balancer.impl.ConsistentHashLoadBalancer
