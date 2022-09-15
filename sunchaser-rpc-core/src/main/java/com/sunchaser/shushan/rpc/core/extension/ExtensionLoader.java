@@ -2,6 +2,7 @@ package com.sunchaser.shushan.rpc.core.extension;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.sunchaser.shushan.rpc.core.common.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -64,7 +65,7 @@ public class ExtensionLoader<T> {
     }
 
     public T getExtension(Enum<?> em) {
-        return getExtension(em.name().toLowerCase());
+        return getExtension(em.name().replaceAll(Constants.UNDERLINE, Constants.EMPTY).toLowerCase());
     }
 
     @SuppressWarnings("unchecked")

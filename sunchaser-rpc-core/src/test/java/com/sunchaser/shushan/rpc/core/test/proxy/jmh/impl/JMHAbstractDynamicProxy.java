@@ -1,7 +1,7 @@
 package com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl;
 
-import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
-import com.sunchaser.shushan.rpc.core.proxy.RpcDynamicProxy;
+import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
+import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
 
 /**
  * no cache
@@ -10,7 +10,7 @@ import com.sunchaser.shushan.rpc.core.proxy.RpcDynamicProxy;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/9/15
  */
-public abstract class JMHAbstractRpcDynamicProxy implements RpcDynamicProxy {
+public abstract class JMHAbstractDynamicProxy implements DynamicProxy {
 
     // no cache
     // private final ConcurrentMap<RpcServiceConfig, Object> PROXY_CACHE = Maps.newConcurrentMap();
@@ -18,20 +18,20 @@ public abstract class JMHAbstractRpcDynamicProxy implements RpcDynamicProxy {
     /**
      * 根据RpcServiceConfig创建并获取代理对象
      *
-     * @param rpcServiceConfig rpc service config
+     * @param rpcFrameworkConfig rpc framework config
      * @return 代理对象
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T createProxyInstance(RpcServiceConfig rpcServiceConfig) {
-        return (T) doCreateProxyInstance(rpcServiceConfig);
+    public <T> T createProxyInstance(RpcFrameworkConfig rpcFrameworkConfig) {
+        return (T) doCreateProxyInstance(rpcFrameworkConfig);
     }
 
     /**
      * doCreateProxyInstance
      *
-     * @param rpcServiceConfig rpc service config
+     * @param rpcFrameworkConfig rpc framework config
      * @return proxy object
      */
-    protected abstract Object doCreateProxyInstance(RpcServiceConfig rpcServiceConfig);
+    protected abstract Object doCreateProxyInstance(RpcFrameworkConfig rpcFrameworkConfig);
 }

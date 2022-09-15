@@ -1,18 +1,22 @@
 package com.sunchaser.shushan.rpc.core.proxy;
 
-import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.common.RpcMessageTypeEnum;
+import com.sunchaser.shushan.rpc.core.compress.Compressor;
+import com.sunchaser.shushan.rpc.core.config.RpcExtensionConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcProtocolConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.extension.ExtensionLoader;
 import com.sunchaser.shushan.rpc.core.handler.RpcPendingHolder;
 import com.sunchaser.shushan.rpc.core.protocol.*;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
-import com.sunchaser.shushan.rpc.core.registry.RegistryEnum;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
 import com.sunchaser.shushan.rpc.core.serialize.ArrayElement;
+import com.sunchaser.shushan.rpc.core.serialize.Serializer;
 import com.sunchaser.shushan.rpc.core.transport.client.RpcClient;
+import com.sunchaser.shushan.rpc.core.uid.SequenceIdGenerator;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Promise;
@@ -44,39 +48,41 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor, MethodHandler {
 
+    private final RpcProtocolConfig rpcProtocolConfig;
+
     private final RpcServiceConfig rpcServiceConfig;
 
-    private static final Registry REGISTRY = ExtensionLoader.getExtensionLoader(Registry.class).getExtension(RegistryEnum.ZOOKEEPER);
+    private final Registry registry;
 
-    private static final RpcClient RPC_CLIENT = ExtensionLoader.getExtensionLoader(RpcClient.class).getExtension(Constants.NETTY);
+    private final RpcClient rpcClient;
 
-    public ProxyInvokeHandler(RpcServiceConfig rpcServiceConfig) {
-        this.rpcServiceConfig = rpcServiceConfig;
+    private final SequenceIdGenerator sequenceIdGenerator;
+
+    private final Serializer serializer;
+
+    private final Compressor compressor;
+
+    public ProxyInvokeHandler(RpcFrameworkConfig rpcFrameworkConfig) {
+        this.rpcProtocolConfig = rpcFrameworkConfig.getRpcProtocolConfig();
+        this.rpcServiceConfig = rpcFrameworkConfig.getRpcServiceConfig();
+        RpcExtensionConfig rpcExtensionConfig = rpcFrameworkConfig.getRpcExtensionConfig();
+        this.registry = ExtensionLoader.getExtensionLoader(Registry.class).getExtension(rpcExtensionConfig.getRegistry());
+        this.rpcClient = ExtensionLoader.getExtensionLoader(RpcClient.class).getExtension(rpcExtensionConfig.getRpcClient());
+        this.sequenceIdGenerator = ExtensionLoader.getExtensionLoader(SequenceIdGenerator.class).getExtension(this.rpcProtocolConfig.getSequenceIdGenerator());
+        this.serializer = ExtensionLoader.getExtensionLoader(Serializer.class).getExtension(this.rpcProtocolConfig.getSerializer());
+        this.compressor = ExtensionLoader.getExtensionLoader(Compressor.class).getExtension(this.rpcProtocolConfig.getCompressor());
     }
 
     protected Object doInvoke(Method method, Object[] args) throws Throwable {
+        long sequenceId = this.sequenceIdGenerator.nextSequenceId();
         // 构建协议头
-        long sequenceId = RpcPendingHolder.generateSequenceId();
-        RpcHeader rpcHeader = RpcHeader.builder()
-                .magic(RpcContext.MAGIC)
-                .version(rpcServiceConfig.getProtocolVersion())
-                .type(RpcMessageTypeEnum.REQUEST.getCode())
-                .serialize(Constants.DEFAULT_SERIALIZE)
-                .compress(Constants.DEFAULT_COMPRESS)
-                .sequenceId(sequenceId)
-                .build();
+        RpcHeader rpcHeader = buildRpcHeader(sequenceId);
 
         // kryo、protostuff等序列化框架会忽略数组中间索引的null元素，这里用特殊值代替null
         ArrayElement.wrapArgs(args);
+
         // 构建协议体
-        RpcRequest rpcRequest = RpcRequest.builder()
-                .serviceName(rpcServiceConfig.getClassName())
-                .version(rpcServiceConfig.getVersion())
-                .group(rpcServiceConfig.getGroup())
-                .methodName(method.getName())
-                .argTypes(method.getParameterTypes())
-                .args(args)
-                .build();
+        RpcRequest rpcRequest = buildRpcRequest(method, args);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("AbstractProxy#proxyInvoke: args: {}", Arrays.toString(args));
@@ -84,10 +90,7 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
         }
 
         // 构建一条完整的RPC协议消息
-        RpcProtocol<RpcRequest> rpcProtocol = RpcProtocol.<RpcRequest>builder()
-                .rpcHeader(rpcHeader)
-                .rpcBody(rpcRequest)
-                .build();
+        RpcProtocol<RpcRequest> rpcProtocol = buildRpcProtocol(rpcHeader, rpcRequest);
 
         // 创建保存RPC调用结果的RpcFuture对象
         RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()));
@@ -95,11 +98,11 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
         RpcPendingHolder.putRpcFuture(sequenceId, rpcFuture);
 
         // 服务发现
-        ServiceMetaData serviceMetaData = REGISTRY.discovery(rpcServiceConfig.getRpcServiceKey());
+        ServiceMetaData serviceMetaData = registry.discovery(rpcServiceConfig.getRpcServiceKey());
 
         try {
             // invoke
-            RPC_CLIENT.invoke(rpcProtocol, serviceMetaData.getHost(), serviceMetaData.getPort());
+            rpcClient.invoke(rpcProtocol, serviceMetaData.getHost(), serviceMetaData.getPort());
         } catch (Throwable t) {
             // rpc调用异常时删除对应RpcFuture
             RpcPendingHolder.removeRpcFuture(sequenceId);
@@ -107,6 +110,11 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
         }
 
         // 获取rpc调用结果
+        RpcResponse rpcResponse = getRpcResponse(rpcFuture);
+        return rpcResponse.getResult();
+    }
+
+    private RpcResponse getRpcResponse(RpcFuture<RpcResponse> rpcFuture) throws Throwable {
         Promise<RpcResponse> promise = rpcFuture.getPromise();
         long timeout = rpcServiceConfig.getTimeout();
         // todo get(0) => get() ?
@@ -116,7 +124,36 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
             LOGGER.error("rpc invoke failed, errorMsg: {}", errorMsg);
             throw new RpcException(errorMsg);
         }
-        return rpcResponse.getResult();
+        return rpcResponse;
+    }
+
+    private static RpcProtocol<RpcRequest> buildRpcProtocol(RpcHeader rpcHeader, RpcRequest rpcRequest) {
+        return RpcProtocol.<RpcRequest>builder()
+                .rpcHeader(rpcHeader)
+                .rpcBody(rpcRequest)
+                .build();
+    }
+
+    private RpcRequest buildRpcRequest(Method method, Object[] args) {
+        return RpcRequest.builder()
+                .serviceName(rpcServiceConfig.getClassName())
+                .version(rpcServiceConfig.getVersion())
+                .group(rpcServiceConfig.getGroup())
+                .methodName(method.getName())
+                .argTypes(method.getParameterTypes())
+                .args(args)
+                .build();
+    }
+
+    private RpcHeader buildRpcHeader(long sequenceId) {
+        return RpcHeader.builder()
+                .magic(RpcContext.MAGIC)
+                .version(rpcProtocolConfig.getProtocolVersion())
+                .type(RpcMessageTypeEnum.REQUEST.getCode())
+                .serialize(serializer.getContentTypeId())
+                .compress(compressor.getContentTypeId())
+                .sequenceId(sequenceId)
+                .build();
     }
 
     /**

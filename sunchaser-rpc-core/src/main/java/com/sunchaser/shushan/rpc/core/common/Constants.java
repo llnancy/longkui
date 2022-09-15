@@ -10,6 +10,10 @@ public interface Constants {
 
     String NETTY = "netty";
 
+    String UNDERLINE = "_";
+
+    String EMPTY = "";
+
     /**
      * 0000 0100
      * version: 0000 01

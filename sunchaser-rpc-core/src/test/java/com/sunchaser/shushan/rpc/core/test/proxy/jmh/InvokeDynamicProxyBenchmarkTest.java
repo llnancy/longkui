@@ -1,11 +1,11 @@
 package com.sunchaser.shushan.rpc.core.test.proxy.jmh;
 
-import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
 import com.sunchaser.shushan.rpc.core.test.HelloService;
-import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHByteBuddyRpcDynamicProxy;
-import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHCglibRpcDynamicProxy;
-import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHJavassistRpcDynamicProxy;
-import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHJdkRpcDynamicProxy;
+import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHByteBuddyDynamicProxy;
+import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHCglibDynamicProxy;
+import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHJavassistDynamicProxy;
+import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHJdkDynamicProxy;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.Runner;
@@ -37,15 +37,15 @@ public class InvokeDynamicProxyBenchmarkTest {
 
     private static final String BYTE_BUDDY = "byteBuddy";
 
-    private static final RpcServiceConfig RPC_SERVICE_CONFIG = RpcServiceConfig.createDefaultConfig(HelloService.class);
+    private static final RpcFrameworkConfig RPC_FRAMEWORK_CONFIG = RpcFrameworkConfig.createDefaultConfig(HelloService.class);
 
-    private static final HelloService JDK_PROXY_INSTANCE = JMHJdkRpcDynamicProxy.getInstance().createProxyInstance(RPC_SERVICE_CONFIG);
+    private static final HelloService JDK_PROXY_INSTANCE = JMHJdkDynamicProxy.getInstance().createProxyInstance(RPC_FRAMEWORK_CONFIG);
 
-    private static final HelloService CGLIB_PROXY_INSTANCE = JMHCglibRpcDynamicProxy.getInstance().createProxyInstance(RPC_SERVICE_CONFIG);
+    private static final HelloService CGLIB_PROXY_INSTANCE = JMHCglibDynamicProxy.getInstance().createProxyInstance(RPC_FRAMEWORK_CONFIG);
 
-    private static final HelloService JAVASSIST_PROXY_INSTANCE = JMHJavassistRpcDynamicProxy.getInstance().createProxyInstance(RPC_SERVICE_CONFIG);
+    private static final HelloService JAVASSIST_PROXY_INSTANCE = JMHJavassistDynamicProxy.getInstance().createProxyInstance(RPC_FRAMEWORK_CONFIG);
 
-    private static final HelloService BYTE_BUDDY_PROXY_INSTANCE = JMHByteBuddyRpcDynamicProxy.getInstance().createProxyInstance(RPC_SERVICE_CONFIG);
+    private static final HelloService BYTE_BUDDY_PROXY_INSTANCE = JMHByteBuddyDynamicProxy.getInstance().createProxyInstance(RPC_FRAMEWORK_CONFIG);
 
     @Benchmark
     public String jdk() {

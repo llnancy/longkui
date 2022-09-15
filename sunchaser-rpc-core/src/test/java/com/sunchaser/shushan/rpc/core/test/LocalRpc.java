@@ -1,8 +1,9 @@
 package com.sunchaser.shushan.rpc.core.test;
 
+import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
-import com.sunchaser.shushan.rpc.core.proxy.RpcDynamicProxy;
-import com.sunchaser.shushan.rpc.core.proxy.impl.JdkRpcDynamicProxy;
+import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
+import com.sunchaser.shushan.rpc.core.proxy.impl.JdkDynamicProxy;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
 import com.sunchaser.shushan.rpc.core.registry.impl.LocalRegistry;
@@ -23,7 +24,8 @@ public class LocalRpc {
     public static void main(String[] args) {
         // provider
         BeanFactory.register(HelloService.class.getName(), new HelloServiceImpl());
-        RpcServiceConfig rpcServiceConfig = RpcServiceConfig.createDefaultConfig(HelloService.class);
+        RpcFrameworkConfig rpcFrameworkConfig = RpcFrameworkConfig.createDefaultConfig(HelloService.class);
+        RpcServiceConfig rpcServiceConfig = rpcFrameworkConfig.getRpcServiceConfig();
         ServiceMetaData serviceMetaData = ServiceMetaData.builder()
                 .serviceKey(rpcServiceConfig.getRpcServiceKey())
                 .host("127.0.0.1")
@@ -34,8 +36,8 @@ public class LocalRpc {
         new NettyRpcServer().start();
 
         // consumer
-        RpcDynamicProxy rpcDynamicProxy = JdkRpcDynamicProxy.getInstance();
-        HelloService helloService = rpcDynamicProxy.createProxyInstance(rpcServiceConfig);
+        DynamicProxy dynamicProxy = JdkDynamicProxy.getInstance();
+        HelloService helloService = dynamicProxy.createProxyInstance(rpcFrameworkConfig);
         String hello = helloService.sayHello("SunChaser", null, 1L);
         LOGGER.info("sayHello result: {}", hello);
     }

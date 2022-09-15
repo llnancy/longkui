@@ -5,7 +5,6 @@ import com.sunchaser.shushan.rpc.core.protocol.RpcFuture;
 import com.sunchaser.shushan.rpc.core.protocol.RpcResponse;
 
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Rpc pending Holder
@@ -15,16 +14,10 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class RpcPendingHolder {
 
-    private static final AtomicLong SEQUENCE_ID_GENERATOR = new AtomicLong(0);
-
     /**
      * todo 时间轮算法定时清理
      */
     private static final ConcurrentMap<Long, RpcFuture<RpcResponse>> RPC_FUTURE_MAP = Maps.newConcurrentMap();
-
-    public static Long generateSequenceId() {
-        return SEQUENCE_ID_GENERATOR.incrementAndGet();
-    }
 
     public static void putRpcFuture(Long sequenceId, RpcFuture<RpcResponse> rpcFuture) {
         RPC_FUTURE_MAP.put(sequenceId, rpcFuture);

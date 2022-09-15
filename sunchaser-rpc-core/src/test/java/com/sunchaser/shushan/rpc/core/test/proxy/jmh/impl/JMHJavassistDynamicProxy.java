@@ -1,7 +1,8 @@
 package com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl;
 
+import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
-import com.sunchaser.shushan.rpc.core.proxy.RpcDynamicProxy;
+import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
 import com.sunchaser.shushan.rpc.core.test.proxy.jmh.JMHProxyInvokeHandler;
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyObject;
@@ -13,23 +14,24 @@ import lombok.SneakyThrows;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/9/15
  */
-public class JMHJavassistRpcDynamicProxy extends JMHAbstractRpcDynamicProxy {
+public class JMHJavassistDynamicProxy extends JMHAbstractDynamicProxy {
 
-    private static final RpcDynamicProxy INSTANCE = new JMHJavassistRpcDynamicProxy();
+    private static final DynamicProxy INSTANCE = new JMHJavassistDynamicProxy();
 
-    public static RpcDynamicProxy getInstance() {
+    public static DynamicProxy getInstance() {
         return INSTANCE;
     }
 
     /**
      * doCreateProxyInstance
      *
-     * @param rpcServiceConfig rpc service config
+     * @param rpcFrameworkConfig rpc framework config
      * @return proxy object
      */
     @SneakyThrows
     @Override
-    protected Object doCreateProxyInstance(RpcServiceConfig rpcServiceConfig) {
+    protected Object doCreateProxyInstance(RpcFrameworkConfig rpcFrameworkConfig) {
+        RpcServiceConfig rpcServiceConfig = rpcFrameworkConfig.getRpcServiceConfig();
         ProxyFactory factory = new ProxyFactory();
         // 设置接口
         factory.setInterfaces(new Class[]{rpcServiceConfig.getTargetClass()});
@@ -38,7 +40,7 @@ public class JMHJavassistRpcDynamicProxy extends JMHAbstractRpcDynamicProxy {
         Class<?> proxyClass = factory.createClass();
         ProxyObject proxyObject = (ProxyObject) proxyClass.getDeclaredConstructor()
                 .newInstance();
-        proxyObject.setHandler(new JMHProxyInvokeHandler(rpcServiceConfig));
+        proxyObject.setHandler(new JMHProxyInvokeHandler(rpcFrameworkConfig));
         return proxyObject;
     }
 }

@@ -3,13 +3,14 @@ package com.sunchaser.shushan.rpc.core.test;
 import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.common.RpcMessageTypeEnum;
-import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.handler.RpcPendingHolder;
 import com.sunchaser.shushan.rpc.core.protocol.*;
-import com.sunchaser.shushan.rpc.core.proxy.RpcDynamicProxy;
-import com.sunchaser.shushan.rpc.core.proxy.impl.JavassistRpcDynamicProxy;
+import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
+import com.sunchaser.shushan.rpc.core.proxy.impl.JavassistDynamicProxy;
 import com.sunchaser.shushan.rpc.core.transport.client.NettyRpcClient;
+import com.sunchaser.shushan.rpc.core.uid.impl.AtomicLongIdGenerator;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Promise;
@@ -29,17 +30,16 @@ public class P2PConsumer {
 
     public static void main(String[] args) throws Exception {
         // p2pConsumer();
-        RpcServiceConfig rpcServiceConfig = RpcServiceConfig.createDefaultConfig(HelloService.class);
-        // HelloService helloService = RpcDynamicProxyFactory.getRpcProxyInstance(rpcServiceConfig);
-        RpcDynamicProxy rpcDynamicProxy = JavassistRpcDynamicProxy.getInstance();
-        HelloService helloService = rpcDynamicProxy.createProxyInstance(rpcServiceConfig);
+        RpcFrameworkConfig rpcFrameworkConfig = RpcFrameworkConfig.createDefaultConfig(HelloService.class);
+        DynamicProxy dynamicProxy = JavassistDynamicProxy.getInstance();
+        HelloService helloService = dynamicProxy.createProxyInstance(rpcFrameworkConfig);
         String hello = helloService.sayHello("SunChaser");
         LOGGER.info("sayHello result: {}", hello);
     }
 
     private static void p2pConsumer() throws InterruptedException, ExecutionException {
         // 构建协议头
-        long sequenceId = RpcPendingHolder.generateSequenceId();
+        long sequenceId = new AtomicLongIdGenerator().nextSequenceId();
         RpcHeader rpcHeader = RpcHeader.builder()
                 .magic(RpcContext.MAGIC)
                 .version(Constants.DEFAULT_PROTOCOL_VERSION)

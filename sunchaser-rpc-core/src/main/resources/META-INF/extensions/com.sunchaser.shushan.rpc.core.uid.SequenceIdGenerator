@@ -1,0 +1,2 @@
+atomiclong=com.sunchaser.shushan.rpc.core.uid.impl.AtomicLongIdGenerator
+snowflake=com.sunchaser.shushan.rpc.core.uid.impl.SnowflakeIdGenerator

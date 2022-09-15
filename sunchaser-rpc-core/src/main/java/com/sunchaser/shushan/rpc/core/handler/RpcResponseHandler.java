@@ -3,11 +3,14 @@ package com.sunchaser.shushan.rpc.core.handler;
 import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.common.RpcMessageTypeEnum;
+import com.sunchaser.shushan.rpc.core.extension.ExtensionLoader;
 import com.sunchaser.shushan.rpc.core.protocol.RpcFuture;
 import com.sunchaser.shushan.rpc.core.protocol.RpcHeader;
 import com.sunchaser.shushan.rpc.core.protocol.RpcProtocol;
 import com.sunchaser.shushan.rpc.core.protocol.RpcResponse;
 import com.sunchaser.shushan.rpc.core.transport.client.ChannelContainer;
+import com.sunchaser.shushan.rpc.core.uid.SequenceIdGenerator;
+import com.sunchaser.shushan.rpc.core.uid.SequenceIdGeneratorEnum;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -51,7 +54,9 @@ public class RpcResponseHandler extends SimpleChannelInboundHandler<RpcProtocol<
                 // 触发写超时事件
                 SocketAddress remoteAddress = ctx.channel().remoteAddress();
                 LOGGER.info("[{}] triggered write idle event", remoteAddress);
-                long sequenceId = RpcPendingHolder.generateSequenceId();
+                SequenceIdGenerator sequenceIdGenerator = ExtensionLoader.getExtensionLoader(SequenceIdGenerator.class)
+                        .getExtension(SequenceIdGeneratorEnum.ATOMIC_LONG);
+                long sequenceId = sequenceIdGenerator.nextSequenceId();
                 RpcHeader rpcHeader = RpcHeader.builder()
                         .magic(RpcContext.MAGIC)
                         .version(Constants.DEFAULT_PROTOCOL_VERSION)

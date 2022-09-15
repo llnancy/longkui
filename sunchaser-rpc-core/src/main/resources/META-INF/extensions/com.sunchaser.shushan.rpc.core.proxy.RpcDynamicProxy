@@ -1,4 +1,0 @@
-jdk=com.sunchaser.shushan.rpc.core.proxy.impl.JdkRpcDynamicProxy
-cglib=com.sunchaser.shushan.rpc.core.proxy.impl.CglibRpcDynamicProxy
-javassist=com.sunchaser.shushan.rpc.core.proxy.impl.JavassistRpcDynamicProxy
-bytebuddy=com.sunchaser.shushan.rpc.core.proxy.impl.ByteBuddyRpcDynamicProxy
