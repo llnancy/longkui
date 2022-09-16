@@ -54,9 +54,9 @@ public class RpcHeader implements Serializable {
 
     /**
      * 消息类型：
-     * 00：REQUEST
-     * 01：RESPONSE
-     * 11：HEARTBEAT
+     * 0：HEARTBEAT
+     * 1：REQUEST
+     * 2：RESPONSE
      */
     private byte type;
 

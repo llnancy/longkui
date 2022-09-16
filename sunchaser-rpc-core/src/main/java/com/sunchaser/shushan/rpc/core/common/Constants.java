@@ -15,11 +15,9 @@ public interface Constants {
     String EMPTY = "";
 
     /**
-     * 0000 0100
-     * version: 0000 01
-     * type: 00
+     * version: 1
      */
-    byte DEFAULT_PROTOCOL_VERSION = 0x4;
+    byte DEFAULT_PROTOCOL_VERSION = (byte) 1;
 
     /**
      * Hessian2

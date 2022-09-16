@@ -22,19 +22,19 @@ import java.util.Optional;
 public enum RpcMessageTypeEnum {
 
     /**
+     * 心跳
+     */
+    HEARTBEAT((byte) 0),
+
+    /**
      * 请求
      */
-    REQUEST((byte) 0),
+    REQUEST((byte) 1),
 
     /**
      * 响应
      */
-    RESPONSE((byte) 1),
-
-    /**
-     * 心跳
-     */
-    HEARTBEAT((byte) 2),
+    RESPONSE((byte) 2),
 
     ;
 
