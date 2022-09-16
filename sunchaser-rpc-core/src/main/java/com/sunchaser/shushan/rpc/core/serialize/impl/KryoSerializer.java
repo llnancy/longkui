@@ -53,12 +53,12 @@ public class KryoSerializer implements Serializer {
     };
 
     /**
-     * Get content type unique id
+     * Get type unique id
      *
      * @return content type id
      */
     @Override
-    public byte getContentTypeId() {
+    public byte getTypeId() {
         return (byte) 4;
     }
 

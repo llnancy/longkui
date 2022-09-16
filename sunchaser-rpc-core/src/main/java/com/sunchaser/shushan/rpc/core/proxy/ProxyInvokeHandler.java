@@ -150,8 +150,8 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
                 .magic(RpcContext.MAGIC)
                 .version(rpcProtocolConfig.getProtocolVersion())
                 .type(RpcMessageTypeEnum.REQUEST.getCode())
-                .serialize(serializer.getContentTypeId())
-                .compress(compressor.getContentTypeId())
+                .serialize(serializer.getTypeId())
+                .compress(compressor.getTypeId())
                 .sequenceId(sequenceId)
                 .build();
     }

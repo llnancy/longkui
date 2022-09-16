@@ -1,6 +1,7 @@
 package com.sunchaser.shushan.rpc.core.compress;
 
 import com.sunchaser.shushan.rpc.core.extension.SPI;
+import com.sunchaser.shushan.rpc.core.util.TypeId;
 
 /**
  * 压缩器
@@ -9,14 +10,7 @@ import com.sunchaser.shushan.rpc.core.extension.SPI;
  * @since JDK8 2022/7/12
  */
 @SPI
-public interface Compressor {
-
-    /**
-     * Get content type unique id
-     *
-     * @return content type id
-     */
-    byte getContentTypeId();
+public interface Compressor extends TypeId {
 
     /**
      * 将数据进行压缩

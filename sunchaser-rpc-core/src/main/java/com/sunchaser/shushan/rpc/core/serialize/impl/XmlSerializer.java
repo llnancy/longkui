@@ -18,12 +18,12 @@ import java.nio.charset.StandardCharsets;
 public class XmlSerializer implements Serializer {
 
     /**
-     * Get content type unique id
+     * Get type unique id
      *
      * @return content type id
      */
     @Override
-    public byte getContentTypeId() {
+    public byte getTypeId() {
         return (byte) 2;
     }
 
