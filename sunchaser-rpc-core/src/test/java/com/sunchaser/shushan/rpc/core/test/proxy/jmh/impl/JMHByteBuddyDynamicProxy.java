@@ -11,7 +11,7 @@ import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 
 /**
- * a rpc dynamic proxy implementation based on Byte Buddy
+ * a dynamic proxy implementation based on Byte Buddy
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/9/15

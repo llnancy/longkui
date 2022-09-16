@@ -9,7 +9,7 @@ import javassist.util.proxy.ProxyObject;
 import lombok.SneakyThrows;
 
 /**
- * a rpc dynamic proxy implementation based on javassist
+ * a dynamic proxy implementation based on javassist
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/9/15

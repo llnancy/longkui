@@ -8,7 +8,7 @@ import com.sunchaser.shushan.rpc.core.test.proxy.jmh.JMHProxyInvokeHandler;
 import java.lang.reflect.Proxy;
 
 /**
- * a rpc dynamic proxy implementation based on JDK
+ * a dynamic proxy implementation based on JDK
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/9/15
