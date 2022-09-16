@@ -12,12 +12,12 @@ import org.xerial.snappy.Snappy;
 public class SnappyCompressor extends AbstractCompressor {
 
     /**
-     * Get content type unique id
+     * Get type unique id
      *
-     * @return content type id
+     * @return type id
      */
     @Override
-    public byte getContentTypeId() {
+    public byte getTypeId() {
         return (byte) 1;
     }
 

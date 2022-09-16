@@ -28,8 +28,8 @@ public class SerializeSupport {
         Set<String> supportedExtensions = extensionLoader.getSupportedExtensions();
         for (String name : supportedExtensions) {
             Serializer serializer = extensionLoader.getExtension(name);
-            byte id = serializer.getContentTypeId();
-            Serializer oldSerializer = ID_SERIALIZER_MAP.get(id);
+            byte typeId = serializer.getTypeId();
+            Serializer oldSerializer = ID_SERIALIZER_MAP.get(typeId);
             if (Objects.nonNull(oldSerializer)) {
                 LOGGER.error("Compressor extension " + serializer.getClass().getName()
                         + " has duplicate id to Compressor extension "
@@ -37,7 +37,7 @@ public class SerializeSupport {
                         + ", ignore this Compressor extension");
                 continue;
             }
-            ID_SERIALIZER_MAP.put(id, serializer);
+            ID_SERIALIZER_MAP.put(typeId, serializer);
         }
     }
 

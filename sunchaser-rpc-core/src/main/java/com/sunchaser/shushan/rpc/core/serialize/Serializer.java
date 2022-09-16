@@ -1,6 +1,7 @@
 package com.sunchaser.shushan.rpc.core.serialize;
 
 import com.sunchaser.shushan.rpc.core.extension.SPI;
+import com.sunchaser.shushan.rpc.core.util.TypeId;
 
 /**
  * 序列化器
@@ -9,14 +10,7 @@ import com.sunchaser.shushan.rpc.core.extension.SPI;
  * @since JDK8 2022/7/12
  */
 @SPI
-public interface Serializer {
-
-    /**
-     * Get content type unique id
-     *
-     * @return content type id
-     */
-    byte getContentTypeId();
+public interface Serializer extends TypeId {
 
     /**
      * 将对象进行序列化

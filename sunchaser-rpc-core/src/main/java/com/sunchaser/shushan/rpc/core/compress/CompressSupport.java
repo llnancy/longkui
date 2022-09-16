@@ -28,8 +28,8 @@ public class CompressSupport {
         Set<String> supportedExtensions = extensionLoader.getSupportedExtensions();
         for (String name : supportedExtensions) {
             Compressor compressor = extensionLoader.getExtension(name);
-            byte id = compressor.getContentTypeId();
-            Compressor oldCompressor = ID_COMPRESSOR_MAP.get(id);
+            byte typeId = compressor.getTypeId();
+            Compressor oldCompressor = ID_COMPRESSOR_MAP.get(typeId);
             if (Objects.nonNull(oldCompressor)) {
                 LOGGER.error("Compressor extension " + compressor.getClass().getName()
                         + " has duplicate id to Compressor extension "
@@ -37,7 +37,7 @@ public class CompressSupport {
                         + ", ignore this Compressor extension");
                 continue;
             }
-            ID_COMPRESSOR_MAP.put(id, compressor);
+            ID_COMPRESSOR_MAP.put(typeId, compressor);
         }
     }
 

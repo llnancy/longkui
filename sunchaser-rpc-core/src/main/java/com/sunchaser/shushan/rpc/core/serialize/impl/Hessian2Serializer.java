@@ -18,12 +18,12 @@ import java.util.Objects;
 public class Hessian2Serializer implements Serializer {
 
     /**
-     * Get content type unique id
+     * Get type unique id
      *
      * @return content type id
      */
     @Override
-    public byte getContentTypeId() {
+    public byte getTypeId() {
         return (byte) 0;
     }
 
