@@ -7,7 +7,7 @@ import com.sunchaser.shushan.rpc.core.test.proxy.jmh.JMHProxyInvokeHandler;
 import net.sf.cglib.proxy.Enhancer;
 
 /**
- * a rpc dynamic proxy implementation based on Cglib
+ * a dynamic proxy implementation based on Cglib
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/9/15

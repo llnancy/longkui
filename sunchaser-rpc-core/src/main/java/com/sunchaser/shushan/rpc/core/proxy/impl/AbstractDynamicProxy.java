@@ -7,7 +7,7 @@ import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * an abstract rpc dynamic proxy implementation
+ * an abstract dynamic proxy implementation
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/9/15
