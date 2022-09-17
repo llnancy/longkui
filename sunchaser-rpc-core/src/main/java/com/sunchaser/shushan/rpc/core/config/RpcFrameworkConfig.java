@@ -19,9 +19,11 @@ public class RpcFrameworkConfig {
 
     private RpcProtocolConfig rpcProtocolConfig = RpcProtocolConfig.createDefaultConfig();
 
+    private RpcServerConfig rpcServerConfig = RpcServerConfig.createDefaultConfig();
+
     private RpcServiceConfig rpcServiceConfig = RpcServiceConfig.createDefaultConfig();
 
-    private RpcExtensionConfig rpcExtensionConfig = RpcExtensionConfig.createDefaultConfig();
+    private RpcComponentConfig rpcComponentConfig = RpcComponentConfig.createDefaultConfig();
 
     public static RpcFrameworkConfig createDefaultConfig(Class<?> clazz) {
         RpcFrameworkConfig rpcFrameworkConfig = new RpcFrameworkConfig();

@@ -10,7 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * rpc extension config
+ * rpc component config
  *
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/9/16
@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RpcExtensionConfig {
+public class RpcComponentConfig {
 
     /**
      * 默认动态代理实现 JDK
@@ -61,7 +61,7 @@ public class RpcExtensionConfig {
      */
     private String rpcServer = Constants.NETTY;
 
-    public static RpcExtensionConfig createDefaultConfig() {
-        return new RpcExtensionConfig();
+    public static RpcComponentConfig createDefaultConfig() {
+        return new RpcComponentConfig();
     }
 }

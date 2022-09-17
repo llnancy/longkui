@@ -1,14 +1,16 @@
 package com.sunchaser.shushan.rpc.core.test;
 
 import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcServerConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
+import com.sunchaser.shushan.rpc.core.provider.ServiceProvider;
+import com.sunchaser.shushan.rpc.core.provider.impl.InMemoryServiceProvider;
 import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
 import com.sunchaser.shushan.rpc.core.proxy.impl.JdkDynamicProxy;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
 import com.sunchaser.shushan.rpc.core.registry.impl.LocalRegistry;
 import com.sunchaser.shushan.rpc.core.transport.server.NettyRpcServer;
-import com.sunchaser.shushan.rpc.core.util.BeanFactory;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -23,16 +25,25 @@ public class LocalRpc {
 
     public static void main(String[] args) {
         // provider
-        BeanFactory.register(HelloService.class.getName(), new HelloServiceImpl());
         RpcFrameworkConfig rpcFrameworkConfig = RpcFrameworkConfig.createDefaultConfig(HelloService.class);
         RpcServiceConfig rpcServiceConfig = rpcFrameworkConfig.getRpcServiceConfig();
+        RpcServerConfig rpcServerConfig = rpcFrameworkConfig.getRpcServerConfig();
+        String serviceKey = rpcServiceConfig.getRpcServiceKey();
+
+        // service provider
+        ServiceProvider serviceProvider = InMemoryServiceProvider.getInstance();
+        serviceProvider.registerProvider(serviceKey, new HelloServiceImpl());
+
+        // registry
         ServiceMetaData serviceMetaData = ServiceMetaData.builder()
-                .serviceKey(rpcServiceConfig.getRpcServiceKey())
-                .host("127.0.0.1")
-                .port(1234)
+                .serviceKey(serviceKey)
+                .host(rpcServerConfig.getHost())
+                .port(rpcServerConfig.getPort())
                 .build();
         Registry registry = LocalRegistry.getInstance();
         registry.register(serviceMetaData);
+
+        // rpc server
         new NettyRpcServer().start();
 
         // consumer

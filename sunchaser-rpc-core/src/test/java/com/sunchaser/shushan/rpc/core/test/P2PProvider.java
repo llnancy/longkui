@@ -1,7 +1,8 @@
 package com.sunchaser.shushan.rpc.core.test;
 
+import com.sunchaser.shushan.rpc.core.provider.ServiceProvider;
+import com.sunchaser.shushan.rpc.core.provider.impl.InMemoryServiceProvider;
 import com.sunchaser.shushan.rpc.core.transport.server.NettyRpcServer;
-import com.sunchaser.shushan.rpc.core.util.BeanFactory;
 
 /**
  * 点对点RPC服务提供者
@@ -15,7 +16,8 @@ public class P2PProvider {
         // 不指定threadFactoryName的NioEventLoopGroup不会导致main方法退出
         // NioEventLoopGroup bossGroup = new NioEventLoopGroup(1);
         // NioEventLoopGroup workerGroup = new NioEventLoopGroup(4);
-        BeanFactory.register(HelloService.class.getName(), new HelloServiceImpl());
+        ServiceProvider serviceProvider = InMemoryServiceProvider.getInstance();
+        serviceProvider.registerProvider(HelloService.class.getName(), new HelloServiceImpl());
         new NettyRpcServer().start(1234);
         System.in.read();
     }

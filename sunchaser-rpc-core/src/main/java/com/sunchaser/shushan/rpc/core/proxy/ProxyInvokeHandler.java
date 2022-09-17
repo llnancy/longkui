@@ -3,7 +3,7 @@ package com.sunchaser.shushan.rpc.core.proxy;
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.common.RpcMessageTypeEnum;
 import com.sunchaser.shushan.rpc.core.compress.Compressor;
-import com.sunchaser.shushan.rpc.core.config.RpcExtensionConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcComponentConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcProtocolConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
@@ -65,9 +65,9 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
     public ProxyInvokeHandler(RpcFrameworkConfig rpcFrameworkConfig) {
         this.rpcProtocolConfig = rpcFrameworkConfig.getRpcProtocolConfig();
         this.rpcServiceConfig = rpcFrameworkConfig.getRpcServiceConfig();
-        RpcExtensionConfig rpcExtensionConfig = rpcFrameworkConfig.getRpcExtensionConfig();
-        this.registry = ExtensionLoader.getExtensionLoader(Registry.class).getExtension(rpcExtensionConfig.getRegistry());
-        this.rpcClient = ExtensionLoader.getExtensionLoader(RpcClient.class).getExtension(rpcExtensionConfig.getRpcClient());
+        RpcComponentConfig rpcComponentConfig = rpcFrameworkConfig.getRpcComponentConfig();
+        this.registry = ExtensionLoader.getExtensionLoader(Registry.class).getExtension(rpcComponentConfig.getRegistry());
+        this.rpcClient = ExtensionLoader.getExtensionLoader(RpcClient.class).getExtension(rpcComponentConfig.getRpcClient());
         this.sequenceIdGenerator = ExtensionLoader.getExtensionLoader(SequenceIdGenerator.class).getExtension(this.rpcProtocolConfig.getSequenceIdGenerator());
         this.serializer = ExtensionLoader.getExtensionLoader(Serializer.class).getExtension(this.rpcProtocolConfig.getSerializer());
         this.compressor = ExtensionLoader.getExtensionLoader(Compressor.class).getExtension(this.rpcProtocolConfig.getCompressor());
