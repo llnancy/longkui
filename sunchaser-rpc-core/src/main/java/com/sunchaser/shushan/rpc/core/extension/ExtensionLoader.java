@@ -1,5 +1,6 @@
 package com.sunchaser.shushan.rpc.core.extension;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.sunchaser.shushan.rpc.core.common.Constants;
@@ -40,15 +41,9 @@ public class ExtensionLoader<T> {
 
     @SuppressWarnings("unchecked")
     public static <T> ExtensionLoader<T> getExtensionLoader(Class<T> type) {
-        if (Objects.isNull(type)) {
-            throw new IllegalArgumentException("Extension type == null");
-        }
-        if (!type.isInterface()) {
-            throw new IllegalArgumentException("Extension type (" + type + ") is not an interface!");
-        }
-        if (Objects.isNull(type.getAnnotation(SPI.class))) {
-            throw new IllegalArgumentException("Extension type (" + type + ") is not an extension, because it is NOT annotated with @" + SPI.class.getSimpleName() + "!");
-        }
+        Preconditions.checkNotNull(type, "Extension type == null");
+        Preconditions.checkArgument(type.isInterface(), "Extension type (" + type + ") is not an interface!");
+        Preconditions.checkArgument(Objects.nonNull(type.getAnnotation(SPI.class)), "Extension type (" + type + ") is not an extension, because it is NOT annotated with @" + SPI.class.getSimpleName() + "!");
         // find in local cache
         ExtensionLoader<T> loader = (ExtensionLoader<T>) EXTENSION_LOADERS.get(type);
         if (Objects.isNull(loader)) {
@@ -59,9 +54,39 @@ public class ExtensionLoader<T> {
         return loader;
     }
 
+    /**
+     * Get extension's instance. Return <code>null</code> if extension is not found or is not initialized. Pls. note
+     * that this method will not trigger extension load.
+     * <p>
+     * In order to trigger extension load, call {@link #getExtension(String)} instead.
+     *
+     * @see #getExtension(String)
+     */
+    @SuppressWarnings("unchecked")
+    public T getLoadedExtension(String name) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(name), "Extension name == null");
+        Holder<Object> holder = cachedInstances.get(name);
+        if (Objects.isNull(holder)) {
+            cachedInstances.putIfAbsent(name, new Holder<>());
+            holder = cachedInstances.get(name);
+        }
+        return (T) holder.get();
+    }
+
     public Set<String> getSupportedExtensions() {
         Map<String, Class<?>> classes = getExtensionClasses();
         return Collections.unmodifiableSet(Sets.newTreeSet(classes.keySet()));
+    }
+
+    /**
+     * Return the list of extensions which are already loaded.
+     * <p>
+     * Usually {@link #getSupportedExtensions()} should be called in order to get all extensions.
+     *
+     * @see #getSupportedExtensions()
+     */
+    public Set<String> getLoadedExtensions() {
+        return Collections.unmodifiableSet(Sets.newTreeSet(cachedInstances.keySet()));
     }
 
     public T getExtension(Enum<?> em) {
@@ -70,9 +95,7 @@ public class ExtensionLoader<T> {
 
     @SuppressWarnings("unchecked")
     public T getExtension(String name) {
-        if (StringUtils.isEmpty(name)) {
-            throw new IllegalArgumentException("Extension name == null");
-        }
+        Preconditions.checkArgument(StringUtils.isNotBlank(name), "Extension name == null");
         Holder<Object> holder = cachedInstances.get(name);
         if (Objects.isNull(holder)) {
             cachedInstances.putIfAbsent(name, new Holder<>());
@@ -94,9 +117,7 @@ public class ExtensionLoader<T> {
     @SuppressWarnings("unchecked")
     private T createExtension(String name) {
         Class<?> clazz = getExtensionClasses().get(name);
-        if (Objects.isNull(clazz)) {
-            throw new IllegalStateException("No such extension " + type.getName() + " by name " + name);
-        }
+        Preconditions.checkNotNull(clazz, "No such extension " + type.getName() + " by name " + name);
         try {
             T instance = (T) EXTENSION_INSTANCES.get(clazz);
             if (Objects.isNull(instance)) {
@@ -181,9 +202,7 @@ public class ExtensionLoader<T> {
 
     private void loadClass(Map<String, Class<?>> extensionClasses, Class<?> clazz, String name) {
         String clazzName = clazz.getName();
-        if (!type.isAssignableFrom(clazz)) {
-            throw new IllegalStateException("Error when load extension class(interface: " + type + ", class line: " + clazzName + "), class " + clazzName + " is not subtype of interface.");
-        }
+        Preconditions.checkState(type.isAssignableFrom(clazz), "Error when load extension class(interface: " + type + ", class line: " + clazzName + "), class " + clazzName + " is not subtype of interface.");
         Class<?> c = extensionClasses.get(name);
         if (Objects.isNull(c)) {
             extensionClasses.put(name, clazz);

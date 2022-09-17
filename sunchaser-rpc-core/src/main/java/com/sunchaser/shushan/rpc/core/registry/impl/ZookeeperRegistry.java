@@ -1,10 +1,10 @@
 package com.sunchaser.shushan.rpc.core.registry.impl;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.sunchaser.shushan.rpc.core.balancer.LoadBalancer;
 import com.sunchaser.shushan.rpc.core.balancer.Node;
 import com.sunchaser.shushan.rpc.core.balancer.impl.RoundRobinLoadBalancer;
-import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
 import lombok.SneakyThrows;
@@ -25,7 +25,6 @@ import org.apache.curator.x.discovery.details.ServiceCacheListener;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
@@ -133,13 +132,11 @@ public class ZookeeperRegistry implements Registry {
         // 缓存中不存在，则通过ServiceDiscovery直接从Zookeeper中获取服务实例
         if (CollectionUtils.isEmpty(serviceInstances)) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("serviceCache don't have serviceKey named {}, will query from zookeeper", serviceKey);
+                LOGGER.debug("serviceCache don't have service instance named {}, will query from zookeeper", serviceKey);
             }
             serviceInstances = (List<ServiceInstance<ServiceMetaData>>) serviceDiscovery.queryForInstances(serviceKey);
         }
-        if (CollectionUtils.isEmpty(serviceInstances)) {
-            throw new RpcException("no serviceKey named " + serviceKey + " was discovered");
-        }
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(serviceInstances), "no service instance named " + serviceKey + " was discovered.");
         // 获取第一个服务实例
         // return serviceInstances.get(0).getPayload();
         List<ImmutablePair<Integer, Integer>> weightPairList = serviceInstances.stream()
@@ -150,9 +147,7 @@ public class ZookeeperRegistry implements Registry {
                 .collect(Collectors.toList());
         // 使用负载均衡器获取服务实例
         Node<ServiceInstance<ServiceMetaData>> select = loadBalancer.select(LoadBalancer.wrap(serviceInstances, weightPairList));
-        if (Objects.isNull(select)) {
-            throw new RpcException("no serviceKey named " + serviceKey + " was discovered");
-        }
+        Preconditions.checkNotNull(select, "no service instance named " + serviceKey + " be selected by loadbalancer.");
         return select.getNode().getPayload();
     }
 
@@ -165,12 +160,12 @@ public class ZookeeperRegistry implements Registry {
 
             @Override
             public void cacheChanged() {
-                LOGGER.info("serviceKey {} modified, cacheChanged", serviceKey);
+                LOGGER.info("service instance {} modified, cacheChanged", serviceKey);
             }
 
             @Override
             public void stateChanged(CuratorFramework curatorFramework, ConnectionState connectionState) {
-                LOGGER.info("serviceKey {} modified, stateChanged, connectionState={}", serviceKey, connectionState);
+                LOGGER.info("service instance {} modified, stateChanged, connectionState={}", serviceKey, connectionState);
             }
         });
         cache.start();

@@ -1,12 +1,12 @@
 package com.sunchaser.shushan.rpc.core.provider.impl;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.provider.ServiceProvider;
 import lombok.SneakyThrows;
 
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * a service provider implementation based on memory
@@ -46,9 +46,7 @@ public class InMemoryServiceProvider implements ServiceProvider {
     @Override
     public Object getProvider(String serviceKey) {
         Object service = SERVICE_PROVIDER_MAP.get(serviceKey);
-        if (Objects.isNull(service)) {
-            throw new RpcException(serviceKey + ". service does not exist.");
-        }
+        Preconditions.checkNotNull(service, serviceKey + ". service does not exist.");
         return service;
     }
 }
