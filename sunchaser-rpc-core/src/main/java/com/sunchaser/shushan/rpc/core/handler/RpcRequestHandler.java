@@ -2,12 +2,12 @@ package com.sunchaser.shushan.rpc.core.handler;
 
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.common.RpcMessageTypeEnum;
-import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.protocol.RpcHeader;
 import com.sunchaser.shushan.rpc.core.protocol.RpcProtocol;
 import com.sunchaser.shushan.rpc.core.protocol.RpcRequest;
 import com.sunchaser.shushan.rpc.core.protocol.RpcResponse;
-import com.sunchaser.shushan.rpc.core.util.BeanFactory;
+import com.sunchaser.shushan.rpc.core.provider.ServiceProvider;
+import com.sunchaser.shushan.rpc.core.provider.impl.InMemoryServiceProvider;
 import com.sunchaser.shushan.rpc.core.util.ThrowableUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -28,8 +28,11 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<R
 
     private final ThreadPoolExecutor requestHandlerPool;
 
+    private final ServiceProvider serviceProvider;
+
     public RpcRequestHandler(ThreadPoolExecutor requestHandlerPool) {
         this.requestHandlerPool = requestHandlerPool;
+        this.serviceProvider = InMemoryServiceProvider.getInstance();
     }
 
     @Override
@@ -94,11 +97,8 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<R
     }
 
     private Object doInvoke(RpcRequest rpcRequest) throws Exception {
-        String serviceName = rpcRequest.getServiceName();
-        Object bean = BeanFactory.getBean(serviceName);
-        if (Objects.isNull(bean)) {
-            throw new RpcException(serviceName + " service bean does not exist.");
-        }
+        String serviceKey = rpcRequest.getRpcServiceKey();
+        Object bean = serviceProvider.getProvider(serviceKey);
         String methodName = rpcRequest.getMethodName();
         Class<?>[] argTypes = rpcRequest.getArgTypes();
         Object[] args = rpcRequest.getArgs();
