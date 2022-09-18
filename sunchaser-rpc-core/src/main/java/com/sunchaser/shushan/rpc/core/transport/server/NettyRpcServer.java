@@ -1,6 +1,7 @@
 package com.sunchaser.shushan.rpc.core.transport.server;
 
 import com.sunchaser.shushan.rpc.core.config.RpcServerConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcShutdownHook;
 import com.sunchaser.shushan.rpc.core.handler.RpcRequestHandler;
 import com.sunchaser.shushan.rpc.core.transport.NettyEventLoopFactory;
 import com.sunchaser.shushan.rpc.core.transport.codec.RpcCodec;
@@ -26,6 +27,8 @@ public class NettyRpcServer implements RpcServer {
     private final ServerBootstrap bootstrap;
 
     public NettyRpcServer(RpcServerConfig rpcServerConfig) {
+        // 注册JVM钩子进行资源优雅关闭
+        Runtime.getRuntime().addShutdownHook(RpcShutdownHook.getRpcShutdownHook());
         EventLoopGroup bossGroup = NettyEventLoopFactory.eventLoopGroup(1, "NettyServerBoss");
         EventLoopGroup workerGroup = NettyEventLoopFactory.eventLoopGroup(rpcServerConfig.getIoThreads(), "NettyServerWorker");
         this.bootstrap = new ServerBootstrap()
