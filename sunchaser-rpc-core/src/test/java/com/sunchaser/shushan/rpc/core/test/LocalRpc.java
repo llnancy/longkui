@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.test;
 
-import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServerConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.provider.ServiceProvider;
@@ -25,9 +25,9 @@ public class LocalRpc {
 
     public static void main(String[] args) {
         // provider
-        RpcFrameworkConfig rpcFrameworkConfig = RpcFrameworkConfig.createDefaultConfig(HelloService.class);
-        RpcServiceConfig rpcServiceConfig = rpcFrameworkConfig.getRpcServiceConfig();
-        RpcServerConfig rpcServerConfig = rpcFrameworkConfig.getRpcServerConfig();
+        RpcApplicationConfig rpcApplicationConfig = RpcApplicationConfig.createDefaultConfig(HelloService.class);
+        RpcServiceConfig rpcServiceConfig = rpcApplicationConfig.getRpcServiceConfig();
+        RpcServerConfig rpcServerConfig = rpcApplicationConfig.getRpcServerConfig();
         String serviceKey = rpcServiceConfig.getRpcServiceKey();
 
         // service provider
@@ -48,7 +48,7 @@ public class LocalRpc {
 
         // consumer
         DynamicProxy dynamicProxy = JdkDynamicProxy.getInstance();
-        HelloService helloService = dynamicProxy.createProxyInstance(rpcFrameworkConfig);
+        HelloService helloService = dynamicProxy.createProxyInstance(rpcApplicationConfig);
         String hello = helloService.sayHello("SunChaser", null, 1L);
         LOGGER.info("sayHello result: {}", hello);
     }

@@ -1,7 +1,6 @@
 package com.sunchaser.shushan.rpc.core.test.proxy.jmh;
 
-import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
-import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
 import com.sunchaser.shushan.rpc.core.test.HelloService;
 import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHByteBuddyDynamicProxy;
 import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHCglibDynamicProxy;
@@ -30,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 @Fork(1)
 public class CreateDynamicProxyBenchmarkTest {
 
-    private static final RpcFrameworkConfig RPC_FRAMEWORK_CONFIG = RpcFrameworkConfig.createDefaultConfig(HelloService.class);
+    private static final RpcApplicationConfig RPC_FRAMEWORK_CONFIG = RpcApplicationConfig.createDefaultConfig(HelloService.class);
 
     @Benchmark
     public HelloService jdkCreate() {

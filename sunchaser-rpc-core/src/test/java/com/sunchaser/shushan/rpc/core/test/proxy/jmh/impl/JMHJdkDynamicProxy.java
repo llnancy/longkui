@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl;
 
-import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
 import com.sunchaser.shushan.rpc.core.test.proxy.jmh.JMHProxyInvokeHandler;
@@ -24,21 +24,21 @@ public class JMHJdkDynamicProxy extends JMHAbstractDynamicProxy {
     /**
      * doCreateProxyInstance
      *
-     * @param rpcFrameworkConfig rpc framework config
+     * @param rpcApplicationConfig rpc framework config
      * @return proxy object
      */
     @Override
-    protected Object doCreateProxyInstance(RpcFrameworkConfig rpcFrameworkConfig) {
-        RpcServiceConfig rpcServiceConfig = rpcFrameworkConfig.getRpcServiceConfig();
+    protected Object doCreateProxyInstance(RpcApplicationConfig rpcApplicationConfig) {
+        RpcServiceConfig rpcServiceConfig = rpcApplicationConfig.getRpcServiceConfig();
         Class<?> clazz = rpcServiceConfig.getTargetClass();
         if (!clazz.isInterface()) {
             // throw new IllegalArgumentException(clazz.getName() + " is not an interface");
-            return JMHCglibDynamicProxy.getInstance().createProxyInstance(rpcFrameworkConfig);
+            return JMHCglibDynamicProxy.getInstance().createProxyInstance(rpcApplicationConfig);
         }
         return Proxy.newProxyInstance(
                 Thread.currentThread().getContextClassLoader(),
                 new Class[]{clazz},
-                new JMHProxyInvokeHandler(rpcFrameworkConfig)
+                new JMHProxyInvokeHandler(rpcApplicationConfig)
         );
     }
 }

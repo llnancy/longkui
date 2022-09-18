@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.proxy.impl;
 
-import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
 import com.sunchaser.shushan.rpc.core.proxy.ProxyInvokeHandler;
@@ -25,13 +25,13 @@ public class JavassistDynamicProxy extends AbstractDynamicProxy {
     /**
      * doCreateProxyInstance
      *
-     * @param rpcFrameworkConfig rpc framework config
+     * @param rpcApplicationConfig rpc framework config
      * @return proxy object
      */
     @SneakyThrows
     @Override
-    protected Object doCreateProxyInstance(RpcFrameworkConfig rpcFrameworkConfig) {
-        RpcServiceConfig rpcServiceConfig = rpcFrameworkConfig.getRpcServiceConfig();
+    protected Object doCreateProxyInstance(RpcApplicationConfig rpcApplicationConfig) {
+        RpcServiceConfig rpcServiceConfig = rpcApplicationConfig.getRpcServiceConfig();
         ProxyFactory factory = new ProxyFactory();
         // 设置接口
         factory.setInterfaces(new Class[]{rpcServiceConfig.getTargetClass()});
@@ -40,7 +40,7 @@ public class JavassistDynamicProxy extends AbstractDynamicProxy {
         Class<?> proxyClass = factory.createClass();
         ProxyObject proxyObject = (ProxyObject) proxyClass.getDeclaredConstructor()
                 .newInstance();
-        proxyObject.setHandler(new ProxyInvokeHandler(rpcFrameworkConfig));
+        proxyObject.setHandler(new ProxyInvokeHandler(rpcApplicationConfig));
         return proxyObject;
     }
 }

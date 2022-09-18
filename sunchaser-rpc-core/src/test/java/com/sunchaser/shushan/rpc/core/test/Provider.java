@@ -1,7 +1,7 @@
 package com.sunchaser.shushan.rpc.core.test;
 
 import com.sunchaser.shushan.rpc.core.common.Constants;
-import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServerConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.extension.ExtensionLoader;
@@ -21,9 +21,9 @@ import com.sunchaser.shushan.rpc.core.transport.server.RpcServer;
 public class Provider {
 
     public static void main(String[] args) throws Exception {
-        RpcFrameworkConfig rpcFrameworkConfig = RpcFrameworkConfig.createDefaultConfig(HelloService.class);
-        RpcServiceConfig rpcServiceConfig = rpcFrameworkConfig.getRpcServiceConfig();
-        RpcServerConfig rpcServerConfig = rpcFrameworkConfig.getRpcServerConfig();
+        RpcApplicationConfig rpcApplicationConfig = RpcApplicationConfig.createDefaultConfig(HelloService.class);
+        RpcServiceConfig rpcServiceConfig = rpcApplicationConfig.getRpcServiceConfig();
+        RpcServerConfig rpcServerConfig = rpcApplicationConfig.getRpcServerConfig();
         String serviceKey = rpcServiceConfig.getRpcServiceKey();
 
         // service provider

@@ -3,7 +3,7 @@ package com.sunchaser.shushan.rpc.core.test;
 import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.common.RpcMessageTypeEnum;
-import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.handler.RpcPendingHolder;
 import com.sunchaser.shushan.rpc.core.protocol.*;
@@ -30,9 +30,9 @@ public class P2PConsumer {
 
     public static void main(String[] args) throws Exception {
         // p2pConsumer();
-        RpcFrameworkConfig rpcFrameworkConfig = RpcFrameworkConfig.createDefaultConfig(HelloService.class);
+        RpcApplicationConfig rpcApplicationConfig = RpcApplicationConfig.createDefaultConfig(HelloService.class);
         DynamicProxy dynamicProxy = JavassistDynamicProxy.getInstance();
-        HelloService helloService = dynamicProxy.createProxyInstance(rpcFrameworkConfig);
+        HelloService helloService = dynamicProxy.createProxyInstance(rpcApplicationConfig);
         String hello = helloService.sayHello("SunChaser");
         LOGGER.info("sayHello result: {}", hello);
     }
