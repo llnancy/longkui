@@ -3,8 +3,8 @@ package com.sunchaser.shushan.rpc.core.proxy;
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.common.RpcMessageTypeEnum;
 import com.sunchaser.shushan.rpc.core.compress.Compressor;
-import com.sunchaser.shushan.rpc.core.config.RpcComponentConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcProtocolConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
@@ -62,12 +62,12 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
 
     private final Compressor compressor;
 
-    public ProxyInvokeHandler(RpcFrameworkConfig rpcFrameworkConfig) {
-        this.rpcProtocolConfig = rpcFrameworkConfig.getRpcProtocolConfig();
-        this.rpcServiceConfig = rpcFrameworkConfig.getRpcServiceConfig();
-        RpcComponentConfig rpcComponentConfig = rpcFrameworkConfig.getRpcComponentConfig();
-        this.registry = ExtensionLoader.getExtensionLoader(Registry.class).getExtension(rpcComponentConfig.getRegistry());
-        this.rpcClient = ExtensionLoader.getExtensionLoader(RpcClient.class).getExtension(rpcComponentConfig.getRpcClient());
+    public ProxyInvokeHandler(RpcApplicationConfig rpcApplicationConfig) {
+        this.rpcProtocolConfig = rpcApplicationConfig.getRpcProtocolConfig();
+        this.rpcServiceConfig = rpcApplicationConfig.getRpcServiceConfig();
+        RpcFrameworkConfig rpcFrameworkConfig = rpcApplicationConfig.getRpcFrameworkConfig();
+        this.registry = ExtensionLoader.getExtensionLoader(Registry.class).getExtension(rpcFrameworkConfig.getRegistry());
+        this.rpcClient = ExtensionLoader.getExtensionLoader(RpcClient.class).getExtension(rpcFrameworkConfig.getRpcClient());
         this.sequenceIdGenerator = ExtensionLoader.getExtensionLoader(SequenceIdGenerator.class).getExtension(this.rpcProtocolConfig.getSequenceIdGenerator());
         this.serializer = ExtensionLoader.getExtensionLoader(Serializer.class).getExtension(this.rpcProtocolConfig.getSerializer());
         this.compressor = ExtensionLoader.getExtensionLoader(Compressor.class).getExtension(this.rpcProtocolConfig.getCompressor());

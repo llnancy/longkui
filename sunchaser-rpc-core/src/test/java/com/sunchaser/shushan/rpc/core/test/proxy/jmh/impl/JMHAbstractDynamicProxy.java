@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl;
 
-import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
 import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
 
 /**
@@ -18,20 +18,20 @@ public abstract class JMHAbstractDynamicProxy implements DynamicProxy {
     /**
      * 根据RpcServiceConfig创建并获取代理对象
      *
-     * @param rpcFrameworkConfig rpc framework config
+     * @param rpcApplicationConfig rpc framework config
      * @return 代理对象
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T createProxyInstance(RpcFrameworkConfig rpcFrameworkConfig) {
-        return (T) doCreateProxyInstance(rpcFrameworkConfig);
+    public <T> T createProxyInstance(RpcApplicationConfig rpcApplicationConfig) {
+        return (T) doCreateProxyInstance(rpcApplicationConfig);
     }
 
     /**
      * doCreateProxyInstance
      *
-     * @param rpcFrameworkConfig rpc framework config
+     * @param rpcApplicationConfig rpc framework config
      * @return proxy object
      */
-    protected abstract Object doCreateProxyInstance(RpcFrameworkConfig rpcFrameworkConfig);
+    protected abstract Object doCreateProxyInstance(RpcApplicationConfig rpcApplicationConfig);
 }

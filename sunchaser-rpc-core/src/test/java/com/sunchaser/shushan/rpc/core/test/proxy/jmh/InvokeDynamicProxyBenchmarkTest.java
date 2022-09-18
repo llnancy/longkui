@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.test.proxy.jmh;
 
-import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
 import com.sunchaser.shushan.rpc.core.test.HelloService;
 import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHByteBuddyDynamicProxy;
 import com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl.JMHCglibDynamicProxy;
@@ -37,7 +37,7 @@ public class InvokeDynamicProxyBenchmarkTest {
 
     private static final String BYTE_BUDDY = "byteBuddy";
 
-    private static final RpcFrameworkConfig RPC_FRAMEWORK_CONFIG = RpcFrameworkConfig.createDefaultConfig(HelloService.class);
+    private static final RpcApplicationConfig RPC_FRAMEWORK_CONFIG = RpcApplicationConfig.createDefaultConfig(HelloService.class);
 
     private static final HelloService JDK_PROXY_INSTANCE = JMHJdkDynamicProxy.getInstance().createProxyInstance(RPC_FRAMEWORK_CONFIG);
 
