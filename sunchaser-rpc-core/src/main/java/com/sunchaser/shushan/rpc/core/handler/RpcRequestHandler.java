@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Netty Rpc Request Handler
@@ -26,12 +26,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Slf4j
 public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<RpcRequest>> {
 
-    private final ThreadPoolExecutor requestHandlerPool;
+    private final ExecutorService requestExecutor;
 
     private final ServiceProvider serviceProvider;
 
-    public RpcRequestHandler(ThreadPoolExecutor requestHandlerPool) {
-        this.requestHandlerPool = requestHandlerPool;
+    public RpcRequestHandler(ExecutorService requestExecutor) {
+        this.requestExecutor = requestExecutor;
         this.serviceProvider = InMemoryServiceProvider.getInstance();
     }
 
@@ -73,9 +73,9 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<R
             }
         };
 
-        if (Objects.nonNull(requestHandlerPool)) {
+        if (Objects.nonNull(requestExecutor)) {
             // 业务线程池中执行
-            requestHandlerPool.execute(rpc);
+            requestExecutor.execute(rpc);
         } else {
             // 业务线程池未被定义，直接在IO线程执行
             rpc.run();

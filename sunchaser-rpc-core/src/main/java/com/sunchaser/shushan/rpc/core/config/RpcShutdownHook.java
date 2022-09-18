@@ -2,6 +2,7 @@ package com.sunchaser.shushan.rpc.core.config;
 
 import com.sunchaser.shushan.rpc.core.extension.ExtensionLoader;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
+import com.sunchaser.shushan.rpc.core.util.ThreadPools;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
@@ -56,5 +57,7 @@ public class RpcShutdownHook extends Thread {
                 LOGGER.warn(t.getMessage(), t);
             }
         }
+        // destroy thread pool
+        ThreadPools.shutDownAll();
     }
 }

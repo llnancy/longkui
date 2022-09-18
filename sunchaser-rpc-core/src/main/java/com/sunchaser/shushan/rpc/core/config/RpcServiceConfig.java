@@ -30,7 +30,7 @@ public class RpcServiceConfig {
     /**
      * 默认超时时间
      */
-    public static final long DEFAULT_TIMEOUT = 0L;
+    public static final Long DEFAULT_TIMEOUT = 0L;
 
     /**
      * rpc服务提供类Class（目标代理类的Class）
@@ -50,7 +50,7 @@ public class RpcServiceConfig {
     /**
      * rpc调用超时时间
      */
-    private long timeout = DEFAULT_TIMEOUT;
+    private Long timeout = DEFAULT_TIMEOUT;
 
     public String getClassName() {
         return this.targetClass.getName();

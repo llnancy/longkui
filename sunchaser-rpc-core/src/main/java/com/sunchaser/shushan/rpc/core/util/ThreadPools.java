@@ -1,13 +1,14 @@
 package com.sunchaser.shushan.rpc.core.util;
 
+import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.sunchaser.shushan.rpc.core.config.ThreadPoolConfig;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
-import javax.annotation.Nonnull;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * ThreadPool Utils
@@ -15,53 +16,82 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/17
  */
+@Slf4j
 public class ThreadPools {
 
     private ThreadPools() {
     }
 
-    public static ThreadPoolExecutor createThreadPool(final String threadNameIdentifier,
-                                                      final int corePoolSize,
-                                                      final int maxPoolSize) {
+    private static final Map<String, ExecutorService> EXECUTOR_SERVICE_MAP = Maps.newConcurrentMap();
+
+    public static ExecutorService createThreadPoolIfAbsent(String threadNameIdentifier) {
+        return createThreadPoolIfAbsent(threadNameIdentifier, ThreadPoolConfig.createDefaultConfig());
+    }
+
+    public static ExecutorService createThreadPoolIfAbsent(String threadNameIdentifier, ThreadPoolConfig threadPoolConfig) {
+        ExecutorService executorService = EXECUTOR_SERVICE_MAP.computeIfAbsent(threadNameIdentifier, v -> createThreadPool(threadNameIdentifier, threadPoolConfig));
+        if (executorService.isShutdown() || executorService.isTerminated()) {
+            EXECUTOR_SERVICE_MAP.remove(threadNameIdentifier);
+            executorService = createThreadPool(threadNameIdentifier, threadPoolConfig);
+            EXECUTOR_SERVICE_MAP.put(threadNameIdentifier, executorService);
+        }
+        return executorService;
+    }
+
+    public static ExecutorService createThreadPool(String threadNameIdentifier, ThreadPoolConfig threadPoolConfig) {
         return new ThreadPoolExecutor(
-                corePoolSize,
-                maxPoolSize,
-                60,
-                TimeUnit.SECONDS,
-                new LinkedBlockingDeque<>(1000),
-                new ThreadFactory() {
-
-                    private final AtomicInteger threadNumber = new AtomicInteger(1);
-
-                    private final ThreadGroup group;
-
-                    private final String namePrefix;
-
-                    {
-                        SecurityManager s = System.getSecurityManager();
-                        group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
-                        namePrefix = "sunchaser-rpc-" + threadNameIdentifier + "-thread-";
-                    }
-
-                    @Override
-                    public Thread newThread(@Nonnull Runnable r) {
-                        Thread t = new Thread(
-                                group,
-                                r,
-                                namePrefix + threadNumber.getAndIncrement(),
-                                0);
-                        if (!t.isDaemon()) {
-                            t.setDaemon(true);
-                        }
-                        if (t.getPriority() != Thread.NORM_PRIORITY) {
-                            t.setPriority(Thread.NORM_PRIORITY);
-                        }
-                        return t;
-                    }
-                },
+                threadPoolConfig.getCorePoolSize(),
+                threadPoolConfig.getMaximumPoolSize(),
+                threadPoolConfig.getKeepAliveTime(),
+                threadPoolConfig.getUnit(),
+                threadPoolConfig.getWorkQueue(),
+                createThreadFactory(threadNameIdentifier),
                 (r, executor) -> {
-                    throw new RpcException("sunchaser-rpc-" + threadNameIdentifier + " Thread pool is EXHAUSTED!");
+                    if (!executor.isShutdown()) {
+                        try {
+                            LOGGER.error("waiting queue is full, putting...");
+                            executor.getQueue().put(r);
+                        } catch (InterruptedException e) {
+                            throw new RpcException("sunchaser-rpc-" + threadNameIdentifier + " Thread pool is EXHAUSTED!", e);
+                        }
+                    }
                 }
         );
+    }
+
+    private static ThreadFactory createThreadFactory(String threadNameIdentifier) {
+        if (StringUtils.isNotBlank(threadNameIdentifier)) {
+            return new ThreadFactoryBuilder()
+                    .setNameFormat("sunchaser-rpc-" + threadNameIdentifier + "-thread-%d")
+                    .setDaemon(true)
+                    .build();
+        }
+        return Executors.defaultThreadFactory();
+    }
+
+    public static void shutDownAll() {
+        for (Map.Entry<String, ExecutorService> entry : EXECUTOR_SERVICE_MAP.entrySet()) {
+            ExecutorService executorService = entry.getValue();
+            // 暂停新任务提交
+            executorService.shutdown();
+            try {
+                // 等待15秒执行未完成的任务
+                if (!executorService.awaitTermination(15, TimeUnit.SECONDS)) {
+                    LOGGER.error("Interrupt the worker, which may cause some task inconsistent. Please check the biz logs.");
+                    // 立即关闭，取消执行未完成的任务
+                    executorService.shutdownNow();
+                    // 等待任务取消的响应
+                    if (!executorService.awaitTermination(15, TimeUnit.SECONDS)) {
+                        LOGGER.error("Thread pool can't be shutdown even with interrupting worker threads, which may cause some task inconsistent. Please check the biz logs.");
+                    }
+                }
+            } catch (InterruptedException e) {
+                LOGGER.error("The current server thread is interrupted when it is trying to stop the worker threads. This may leave an inconsistent state. Please check the biz logs.");
+                // 立即关闭
+                executorService.shutdownNow();
+                // 保留中断状态
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 }
