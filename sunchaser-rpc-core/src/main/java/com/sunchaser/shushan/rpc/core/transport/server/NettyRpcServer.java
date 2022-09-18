@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.transport.server;
 
-import com.sunchaser.shushan.rpc.core.common.Constants;
+import com.sunchaser.shushan.rpc.core.config.RpcServerConfig;
 import com.sunchaser.shushan.rpc.core.handler.RpcRequestHandler;
 import com.sunchaser.shushan.rpc.core.transport.NettyEventLoopFactory;
 import com.sunchaser.shushan.rpc.core.transport.codec.RpcCodec;
@@ -25,13 +25,9 @@ public class NettyRpcServer implements RpcServer {
 
     private final ServerBootstrap bootstrap;
 
-    public NettyRpcServer() {
-        this(Constants.DEFAULT_IO_THREADS);
-    }
-
-    public NettyRpcServer(int nThreads) {
+    public NettyRpcServer(RpcServerConfig rpcServerConfig) {
         EventLoopGroup bossGroup = NettyEventLoopFactory.eventLoopGroup(1, "NettyServerBoss");
-        EventLoopGroup workerGroup = NettyEventLoopFactory.eventLoopGroup(nThreads, "NettyServerWorker");
+        EventLoopGroup workerGroup = NettyEventLoopFactory.eventLoopGroup(rpcServerConfig.getIoThreads(), "NettyServerWorker");
         this.bootstrap = new ServerBootstrap()
                 .group(bossGroup, workerGroup)
                 .channel(NettyEventLoopFactory.serverSocketChannelClass())
@@ -47,10 +43,9 @@ public class NettyRpcServer implements RpcServer {
                                 .addLast(
                                         "rpc-server-handler",
                                         new RpcRequestHandler(
-                                                ThreadPools.createThreadPool(
+                                                ThreadPools.createThreadPoolIfAbsent(
                                                         this.getClass().getName(),
-                                                        10,
-                                                        10
+                                                        rpcServerConfig.getThreadPoolConfig()
                                                 )
                                         )
                                 );

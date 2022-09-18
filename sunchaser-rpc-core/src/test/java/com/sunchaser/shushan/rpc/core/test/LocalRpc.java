@@ -44,7 +44,7 @@ public class LocalRpc {
         registry.register(serviceMetaData);
 
         // rpc server
-        new NettyRpcServer().start();
+        new NettyRpcServer(rpcServerConfig).start();
 
         // consumer
         DynamicProxy dynamicProxy = JdkDynamicProxy.getInstance();
