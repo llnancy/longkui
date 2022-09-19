@@ -26,11 +26,19 @@ public class NettyRpcServer implements RpcServer {
 
     private final ServerBootstrap bootstrap;
 
+    private final EventLoopGroup bossGroup;
+
+    private final EventLoopGroup workerGroup;
+
+    public NettyRpcServer() {
+        this(RpcServerConfig.createDefaultConfig());
+    }
+
     public NettyRpcServer(RpcServerConfig rpcServerConfig) {
         // 注册JVM钩子进行资源优雅关闭
         Runtime.getRuntime().addShutdownHook(RpcShutdownHook.getRpcShutdownHook());
-        EventLoopGroup bossGroup = NettyEventLoopFactory.eventLoopGroup(1, "NettyServerBoss");
-        EventLoopGroup workerGroup = NettyEventLoopFactory.eventLoopGroup(rpcServerConfig.getIoThreads(), "NettyServerWorker");
+        bossGroup = NettyEventLoopFactory.eventLoopGroup(1, "NettyServerBoss");
+        workerGroup = NettyEventLoopFactory.eventLoopGroup(rpcServerConfig.getIoThreads(), "NettyServerWorker");
         this.bootstrap = new ServerBootstrap()
                 .group(bossGroup, workerGroup)
                 .channel(NettyEventLoopFactory.serverSocketChannelClass())
@@ -58,7 +66,20 @@ public class NettyRpcServer implements RpcServer {
 
     @Override
     public void start(InetSocketAddress localAddress) {
-        ChannelFuture channelFuture = bootstrap.bind(localAddress);
-        channelFuture.syncUninterruptibly();
+        ChannelFuture channelFuture = bootstrap.bind(localAddress)
+                .syncUninterruptibly();
+        channelFuture.channel()
+                .closeFuture()
+                .syncUninterruptibly();
+    }
+
+    @Override
+    public void destroy() {
+        if (!bossGroup.isShutdown()) {
+            bossGroup.shutdownGracefully();
+        }
+        if (!workerGroup.isShutdown()) {
+            workerGroup.shutdownGracefully();
+        }
     }
 }

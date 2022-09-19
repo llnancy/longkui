@@ -33,4 +33,9 @@ public interface RpcClient {
     default void invoke(RpcProtocol<RpcRequest> rpcProtocol, String host, int port) {
         invoke(rpcProtocol, new InetSocketAddress(host, port));
     }
+
+    /**
+     * 销毁
+     */
+    void destroy();
 }

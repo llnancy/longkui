@@ -37,4 +37,9 @@ public interface RpcServer {
     default void start() {
         start(DEFAULT_PORT);
     }
+
+    /**
+     * 销毁
+     */
+    void destroy();
 }

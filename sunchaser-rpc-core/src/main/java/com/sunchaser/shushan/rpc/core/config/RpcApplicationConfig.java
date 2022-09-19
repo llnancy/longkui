@@ -21,6 +21,8 @@ public class RpcApplicationConfig {
 
     private RpcServerConfig rpcServerConfig = RpcServerConfig.createDefaultConfig();
 
+    private RpcClientConfig rpcClientConfig = RpcClientConfig.createDefaultConfig();
+
     private RpcServiceConfig rpcServiceConfig = RpcServiceConfig.createDefaultConfig();
 
     private RpcFrameworkConfig rpcFrameworkConfig = RpcFrameworkConfig.createDefaultConfig();
