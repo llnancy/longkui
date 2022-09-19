@@ -22,6 +22,8 @@ public class RpcClientConfig {
 
     private Integer ioThreads = Constants.DEFAULT_IO_THREADS;
 
+    private ThreadPoolConfig callbackThreadPoolConfig = ThreadPoolConfig.createDefaultConfig();
+
     public static RpcClientConfig createDefaultConfig() {
         return new RpcClientConfig();
     }

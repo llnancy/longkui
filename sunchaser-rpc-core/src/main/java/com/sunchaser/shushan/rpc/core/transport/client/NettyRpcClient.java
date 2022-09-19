@@ -1,5 +1,6 @@
 package com.sunchaser.shushan.rpc.core.transport.client;
 
+import com.sunchaser.shushan.rpc.core.call.RpcCallbackExecutor;
 import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.config.RpcClientConfig;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
@@ -49,6 +50,7 @@ public class NettyRpcClient extends AbstractRpcClient {
 
     private void initBootstrap(RpcClientConfig rpcClientConfig) {
         this.eventLoopGroup = NettyEventLoopFactory.eventLoopGroup(rpcClientConfig.getIoThreads(), "NettyClientWorker");
+        RpcCallbackExecutor rpcCallbackExecutor = new RpcCallbackExecutor(rpcClientConfig.getCallbackThreadPoolConfig());
         this.bootstrap.group(eventLoopGroup)
                 .channel(NettyEventLoopFactory.socketChannelClass())
                 .option(ChannelOption.SO_KEEPALIVE, true)
@@ -60,7 +62,7 @@ public class NettyRpcClient extends AbstractRpcClient {
                         ch.pipeline()
                                 .addLast("rpc-codec", new RpcCodec<>())
                                 .addLast("rpc-client-idle-state-handler", new IdleStateHandler(0, 30, 0))
-                                .addLast("rpc-client-handler", new RpcResponseHandler());
+                                .addLast("rpc-client-handler", new RpcResponseHandler(rpcCallbackExecutor));
                     }
                 });
     }
