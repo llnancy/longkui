@@ -1,6 +1,7 @@
 package com.sunchaser.shushan.rpc.core.transport.client;
 
 import com.sunchaser.shushan.rpc.core.common.Constants;
+import com.sunchaser.shushan.rpc.core.config.RpcClientConfig;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.handler.RpcResponseHandler;
 import com.sunchaser.shushan.rpc.core.protocol.RpcProtocol;
@@ -34,26 +35,25 @@ public class NettyRpcClient extends AbstractRpcClient {
 
     private final Bootstrap bootstrap;
 
+    private EventLoopGroup eventLoopGroup;
+
     public NettyRpcClient() {
-        this(Constants.DEFAULT_CONNECTION_TIMEOUT);
+        this(RpcClientConfig.createDefaultConfig());
     }
 
-    public NettyRpcClient(Integer connectionTimeout) {
-        this(connectionTimeout, Constants.DEFAULT_IO_THREADS);
-    }
-
-    public NettyRpcClient(Integer connectionTimeout, int nThreads) {
-        super(connectionTimeout);
+    public NettyRpcClient(RpcClientConfig rpcClientConfig) {
+        super(rpcClientConfig.getConnectionTimeout());
         this.bootstrap = new Bootstrap();
-        initBootstrap(nThreads);
+        initBootstrap(rpcClientConfig);
     }
 
-    private void initBootstrap(int nThreads) {
-        bootstrap.group(NettyEventLoopFactory.eventLoopGroup(nThreads, "NettyClientWorker"))
+    private void initBootstrap(RpcClientConfig rpcClientConfig) {
+        this.eventLoopGroup = NettyEventLoopFactory.eventLoopGroup(rpcClientConfig.getIoThreads(), "NettyClientWorker");
+        this.bootstrap.group(eventLoopGroup)
                 .channel(NettyEventLoopFactory.socketChannelClass())
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Math.max(Constants.DEFAULT_CONNECTION_TIMEOUT, connectionTimeout))
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Math.max(Constants.DEFAULT_CONNECTION_TIMEOUT, rpcClientConfig.getConnectionTimeout()))
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
@@ -103,5 +103,12 @@ public class NettyRpcClient extends AbstractRpcClient {
             throw new RpcException("Rpc netty client failed to connect server [" + connectAddress + "], error message is:" + future.cause().getMessage(), cause);
         }
         return channel;
+    }
+
+    @Override
+    public void destroy() {
+        if (!eventLoopGroup.isShutdown()) {
+            eventLoopGroup.shutdownGracefully();
+        }
     }
 }

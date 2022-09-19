@@ -42,6 +42,5 @@ public class Provider {
         // rpc server
         RpcServer rpcServer = ExtensionLoader.getExtensionLoader(RpcServer.class).getExtension(Constants.NETTY);
         rpcServer.start();
-        System.in.read();
     }
 }
