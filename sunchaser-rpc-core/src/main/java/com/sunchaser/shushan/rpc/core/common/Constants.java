@@ -8,6 +8,8 @@ package com.sunchaser.shushan.rpc.core.common;
  */
 public interface Constants {
 
+    String DEFAULT = "default";
+
     String NETTY = "netty";
 
     String UNDERLINE = "_";

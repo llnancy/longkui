@@ -1,5 +1,7 @@
 package com.sunchaser.shushan.rpc.core.config;
 
+import com.sunchaser.shushan.rpc.core.call.CallType;
+import com.sunchaser.shushan.rpc.core.common.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +27,7 @@ public class RpcServiceConfig {
     /**
      * 默认分组
      */
-    public static final String DEFAULT_GROUP = "default";
+    public static final String DEFAULT_GROUP = Constants.DEFAULT;
 
     /**
      * 默认超时时间
@@ -51,6 +53,11 @@ public class RpcServiceConfig {
      * rpc调用超时时间
      */
     private Long timeout = DEFAULT_TIMEOUT;
+
+    /**
+     * rpc call type, default SYNC
+     */
+    private CallType callType = CallType.SYNC;
 
     public String getClassName() {
         return this.targetClass.getName();

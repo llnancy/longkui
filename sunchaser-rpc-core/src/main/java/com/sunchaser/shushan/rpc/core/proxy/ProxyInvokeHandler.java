@@ -1,10 +1,15 @@
 package com.sunchaser.shushan.rpc.core.proxy;
 
+import com.google.common.base.Preconditions;
+import com.sunchaser.shushan.rpc.core.call.CallType;
+import com.sunchaser.shushan.rpc.core.call.RpcCallback;
+import com.sunchaser.shushan.rpc.core.call.RpcCallbackHolder;
+import com.sunchaser.shushan.rpc.core.call.RpcFutureHolder;
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.common.RpcMessageTypeEnum;
 import com.sunchaser.shushan.rpc.core.compress.Compressor;
-import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcFrameworkConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcProtocolConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
@@ -92,39 +97,68 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
         // 构建一条完整的RPC协议消息
         RpcProtocol<RpcRequest> rpcProtocol = buildRpcProtocol(rpcHeader, rpcRequest);
 
-        // 创建保存RPC调用结果的RpcFuture对象
-        RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()));
-        // 保存协议唯一标识sequenceId与RpcFuture对象的映射关系
-        RpcPendingHolder.putRpcFuture(sequenceId, rpcFuture);
-
         // 服务发现
         ServiceMetaData serviceMetaData = registry.discovery(rpcServiceConfig.getRpcServiceKey());
-
-        try {
-            // invoke
-            rpcClient.invoke(rpcProtocol, serviceMetaData.getHost(), serviceMetaData.getPort());
-        } catch (Throwable t) {
-            // rpc调用异常时删除对应RpcFuture
-            RpcPendingHolder.removeRpcFuture(sequenceId);
-            throw t;
+        String host = serviceMetaData.getHost();
+        Integer port = serviceMetaData.getPort();
+        CallType callType = rpcServiceConfig.getCallType();
+        if (callType == CallType.SYNC) {
+            try {
+                // 创建保存RPC调用结果的RpcFuture对象
+                RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()));
+                // 保存协议唯一标识sequenceId与RpcFuture对象的映射关系
+                RpcPendingHolder.putRpcFuture(sequenceId, rpcFuture);
+                // invoke
+                rpcClient.invoke(rpcProtocol, host, port);
+                Promise<RpcResponse> promise = rpcFuture.getPromise();
+                long timeout = rpcServiceConfig.getTimeout();
+                // todo get(0) => get() ?
+                RpcResponse rpcResponse = timeout == 0 ? promise.get() : promise.get(timeout, TimeUnit.MILLISECONDS);
+                String errorMsg = rpcResponse.getErrorMsg();
+                if (StringUtils.isNotBlank(errorMsg)) {
+                    LOGGER.error("sunchaser-rpc >>>>>> rpc invoke failed, errorMsg: {}.", errorMsg);
+                    throw new RpcException(errorMsg);
+                }
+                return rpcResponse.getResult();
+            } catch (Throwable t) {
+                // rpc调用异常时删除对应RpcFuture
+                RpcPendingHolder.removeRpcFuture(sequenceId);
+                throw t;
+            }
+        } else if (callType == CallType.FUTURE) {
+            try {
+                // 创建保存RPC调用结果的RpcFuture对象
+                RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()));
+                // 保存协议唯一标识sequenceId与RpcFuture对象的映射关系
+                RpcPendingHolder.putRpcFuture(sequenceId, rpcFuture);
+                RpcFutureHolder.setFuture(rpcFuture);
+                rpcClient.invoke(rpcProtocol, host, port);
+            } catch (Throwable t) {
+                // rpc调用异常时删除对应RpcFuture
+                RpcPendingHolder.removeRpcFuture(sequenceId);
+                throw t;
+            }
+        } else if (callType == CallType.CALLBACK) {
+            try {
+                @SuppressWarnings("unchecked")
+                RpcCallback<RpcResponse> rpcCallback = (RpcCallback<RpcResponse>) RpcCallbackHolder.getCallback();
+                Preconditions.checkNotNull(rpcCallback, "sunchaser-rpc >>>>>> RpcInvokeCallback(CallType = CALLBACK) instance cannot be null.");
+                // 创建保存RPC调用结果的RpcFuture对象
+                RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()), rpcCallback);
+                // 保存协议唯一标识sequenceId与RpcFuture对象的映射关系
+                RpcPendingHolder.putRpcFuture(sequenceId, rpcFuture);
+                rpcClient.invoke(rpcProtocol, host, port);
+            } catch (Throwable t) {
+                // rpc调用异常时删除对应RpcFuture
+                RpcPendingHolder.removeRpcFuture(sequenceId);
+                throw t;
+            }
+        } else if (callType == CallType.ONEWAY) {
+            rpcClient.invoke(rpcProtocol, host, port);
+        } else {
+            throw new RpcException("sunchaser-rpc >>>>>> CallType of " + callType + " is not supported!");
         }
-
-        // 获取rpc调用结果
-        RpcResponse rpcResponse = getRpcResponse(rpcFuture);
-        return rpcResponse.getResult();
-    }
-
-    private RpcResponse getRpcResponse(RpcFuture<RpcResponse> rpcFuture) throws Throwable {
-        Promise<RpcResponse> promise = rpcFuture.getPromise();
-        long timeout = rpcServiceConfig.getTimeout();
-        // todo get(0) => get() ?
-        RpcResponse rpcResponse = timeout == 0 ? promise.get() : promise.get(timeout, TimeUnit.MILLISECONDS);
-        String errorMsg = rpcResponse.getErrorMsg();
-        if (StringUtils.isNotBlank(errorMsg)) {
-            LOGGER.error("rpc invoke failed, errorMsg: {}", errorMsg);
-            throw new RpcException(errorMsg);
-        }
-        return rpcResponse;
+        return null;
     }
 
     private static RpcProtocol<RpcRequest> buildRpcProtocol(RpcHeader rpcHeader, RpcRequest rpcRequest) {

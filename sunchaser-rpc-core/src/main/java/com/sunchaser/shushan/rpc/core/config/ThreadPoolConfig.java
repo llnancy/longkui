@@ -1,6 +1,7 @@
 package com.sunchaser.shushan.rpc.core.config;
 
 import com.google.common.collect.Queues;
+import com.sunchaser.shushan.rpc.core.common.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 @Builder
 public class ThreadPoolConfig {
 
+    private static final String DEFAULT_THREAD_NAME_IDENTIFIER = Constants.DEFAULT;
+
     private static final Integer DEFAULT_CORE_POOL_SIZE = 10;
 
     private static final Integer DEFAULT_MAXIMUM_POOL_SIZE_SIZE = 100;
@@ -30,6 +33,8 @@ public class ThreadPoolConfig {
     private static final TimeUnit DEFAULT_UNIT = TimeUnit.SECONDS;
 
     private static final Integer DEFAULT_WORK_QUEUE_CAPACITY = 1000;
+
+    private String threadNameIdentifier = DEFAULT_THREAD_NAME_IDENTIFIER;
 
     private Integer corePoolSize = DEFAULT_CORE_POOL_SIZE;
 

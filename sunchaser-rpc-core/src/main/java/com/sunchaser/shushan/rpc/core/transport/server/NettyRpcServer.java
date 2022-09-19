@@ -55,8 +55,8 @@ public class NettyRpcServer implements RpcServer {
                                         "rpc-server-handler",
                                         new RpcRequestHandler(
                                                 ThreadPools.createThreadPoolIfAbsent(
-                                                        this.getClass().getName(),
                                                         rpcServerConfig.getThreadPoolConfig()
+                                                                .setThreadNameIdentifier(this.getClass().getName())
                                                 )
                                         )
                                 );
