@@ -2,7 +2,7 @@
     <img src="https://cdn.lilu.org.cn/sunchaser-logo.png" alt="logo" />
     <h2 align="center">sunchaser-rpc</h2>
     <p align="center">
-        sunchaser-rpc, A high performance RPC framework based on netty.
+        sunchaser-rpc, A high performance RPC framework based on Netty.
         <br /><br />
         <img src="https://img.shields.io/circleci/project/github/badges/shields/master?color=%231ab1ad&label=master" alt="project" />
         <img src="https://img.shields.io/badge/JDK-8.0+-0e83c" alt="java-version" />
