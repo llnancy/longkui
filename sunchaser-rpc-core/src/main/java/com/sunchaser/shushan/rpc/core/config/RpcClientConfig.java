@@ -3,10 +3,7 @@ package com.sunchaser.shushan.rpc.core.config;
 import com.sunchaser.shushan.rpc.core.balancer.LoadBalancerEnum;
 import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.proxy.DynamicProxyEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * rpc client config
@@ -18,6 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class RpcClientConfig {
 
     /**

@@ -74,9 +74,9 @@ public class ThreadPools {
     }
 
     public static void shutdown(ExecutorService executorService) {
-        // 暂停新任务提交
-        executorService.shutdown();
         try {
+            // 暂停新任务提交
+            executorService.shutdown();
             // 等待15秒执行未完成的任务
             if (!executorService.awaitTermination(15, TimeUnit.SECONDS)) {
                 LOGGER.error("Interrupt the worker, which may cause some task inconsistent. Please check the biz logs.");
@@ -87,8 +87,8 @@ public class ThreadPools {
                     LOGGER.error("Thread pool can't be shutdown even with interrupting worker threads, which may cause some task inconsistent. Please check the biz logs.");
                 }
             }
-        } catch (InterruptedException e) {
-            LOGGER.error("The current server thread is interrupted when it is trying to stop the worker threads. This may leave an inconsistent state. Please check the biz logs.");
+        } catch (Throwable t) {
+            LOGGER.error("The current server thread is interrupted when it is trying to stop the worker threads. This may leave an inconsistent state. Please check the biz logs.", t);
             // 立即关闭
             executorService.shutdownNow();
             // 保留中断状态

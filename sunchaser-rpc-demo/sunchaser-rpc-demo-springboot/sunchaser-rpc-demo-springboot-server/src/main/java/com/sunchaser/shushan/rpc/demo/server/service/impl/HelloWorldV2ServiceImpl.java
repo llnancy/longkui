@@ -7,7 +7,7 @@ import com.sunchaser.shushan.rpc.server.annotation.RpcService;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/9/21
  */
-@RpcService(version = "0.0.2", group = "world")
+@RpcService(version = "0.0.2", group = "hello")
 public class HelloWorldV2ServiceImpl implements HelloWorldService {
 
     @Override

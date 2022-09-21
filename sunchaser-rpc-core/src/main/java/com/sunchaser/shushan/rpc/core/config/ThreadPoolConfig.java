@@ -2,10 +2,7 @@ package com.sunchaser.shushan.rpc.core.config;
 
 import com.google.common.collect.Queues;
 import com.sunchaser.shushan.rpc.core.common.Constants;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -20,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class ThreadPoolConfig {
 
     private static final String DEFAULT_THREAD_NAME_IDENTIFIER = Constants.DEFAULT;

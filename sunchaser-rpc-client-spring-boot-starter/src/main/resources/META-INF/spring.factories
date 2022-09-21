@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.sunchaser.shushan.rpc.client.autoconfigure.RpcClientAutoConfiguration

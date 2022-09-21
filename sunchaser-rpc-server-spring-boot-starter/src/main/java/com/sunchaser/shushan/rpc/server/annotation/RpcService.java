@@ -18,9 +18,9 @@ import java.lang.annotation.*;
 @Service
 public @interface RpcService {
 
-    String version() default RpcServiceConfig.DEFAULT_VERSION;
-
     String group() default RpcServiceConfig.DEFAULT_GROUP;
+
+    String version() default RpcServiceConfig.DEFAULT_VERSION;
 
     int weight() default Weightable.DEFAULT_WEIGHT;
 
