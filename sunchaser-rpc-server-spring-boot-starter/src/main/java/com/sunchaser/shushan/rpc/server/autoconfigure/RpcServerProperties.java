@@ -4,6 +4,7 @@ import com.sunchaser.shushan.rpc.core.config.RpcServerConfig;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 /**
  * rpc server properties
@@ -19,5 +20,6 @@ public class RpcServerProperties {
     /**
      * rpc server config
      */
+    @NestedConfigurationProperty
     private RpcServerConfig config;
 }

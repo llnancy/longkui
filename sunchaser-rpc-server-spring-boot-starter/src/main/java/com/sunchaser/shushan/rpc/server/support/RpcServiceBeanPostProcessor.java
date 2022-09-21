@@ -1,5 +1,6 @@
 package com.sunchaser.shushan.rpc.server.support;
 
+import com.google.common.base.Preconditions;
 import com.sunchaser.shushan.rpc.core.config.RpcServerConfig;
 import com.sunchaser.shushan.rpc.core.extension.ExtensionLoader;
 import com.sunchaser.shushan.rpc.core.provider.ServiceProvider;
@@ -14,9 +15,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.lang.NonNull;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -26,7 +29,7 @@ import java.util.Objects;
  * @since JDK8 2022/9/21
  */
 @Slf4j
-public class RpcServiceBeanPostProcessor implements BeanPostProcessor, InitializingBean, DisposableBean {
+public class RpcServiceBeanPostProcessor implements ApplicationContextAware, InitializingBean, DisposableBean {
 
     private final RpcServerConfig rpcServerConfig;
 
@@ -44,10 +47,18 @@ public class RpcServiceBeanPostProcessor implements BeanPostProcessor, Initializ
     }
 
     @Override
-    public Object postProcessAfterInitialization(Object bean, @NonNull String beanName) throws BeansException {
-        Class<?> beanClass = bean.getClass();
-        RpcService rpcService = beanClass.getAnnotation(RpcService.class);
-        if (Objects.nonNull(rpcService)) {
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        Map<String, Object> beansMap = applicationContext.getBeansWithAnnotation(RpcService.class);
+        if (CollectionUtils.isEmpty(beansMap)) {
+            return;
+        }
+        for (Object bean : beansMap.values()) {
+            Class<?> beanClass = bean.getClass();
+            Preconditions.checkArgument(beanClass.getInterfaces().length != 0, "sunchaser-rpc >>>>>> rpc service must inherit interface.");
+            RpcService rpcService = beanClass.getAnnotation(RpcService.class);
+            if (Objects.isNull(rpcService)) {
+                return;
+            }
             String serviceKey = ServiceUtils.buildServiceKey(beanClass.getName(), rpcService.group(), rpcService.version());
             serviceProvider.registerProvider(serviceKey, bean);
             int port = rpcServerConfig.getPort();
@@ -62,7 +73,6 @@ public class RpcServiceBeanPostProcessor implements BeanPostProcessor, Initializ
             registry.register(serviceMetaData);
             LOGGER.info("sunchaser-rpc >>>>>> server initialized with port(s): {} (tcp)", port);
         }
-        return bean;
     }
 
     @Override
