@@ -1,9 +1,8 @@
 package com.sunchaser.shushan.rpc.core.test;
 
-import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcClientConfig;
 import com.sunchaser.shushan.rpc.core.extension.ExtensionLoader;
 import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
-import com.sunchaser.shushan.rpc.core.proxy.DynamicProxyEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 
@@ -17,10 +16,10 @@ import org.junit.jupiter.api.Assertions;
 public class Consumer {
 
     public static void main(String[] args) throws Exception {
-        RpcApplicationConfig rpcApplicationConfig = RpcApplicationConfig.createDefaultConfig(HelloService.class);
+        RpcClientConfig rpcClientConfig = RpcClientConfig.createDefaultConfig(HelloService.class);
         // RpcDynamicProxy rpcDynamicProxy = JdkRpcDynamicProxy.getInstance();
-        DynamicProxy dynamicProxy = ExtensionLoader.getExtensionLoader(DynamicProxy.class).getExtension(DynamicProxyEnum.JDK);
-        HelloService helloService = dynamicProxy.createProxyInstance(rpcApplicationConfig);
+        DynamicProxy dynamicProxy = ExtensionLoader.getExtensionLoader(DynamicProxy.class).getExtension(rpcClientConfig.getDynamicProxy());
+        HelloService helloService = dynamicProxy.createProxyInstance(rpcClientConfig);
         String hello = helloService.sayHello("SunChaser");
         LOGGER.info("sayHello result: {}", hello);
         Assertions.assertEquals("Hello:" + "SunChaser", hello);

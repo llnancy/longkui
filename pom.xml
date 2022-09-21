@@ -10,6 +10,8 @@
     <version>0.0.1-SNAPSHOT</version>
     <modules>
         <module>sunchaser-rpc-core</module>
+        <module>sunchaser-rpc-server-spring-boot-starter</module>
+        <module>sunchaser-rpc-client-spring-boot-starter</module>
     </modules>
 
     <properties>
@@ -17,6 +19,19 @@
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <springboot.version>2.7.0</springboot.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Boot -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${springboot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

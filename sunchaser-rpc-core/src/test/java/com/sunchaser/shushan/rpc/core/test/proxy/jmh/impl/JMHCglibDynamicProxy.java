@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl;
 
-import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcClientConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
 import com.sunchaser.shushan.rpc.core.test.proxy.jmh.JMHProxyInvokeHandler;
@@ -23,15 +23,15 @@ public class JMHCglibDynamicProxy extends JMHAbstractDynamicProxy {
     /**
      * doCreateProxyInstance
      *
-     * @param rpcApplicationConfig rpc framework config
+     * @param rpcClientConfig rpc client config
      * @return proxy object
      */
     @Override
-    protected Object doCreateProxyInstance(RpcApplicationConfig rpcApplicationConfig) {
-        RpcServiceConfig rpcServiceConfig = rpcApplicationConfig.getRpcServiceConfig();
+    protected Object doCreateProxyInstance(RpcClientConfig rpcClientConfig) {
+        RpcServiceConfig rpcServiceConfig = rpcClientConfig.getRpcServiceConfig();
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(rpcServiceConfig.getTargetClass());
-        enhancer.setCallback(new JMHProxyInvokeHandler(rpcApplicationConfig));
+        enhancer.setCallback(new JMHProxyInvokeHandler(rpcClientConfig));
         return enhancer.create();
     }
 }

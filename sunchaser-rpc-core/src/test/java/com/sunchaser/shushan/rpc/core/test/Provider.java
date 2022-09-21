@@ -1,14 +1,11 @@
 package com.sunchaser.shushan.rpc.core.test;
 
-import com.sunchaser.shushan.rpc.core.common.Constants;
-import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServerConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.extension.ExtensionLoader;
 import com.sunchaser.shushan.rpc.core.provider.ServiceProvider;
 import com.sunchaser.shushan.rpc.core.provider.impl.InMemoryServiceProvider;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
-import com.sunchaser.shushan.rpc.core.registry.RegistryEnum;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
 import com.sunchaser.shushan.rpc.core.transport.server.RpcServer;
 
@@ -21,9 +18,8 @@ import com.sunchaser.shushan.rpc.core.transport.server.RpcServer;
 public class Provider {
 
     public static void main(String[] args) throws Exception {
-        RpcApplicationConfig rpcApplicationConfig = RpcApplicationConfig.createDefaultConfig(HelloService.class);
-        RpcServiceConfig rpcServiceConfig = rpcApplicationConfig.getRpcServiceConfig();
-        RpcServerConfig rpcServerConfig = rpcApplicationConfig.getRpcServerConfig();
+        RpcServerConfig rpcServerConfig = RpcServerConfig.createDefaultConfig();
+        RpcServiceConfig rpcServiceConfig = RpcServiceConfig.createDefaultConfig(HelloService.class);
         String serviceKey = rpcServiceConfig.getRpcServiceKey();
 
         // service provider
@@ -35,12 +31,15 @@ public class Provider {
                 .serviceKey(serviceKey)
                 .host(rpcServerConfig.getHost())
                 .port(rpcServerConfig.getPort())
+                .weight(rpcServiceConfig.getWeight())
+                .warmup(rpcServiceConfig.getWarmup())
+                .timestamp(System.currentTimeMillis())
                 .build();
-        Registry registry = ExtensionLoader.getExtensionLoader(Registry.class).getExtension(RegistryEnum.ZOOKEEPER);
+        Registry registry = ExtensionLoader.getExtensionLoader(Registry.class).getExtension(rpcServerConfig.getRegistry());
         registry.register(serviceMetaData);
 
         // rpc server
-        RpcServer rpcServer = ExtensionLoader.getExtensionLoader(RpcServer.class).getExtension(Constants.NETTY);
+        RpcServer rpcServer = ExtensionLoader.getExtensionLoader(RpcServer.class).getExtension(rpcServerConfig.getRpcServer());
         rpcServer.start();
     }
 }

@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.proxy;
 
-import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcClientConfig;
 import com.sunchaser.shushan.rpc.core.extension.SPI;
 
 /**
@@ -20,11 +20,11 @@ import com.sunchaser.shushan.rpc.core.extension.SPI;
 public interface DynamicProxy {
 
     /**
-     * 根据RpcServiceConfig创建并获取代理对象
+     * 根据RpcClientConfig创建并获取代理对象
      *
-     * @param rpcApplicationConfig rpc framework config
-     * @param <T>                代理对象的类型
+     * @param rpcClientConfig rpc client config
+     * @param <T>             代理对象的类型
      * @return 代理对象
      */
-    <T> T createProxyInstance(RpcApplicationConfig rpcApplicationConfig);
+    <T> T createProxyInstance(RpcClientConfig rpcClientConfig);
 }

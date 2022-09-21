@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.proxy.impl;
 
-import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcClientConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
 import com.sunchaser.shushan.rpc.core.proxy.ProxyInvokeHandler;
@@ -24,21 +24,21 @@ public class JdkDynamicProxy extends AbstractDynamicProxy {
     /**
      * doCreateProxyInstance
      *
-     * @param rpcApplicationConfig rpc framework config
+     * @param rpcClientConfig rpc client config
      * @return proxy object
      */
     @Override
-    protected Object doCreateProxyInstance(RpcApplicationConfig rpcApplicationConfig) {
-        RpcServiceConfig rpcServiceConfig = rpcApplicationConfig.getRpcServiceConfig();
+    protected Object doCreateProxyInstance(RpcClientConfig rpcClientConfig) {
+        RpcServiceConfig rpcServiceConfig = rpcClientConfig.getRpcServiceConfig();
         Class<?> clazz = rpcServiceConfig.getTargetClass();
         if (!clazz.isInterface()) {
             // throw new IllegalArgumentException(clazz.getName() + " is not an interface");
-            return CglibDynamicProxy.getInstance().createProxyInstance(rpcApplicationConfig);
+            return CglibDynamicProxy.getInstance().createProxyInstance(rpcClientConfig);
         }
         return Proxy.newProxyInstance(
                 Thread.currentThread().getContextClassLoader(),
                 new Class[]{clazz},
-                new ProxyInvokeHandler(rpcApplicationConfig)
+                new ProxyInvokeHandler(rpcClientConfig)
         );
     }
 }

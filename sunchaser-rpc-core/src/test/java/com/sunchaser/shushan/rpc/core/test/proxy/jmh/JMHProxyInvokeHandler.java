@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.test.proxy.jmh;
 
-import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcClientConfig;
 import javassist.util.proxy.MethodHandler;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +24,10 @@ import java.lang.reflect.Method;
 @Slf4j
 public class JMHProxyInvokeHandler implements InvocationHandler, MethodInterceptor, MethodHandler {
 
-    private final RpcApplicationConfig rpcApplicationConfig;
+    private final RpcClientConfig rpcClientConfig;
 
-    public JMHProxyInvokeHandler(RpcApplicationConfig rpcApplicationConfig) {
-        this.rpcApplicationConfig = rpcApplicationConfig;
+    public JMHProxyInvokeHandler(RpcClientConfig rpcClientConfig) {
+        this.rpcClientConfig = rpcClientConfig;
     }
 
     public Object benchmarkInvoke(Object[] args) {

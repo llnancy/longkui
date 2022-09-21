@@ -16,7 +16,6 @@
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <springboot.version>2.7.0</springboot.version>
         <guava.version>31.1-jre</guava.version>
         <collection4.version>4.4</collection4.version>
         <curator-x-discovery.version>5.3.0</curator-x-discovery.version>
@@ -34,19 +33,6 @@
         <jmh.version>1.35</jmh.version>
         <hutool.version>5.8.5</hutool.version>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <!-- Spring Boot -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${springboot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <!-- lombok -->
