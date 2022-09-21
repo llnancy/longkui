@@ -1,7 +1,7 @@
 package com.sunchaser.shushan.rpc.core.proxy.impl;
 
 import com.google.common.collect.Maps;
-import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcClientConfig;
 import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
 
 import java.util.concurrent.ConcurrentMap;
@@ -14,25 +14,25 @@ import java.util.concurrent.ConcurrentMap;
  */
 public abstract class AbstractDynamicProxy implements DynamicProxy {
 
-    private final ConcurrentMap<RpcApplicationConfig, Object> PROXY_CACHE = Maps.newConcurrentMap();
+    private final ConcurrentMap<RpcClientConfig, Object> PROXY_CACHE = Maps.newConcurrentMap();
 
     /**
      * 根据RpcServiceConfig创建并获取代理对象
      *
-     * @param rpcApplicationConfig rpc framework config
+     * @param rpcClientConfig rpc client config
      * @return 代理对象
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T createProxyInstance(RpcApplicationConfig rpcApplicationConfig) {
-        return (T) PROXY_CACHE.computeIfAbsent(rpcApplicationConfig, proxy -> doCreateProxyInstance(rpcApplicationConfig));
+    public <T> T createProxyInstance(RpcClientConfig rpcClientConfig) {
+        return (T) PROXY_CACHE.computeIfAbsent(rpcClientConfig, proxy -> doCreateProxyInstance(rpcClientConfig));
     }
 
     /**
      * doCreateProxyInstance
      *
-     * @param rpcApplicationConfig rpc framework config
+     * @param rpcClientConfig rpc client config
      * @return proxy object
      */
-    protected abstract Object doCreateProxyInstance(RpcApplicationConfig rpcApplicationConfig);
+    protected abstract Object doCreateProxyInstance(RpcClientConfig rpcClientConfig);
 }

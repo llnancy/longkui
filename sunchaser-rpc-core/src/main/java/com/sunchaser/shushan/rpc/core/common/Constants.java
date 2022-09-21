@@ -1,5 +1,7 @@
 package com.sunchaser.shushan.rpc.core.common;
 
+import com.sunchaser.shushan.rpc.core.registry.RegistryEnum;
+
 /**
  * 常量
  *
@@ -34,4 +36,9 @@ public interface Constants {
     int DEFAULT_CONNECTION_TIMEOUT = 3000;
 
     int DEFAULT_IO_THREADS = Math.min(Runtime.getRuntime().availableProcessors() + 1, 32);
+
+    /**
+     * default registry implementation. zookeeper
+     */
+    String DEFAULT_REGISTRY = RegistryEnum.ZOOKEEPER.name().toLowerCase();
 }

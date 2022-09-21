@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.core.proxy.impl;
 
-import com.sunchaser.shushan.rpc.core.config.RpcApplicationConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcClientConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
 import com.sunchaser.shushan.rpc.core.proxy.ProxyInvokeHandler;
@@ -27,18 +27,18 @@ public class ByteBuddyDynamicProxy extends AbstractDynamicProxy {
     /**
      * doCreateProxyInstance
      *
-     * @param rpcApplicationConfig rpc framework config
+     * @param rpcClientConfig rpc client config
      * @return proxy object
      */
     @SuppressWarnings("all")
     @SneakyThrows
     @Override
-    protected Object doCreateProxyInstance(RpcApplicationConfig rpcApplicationConfig) {
-        RpcServiceConfig rpcServiceConfig = rpcApplicationConfig.getRpcServiceConfig();
+    protected Object doCreateProxyInstance(RpcClientConfig rpcClientConfig) {
+        RpcServiceConfig rpcServiceConfig = rpcClientConfig.getRpcServiceConfig();
         Class<?> clazz = rpcServiceConfig.getTargetClass();
         return new ByteBuddy().subclass(clazz)
                 .method(ElementMatchers.isDeclaredBy(clazz))
-                .intercept(MethodDelegation.to(new ProxyInvokeHandler(rpcApplicationConfig)))
+                .intercept(MethodDelegation.to(new ProxyInvokeHandler(rpcClientConfig)))
                 .make()
                 .load(clazz.getClassLoader(), ClassLoadingStrategy.Default.INJECTION)
                 .getLoaded()

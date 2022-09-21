@@ -1,5 +1,6 @@
 package com.sunchaser.shushan.rpc.core.protocol;
 
+import com.sunchaser.shushan.rpc.core.util.ServiceUtils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -52,6 +53,6 @@ public class RpcRequest implements Serializable {
     private Object[] args;
 
     public String getRpcServiceKey() {
-        return String.join("#", serviceName, version, group);
+        return ServiceUtils.buildServiceKey(serviceName, group, version);
     }
 }

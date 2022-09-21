@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>sunchaser-rpc-server-spring-boot-starter</artifactId>
+    <artifactId>sunchaser-rpc-client-spring-boot-starter</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

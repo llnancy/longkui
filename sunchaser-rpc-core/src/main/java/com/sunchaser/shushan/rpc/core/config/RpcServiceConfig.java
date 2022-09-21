@@ -1,7 +1,9 @@
 package com.sunchaser.shushan.rpc.core.config;
 
+import com.sunchaser.shushan.rpc.core.balancer.Weightable;
 import com.sunchaser.shushan.rpc.core.call.CallType;
 import com.sunchaser.shushan.rpc.core.common.Constants;
+import com.sunchaser.shushan.rpc.core.util.ServiceUtils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -50,6 +52,16 @@ public class RpcServiceConfig {
     private String group = DEFAULT_GROUP;
 
     /**
+     * rpc service node weight
+     */
+    private Integer weight = Weightable.DEFAULT_WEIGHT;
+
+    /**
+     * rpc service node warmup time
+     */
+    private Integer warmup = Weightable.DEFAULT_WARMUP;
+
+    /**
      * rpc调用超时时间
      */
     private Long timeout = DEFAULT_TIMEOUT;
@@ -64,14 +76,10 @@ public class RpcServiceConfig {
     }
 
     public String getRpcServiceKey() {
-        return String.join("#", this.getClassName(), version, group);
-    }
-
-    public static RpcServiceConfig createDefaultConfig() {
-        return new RpcServiceConfig();
+        return ServiceUtils.buildServiceKey(this.getClassName(), this.group, this.version);
     }
 
     public static RpcServiceConfig createDefaultConfig(Class<?> clazz) {
-        return createDefaultConfig().setTargetClass(clazz);
+        return new RpcServiceConfig().setTargetClass(clazz);
     }
 }

@@ -2,6 +2,7 @@ package com.sunchaser.shushan.rpc.core.config;
 
 import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.transport.server.RpcServer;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -16,15 +17,38 @@ import java.net.InetAddress;
  */
 @Data
 @Builder
+@AllArgsConstructor
 public class RpcServerConfig {
 
+    /**
+     * server host
+     */
     private String host;
 
+    /**
+     * server port
+     */
     private Integer port;
 
+    /**
+     * io threads
+     */
     private Integer ioThreads;
 
+    /**
+     * biz thread pool config
+     */
     private ThreadPoolConfig threadPoolConfig;
+
+    /**
+     * rpc server (service provider)
+     */
+    private String rpcServer;
+
+    /**
+     * registry
+     */
+    private String registry;
 
     @SneakyThrows
     public RpcServerConfig() {
@@ -32,13 +56,8 @@ public class RpcServerConfig {
         this.port = RpcServer.DEFAULT_PORT;
         this.ioThreads = Constants.DEFAULT_IO_THREADS;
         this.threadPoolConfig = ThreadPoolConfig.createDefaultConfig();
-    }
-
-    public RpcServerConfig(String host, Integer port, Integer ioThreads, ThreadPoolConfig threadPoolConfig) {
-        this.host = host;
-        this.port = port;
-        this.ioThreads = ioThreads;
-        this.threadPoolConfig = threadPoolConfig;
+        this.rpcServer = Constants.NETTY;
+        this.registry = Constants.DEFAULT_REGISTRY;
     }
 
     public static RpcServerConfig createDefaultConfig() {
