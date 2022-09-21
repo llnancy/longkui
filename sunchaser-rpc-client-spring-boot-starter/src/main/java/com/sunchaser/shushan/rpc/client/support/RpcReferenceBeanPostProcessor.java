@@ -14,6 +14,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.util.ReflectionUtils;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * rpc reference bean post processor
@@ -50,11 +51,12 @@ public class RpcReferenceBeanPostProcessor implements BeanPostProcessor {
             RpcReference rpcReference = AnnotationUtils.getAnnotation(field, RpcReference.class);
             if (Objects.nonNull(rpcReference)) {
                 field.setAccessible(true);
-                RpcServiceConfig rpcServiceConfig = rpcClientConfig.getRpcServiceConfig();
-                rpcServiceConfig.setTargetClass(field.getType())
-                        .setVersion(rpcReference.version())
+                RpcServiceConfig rpcServiceConfig = Optional.ofNullable(rpcClientConfig.getRpcServiceConfig())
+                        .orElse(RpcServiceConfig.createDefaultConfig(field.getType()));
+                rpcServiceConfig.setVersion(rpcReference.version())
                         .setGroup(rpcReference.group());
-                // 动态将字段的值修改为代理对象
+                rpcClientConfig.setRpcServiceConfig(rpcServiceConfig);
+                // 动态将字段的值修改为代理对象 todo new RpcServiceConfig
                 ReflectionUtils.setField(field, bean, dynamicProxy.createProxyInstance(rpcClientConfig));
             }
         });

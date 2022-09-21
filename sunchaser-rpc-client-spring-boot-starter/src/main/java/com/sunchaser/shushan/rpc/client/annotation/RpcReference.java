@@ -16,7 +16,7 @@ import java.lang.annotation.*;
 @Inherited
 public @interface RpcReference {
 
-    String version() default RpcServiceConfig.DEFAULT_VERSION;
-
     String group() default RpcServiceConfig.DEFAULT_GROUP;
+
+    String version() default RpcServiceConfig.DEFAULT_VERSION;
 }

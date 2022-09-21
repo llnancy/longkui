@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -121,7 +122,9 @@ public class ExtensionLoader<T> {
         try {
             T instance = (T) EXTENSION_INSTANCES.get(clazz);
             if (Objects.isNull(instance)) {
-                EXTENSION_INSTANCES.putIfAbsent(clazz, clazz.getDeclaredConstructor().newInstance());
+                Constructor<?> constructor = clazz.getDeclaredConstructor();
+                Object obj = constructor.newInstance();
+                EXTENSION_INSTANCES.putIfAbsent(clazz, obj);
                 instance = (T) EXTENSION_INSTANCES.get(clazz);
             }
             // no inject

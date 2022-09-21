@@ -12,6 +12,7 @@
         <module>sunchaser-rpc-core</module>
         <module>sunchaser-rpc-server-spring-boot-starter</module>
         <module>sunchaser-rpc-client-spring-boot-starter</module>
+        <module>sunchaser-rpc-demo</module>
     </modules>
 
     <properties>

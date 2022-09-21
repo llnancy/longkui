@@ -2,6 +2,7 @@ package com.sunchaser.shushan.rpc.server.annotation;
 
 import com.sunchaser.shushan.rpc.core.balancer.Weightable;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
+import org.springframework.stereotype.Service;
 
 import java.lang.annotation.*;
 
@@ -14,12 +15,12 @@ import java.lang.annotation.*;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
-@Inherited
+@Service
 public @interface RpcService {
 
-    String version() default RpcServiceConfig.DEFAULT_VERSION;
-
     String group() default RpcServiceConfig.DEFAULT_GROUP;
+
+    String version() default RpcServiceConfig.DEFAULT_VERSION;
 
     int weight() default Weightable.DEFAULT_WEIGHT;
 
