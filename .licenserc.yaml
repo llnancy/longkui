@@ -31,6 +31,7 @@ header:
     - '**/resources/META-INF/**/**'
     - '**/vendor/**'
     - 'examples/docker/zk-compose.yml'
+    - 'lombok.config'
 
   comment: on-failure
 
