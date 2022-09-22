@@ -3,13 +3,18 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>sunchaser-rpc</artifactId>
+        <artifactId>examples</artifactId>
         <groupId>com.sunchaser.shushan</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>sunchaser-rpc-server-spring-boot-starter</artifactId>
+    <artifactId>example-frameless</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>frameless-facade</module>
+        <module>frameless-server</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -18,11 +23,4 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.sunchaser.shushan</groupId>
-            <artifactId>sunchaser-rpc-server-spring-boot-autoconfigure</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
 </project>

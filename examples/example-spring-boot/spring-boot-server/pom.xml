@@ -2,21 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>example-spring-boot</artifactId>
+        <groupId>com.sunchaser.shushan</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.sunchaser.shushan</groupId>
-    <artifactId>sunchaser-rpc</artifactId>
-    <packaging>pom</packaging>
-    <version>0.0.1-SNAPSHOT</version>
-    <modules>
-        <module>examples</module>
-        <module>sunchaser-rpc-core</module>
-        <module>sunchaser-rpc-common-spring-boot</module>
-        <module>sunchaser-rpc-client-spring-boot-autoconfigure</module>
-        <module>sunchaser-rpc-server-spring-boot-autoconfigure</module>
-        <module>sunchaser-rpc-client-spring-boot-starter</module>
-        <module>sunchaser-rpc-server-spring-boot-starter</module>
-    </modules>
+    <artifactId>spring-boot-server</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -38,4 +31,21 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sunchaser.shushan</groupId>
+            <artifactId>spring-boot-facade</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sunchaser.shushan</groupId>
+            <artifactId>sunchaser-rpc-server-spring-boot-starter</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 </project>

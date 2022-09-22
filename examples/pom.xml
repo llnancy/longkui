@@ -9,7 +9,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>sunchaser-rpc-server-spring-boot-starter</artifactId>
+    <artifactId>examples</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>example-frameless</module>
+        <module>example-spring-boot</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -18,11 +23,4 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.sunchaser.shushan</groupId>
-            <artifactId>sunchaser-rpc-server-spring-boot-autoconfigure</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
 </project>
