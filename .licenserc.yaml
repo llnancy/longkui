@@ -1,7 +1,7 @@
 header:
   license:
     spdx-id: Apache-2.0
-    copyright-owner: Apollo Authors
+    copyright-owner: SunChaser
 
   paths-ignore:
     - '.github/ISSUE_TEMPLATE'
@@ -30,6 +30,7 @@ header:
     - 'CNAME'
     - '**/resources/META-INF/**/**'
     - '**/vendor/**'
+    - 'examples/docker/zk-compose.yml'
 
   comment: on-failure
 
