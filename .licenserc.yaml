@@ -1,0 +1,39 @@
+header:
+  license:
+    spdx-id: Apache-2.0
+    copyright-owner: SunChaser
+
+  paths-ignore:
+    - '.github/ISSUE_TEMPLATE'
+    - '.github/PULL_REQUEST_TEMPLATE'
+    - '.github/workflows/**'
+    - '**/.gitignore'
+    - '**/.helmignore'
+    - '.gitmodules'
+    - '.gitattributes'
+    - '.mvn'
+    - '**/*.md'
+    - '**/*.svg'
+    - '**/*.json'
+    - '**/*.conf'
+    - '**/*.ftl'
+    - '**/*.iml'
+    - '**/*.tpl'
+    - '**/*.factories'
+    - '**/*.handlers'
+    - '**/*.schemas'
+    - '**/*.nojekyll'
+    - 'mvnw'
+    - 'mvnw.cmd'
+    - '**/target/**'
+    - 'LICENSE'
+    - 'NOTICE'
+    - 'CNAME'
+    - '**/resources/META-INF/**/**'
+    - '**/vendor/**'
+    - 'examples/docker/zk-compose.yml'
+    - 'lombok.config'
+
+  comment: on-failure
+
+  license-location-threshold: 130
