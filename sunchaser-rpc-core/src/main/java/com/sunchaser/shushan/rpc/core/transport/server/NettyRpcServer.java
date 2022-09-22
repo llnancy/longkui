@@ -42,7 +42,7 @@ public class NettyRpcServer implements RpcServer {
 
     public NettyRpcServer(RpcServerConfig rpcServerConfig) {
         // 注册JVM钩子进行资源优雅关闭
-        // Runtime.getRuntime().addShutdownHook(RpcShutdownHook.getRpcShutdownHook());
+        Runtime.getRuntime().addShutdownHook(RpcShutdownHook.getRpcShutdownHook());
         bossGroup = NettyEventLoopFactory.eventLoopGroup(1, "NettyServerBoss");
         workerGroup = NettyEventLoopFactory.eventLoopGroup(rpcServerConfig.getIoThreads(), "NettyServerWorker");
         this.requestExecutor = ThreadPools.createThreadPoolIfAbsent(
