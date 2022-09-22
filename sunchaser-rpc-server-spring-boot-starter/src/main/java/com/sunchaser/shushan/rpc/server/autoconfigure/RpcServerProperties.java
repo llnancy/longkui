@@ -1,6 +1,6 @@
 package com.sunchaser.shushan.rpc.server.autoconfigure;
 
-import com.sunchaser.shushan.rpc.core.config.RpcServerConfig;
+import com.sunchaser.shushan.rpc.core.config.ThreadPoolConfig;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -18,8 +18,33 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 public class RpcServerProperties {
 
     /**
-     * rpc server config
+     * server host
+     */
+    private String host;
+
+    /**
+     * server port
+     */
+    private Integer port;
+
+    /**
+     * io threads
+     */
+    private Integer ioThreads;
+
+    /**
+     * biz thread pool config (request executor)
      */
     @NestedConfigurationProperty
-    private RpcServerConfig config;
+    private ThreadPoolConfig requestExecutorConfig;
+
+    /**
+     * rpc server (service provider)
+     */
+    private String rpcServer;
+
+    /**
+     * registry
+     */
+    private String registry;
 }

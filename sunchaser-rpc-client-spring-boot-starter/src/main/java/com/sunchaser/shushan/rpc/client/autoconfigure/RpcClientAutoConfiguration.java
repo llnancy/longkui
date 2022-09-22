@@ -1,6 +1,7 @@
 package com.sunchaser.shushan.rpc.client.autoconfigure;
 
 import com.sunchaser.shushan.rpc.client.support.RpcReferenceBeanPostProcessor;
+import com.sunchaser.shushan.rpc.core.config.RpcClientConfig;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,8 @@ public class RpcClientAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(RpcReferenceBeanPostProcessor.class)
     public RpcReferenceBeanPostProcessor rpcReferenceBeanPostProcessor(RpcClientProperties properties) {
-        return new RpcReferenceBeanPostProcessor(properties);
+        RpcClientConfig rpcClientConfig = RpcClientConfig.createDefaultConfig();
+        new RpcClientConfigurer(properties).configure(rpcClientConfig);
+        return new RpcReferenceBeanPostProcessor(rpcClientConfig);
     }
 }

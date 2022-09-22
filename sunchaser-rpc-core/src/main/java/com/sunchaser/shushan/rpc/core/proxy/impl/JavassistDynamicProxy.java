@@ -25,13 +25,13 @@ public class JavassistDynamicProxy extends AbstractDynamicProxy {
     /**
      * doCreateProxyInstance
      *
-     * @param rpcClientConfig rpc client config
+     * @param rpcClientConfig  rpc client config
+     * @param rpcServiceConfig rpc service config
      * @return proxy object
      */
     @SneakyThrows
     @Override
-    protected Object doCreateProxyInstance(RpcClientConfig rpcClientConfig) {
-        RpcServiceConfig rpcServiceConfig = rpcClientConfig.getRpcServiceConfig();
+    protected Object doCreateProxyInstance(RpcClientConfig rpcClientConfig, RpcServiceConfig rpcServiceConfig) {
         ProxyFactory factory = new ProxyFactory();
         // 设置接口
         factory.setInterfaces(new Class[]{rpcServiceConfig.getTargetClass()});
@@ -40,7 +40,7 @@ public class JavassistDynamicProxy extends AbstractDynamicProxy {
         Class<?> proxyClass = factory.createClass();
         ProxyObject proxyObject = (ProxyObject) proxyClass.getDeclaredConstructor()
                 .newInstance();
-        proxyObject.setHandler(new ProxyInvokeHandler(rpcClientConfig));
+        proxyObject.setHandler(new ProxyInvokeHandler(rpcClientConfig, rpcServiceConfig));
         return proxyObject;
     }
 }

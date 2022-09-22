@@ -24,21 +24,21 @@ public class JdkDynamicProxy extends AbstractDynamicProxy {
     /**
      * doCreateProxyInstance
      *
-     * @param rpcClientConfig rpc client config
+     * @param rpcClientConfig  rpc client config
+     * @param rpcServiceConfig rpc service config
      * @return proxy object
      */
     @Override
-    protected Object doCreateProxyInstance(RpcClientConfig rpcClientConfig) {
-        RpcServiceConfig rpcServiceConfig = rpcClientConfig.getRpcServiceConfig();
+    protected Object doCreateProxyInstance(RpcClientConfig rpcClientConfig, RpcServiceConfig rpcServiceConfig) {
         Class<?> clazz = rpcServiceConfig.getTargetClass();
         if (!clazz.isInterface()) {
             // throw new IllegalArgumentException(clazz.getName() + " is not an interface");
-            return CglibDynamicProxy.getInstance().createProxyInstance(rpcClientConfig);
+            return CglibDynamicProxy.getInstance().createProxyInstance(rpcClientConfig, rpcServiceConfig);
         }
         return Proxy.newProxyInstance(
                 Thread.currentThread().getContextClassLoader(),
                 new Class[]{clazz},
-                new ProxyInvokeHandler(rpcClientConfig)
+                new ProxyInvokeHandler(rpcClientConfig, rpcServiceConfig)
         );
     }
 }

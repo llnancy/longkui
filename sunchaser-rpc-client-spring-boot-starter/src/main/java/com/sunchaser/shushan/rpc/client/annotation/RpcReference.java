@@ -1,5 +1,6 @@
 package com.sunchaser.shushan.rpc.client.annotation;
 
+import com.sunchaser.shushan.rpc.core.call.CallType;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 
 import java.lang.annotation.*;
@@ -19,4 +20,8 @@ public @interface RpcReference {
     String group() default RpcServiceConfig.DEFAULT_GROUP;
 
     String version() default RpcServiceConfig.DEFAULT_VERSION;
+
+    long timeout() default RpcServiceConfig.DEFAULT_TIMEOUT;
+
+    CallType callType() default CallType.SYNC;
 }

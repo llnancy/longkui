@@ -12,7 +12,6 @@ import com.sunchaser.shushan.rpc.core.transport.server.NettyRpcServer;
 import com.sunchaser.shushan.rpc.core.transport.server.RpcServer;
 import com.sunchaser.shushan.rpc.core.util.ServiceUtils;
 import com.sunchaser.shushan.rpc.server.annotation.RpcService;
-import com.sunchaser.shushan.rpc.server.autoconfigure.RpcServerProperties;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -35,7 +34,7 @@ import java.util.Objects;
 @Slf4j
 public class RpcServerStarter implements ApplicationContextAware, InitializingBean, DisposableBean {
 
-    private final RpcServerConfig rpcServerConfig;
+    private final Integer port;
 
     private final Registry registry;
 
@@ -43,10 +42,9 @@ public class RpcServerStarter implements ApplicationContextAware, InitializingBe
 
     private final ServiceProvider serviceProvider;
 
-    public RpcServerStarter(RpcServerProperties properties) {
-        this.rpcServerConfig = properties.getConfig();
-        this.registry = ExtensionLoader.getExtensionLoader(Registry.class).getExtension(rpcServerConfig.getRegistry());
-        RpcServerConfig config = properties.getConfig();
+    public RpcServerStarter(RpcServerConfig config) {
+        this.port = config.getPort();
+        this.registry = ExtensionLoader.getExtensionLoader(Registry.class).getExtension(config.getRegistry());
         String rpcServer = config.getRpcServer();
         if (Constants.NETTY.equals(rpcServer)) {
             this.rpcServer = new NettyRpcServer(config);
@@ -73,7 +71,6 @@ public class RpcServerStarter implements ApplicationContextAware, InitializingBe
             }
             String serviceKey = ServiceUtils.buildServiceKey(interfaces[0].getCanonicalName(), rpcService.group(), rpcService.version());
             serviceProvider.registerProvider(serviceKey, bean);
-            int port = rpcServerConfig.getPort();
             ServiceMetaData serviceMetaData = ServiceMetaData.builder()
                     .serviceKey(serviceKey)
                     .host(InetAddress.getLocalHost().getHostAddress())
@@ -88,7 +85,6 @@ public class RpcServerStarter implements ApplicationContextAware, InitializingBe
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Integer port = rpcServerConfig.getPort();
         rpcServer.start(port);
     }
 

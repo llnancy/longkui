@@ -1,5 +1,6 @@
 package com.sunchaser.shushan.rpc.server.autoconfigure;
 
+import com.sunchaser.shushan.rpc.core.config.RpcServerConfig;
 import com.sunchaser.shushan.rpc.server.support.RpcServerStarter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -19,6 +20,8 @@ public class RpcServerAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(RpcServerStarter.class)
     public RpcServerStarter rpcServiceBeanPostProcessor(RpcServerProperties properties) {
-        return new RpcServerStarter(properties);
+        RpcServerConfig rpcServerConfig = RpcServerConfig.createDefaultConfig();
+        new RpcServerConfigurer(properties).configure(rpcServerConfig);
+        return new RpcServerStarter(rpcServerConfig);
     }
 }

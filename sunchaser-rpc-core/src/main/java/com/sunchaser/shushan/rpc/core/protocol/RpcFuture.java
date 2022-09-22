@@ -21,7 +21,7 @@ public class RpcFuture<T> {
 
     private Promise<T> promise;
 
-    private RpcCallback<T> rpcCallback;
+    private RpcCallback<?> rpcCallback;
 
     public RpcFuture(Promise<T> promise) {
         this.promise = promise;

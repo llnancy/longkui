@@ -1,7 +1,6 @@
 package com.sunchaser.shushan.rpc.client.support;
 
 import com.sunchaser.shushan.rpc.client.annotation.RpcReference;
-import com.sunchaser.shushan.rpc.client.autoconfigure.RpcClientProperties;
 import com.sunchaser.shushan.rpc.core.config.RpcClientConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.extension.ExtensionLoader;
@@ -14,7 +13,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.util.ReflectionUtils;
 
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * rpc reference bean post processor
@@ -28,8 +26,8 @@ public class RpcReferenceBeanPostProcessor implements BeanPostProcessor {
 
     private final DynamicProxy dynamicProxy;
 
-    public RpcReferenceBeanPostProcessor(RpcClientProperties properties) {
-        this.rpcClientConfig = properties.getConfig();
+    public RpcReferenceBeanPostProcessor(RpcClientConfig config) {
+        this.rpcClientConfig = config;
         this.dynamicProxy = ExtensionLoader.getExtensionLoader(DynamicProxy.class).getExtension(rpcClientConfig.getDynamicProxy());
     }
 
@@ -51,15 +49,20 @@ public class RpcReferenceBeanPostProcessor implements BeanPostProcessor {
             RpcReference rpcReference = AnnotationUtils.getAnnotation(field, RpcReference.class);
             if (Objects.nonNull(rpcReference)) {
                 field.setAccessible(true);
-                RpcServiceConfig rpcServiceConfig = Optional.ofNullable(rpcClientConfig.getRpcServiceConfig())
-                        .orElse(RpcServiceConfig.createDefaultConfig(field.getType()));
-                rpcServiceConfig.setVersion(rpcReference.version())
-                        .setGroup(rpcReference.group());
-                rpcClientConfig.setRpcServiceConfig(rpcServiceConfig);
-                // 动态将字段的值修改为代理对象 todo new RpcServiceConfig
-                ReflectionUtils.setField(field, bean, dynamicProxy.createProxyInstance(rpcClientConfig));
+                RpcServiceConfig rpcServiceConfig = createRpcServiceConfig(field.getType(), rpcReference);
+                // 动态将字段的值修改为代理对象
+                ReflectionUtils.setField(field, bean, dynamicProxy.createProxyInstance(rpcClientConfig, rpcServiceConfig));
             }
         });
         return bean;
+    }
+
+    private static <T> RpcServiceConfig createRpcServiceConfig(Class<T> clazz, RpcReference rpcReference) {
+        RpcServiceConfig rpcServiceConfig = RpcServiceConfig.createDefaultConfig(clazz);
+        rpcServiceConfig.setVersion(rpcReference.version())
+                .setGroup(rpcReference.group())
+                .setTimeout(rpcReference.timeout())
+                .setCallType(rpcReference.callType());
+        return rpcServiceConfig;
     }
 }

@@ -4,6 +4,7 @@ import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.common.RpcMessageTypeEnum;
 import com.sunchaser.shushan.rpc.core.config.RpcClientConfig;
+import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.handler.RpcPendingHolder;
 import com.sunchaser.shushan.rpc.core.protocol.*;
@@ -30,9 +31,10 @@ public class P2PConsumer {
 
     public static void main(String[] args) throws Exception {
         // p2pConsumer();
-        RpcClientConfig rpcClientConfig = RpcClientConfig.createDefaultConfig(HelloService.class);
+        RpcClientConfig rpcClientConfig = RpcClientConfig.createDefaultConfig();
+        RpcServiceConfig rpcServiceConfig = RpcServiceConfig.createDefaultConfig(HelloService.class);
         DynamicProxy dynamicProxy = JavassistDynamicProxy.getInstance();
-        HelloService helloService = dynamicProxy.createProxyInstance(rpcClientConfig);
+        HelloService helloService = dynamicProxy.createProxyInstance(rpcClientConfig, rpcServiceConfig);
         String hello = helloService.sayHello("SunChaser");
         LOGGER.info("sayHello result: {}", hello);
     }

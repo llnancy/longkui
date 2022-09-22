@@ -36,9 +36,9 @@ public class RpcServerConfig {
     private Integer ioThreads;
 
     /**
-     * biz thread pool config
+     * biz thread pool config (request executor)
      */
-    private ThreadPoolConfig threadPoolConfig;
+    private ThreadPoolConfig requestExecutorConfig;
 
     /**
      * rpc server (service provider)
@@ -55,7 +55,7 @@ public class RpcServerConfig {
         this.host = InetAddress.getLocalHost().getHostAddress();
         this.port = RpcServer.DEFAULT_PORT;
         this.ioThreads = Constants.DEFAULT_IO_THREADS;
-        this.threadPoolConfig = ThreadPoolConfig.createDefaultConfig();
+        this.requestExecutorConfig = ThreadPoolConfig.createDefaultConfig();
         this.rpcServer = Constants.NETTY;
         this.registry = Constants.DEFAULT_REGISTRY;
     }
