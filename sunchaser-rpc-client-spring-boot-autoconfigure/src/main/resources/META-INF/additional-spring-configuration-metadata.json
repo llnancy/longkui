@@ -1,0 +1,6 @@
+{
+  "properties": [{
+    "name": "sunchaser.rpc.client.connection-timeout",
+    "defaultValue": 3000
+  }]
+}
