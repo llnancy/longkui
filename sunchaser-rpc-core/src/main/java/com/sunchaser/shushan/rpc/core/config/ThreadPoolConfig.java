@@ -23,32 +23,32 @@ public class ThreadPoolConfig {
     /**
      * default thread name identifier: default
      */
-    private static final String DEFAULT_THREAD_NAME_IDENTIFIER = Constants.DEFAULT;
+    public static final String DEFAULT_THREAD_NAME_IDENTIFIER = Constants.DEFAULT;
 
     /**
      * default core pool size: 10
      */
-    private static final Integer DEFAULT_CORE_POOL_SIZE = 10;
+    public static final Integer DEFAULT_CORE_POOL_SIZE = 10;
 
     /**
      * default max pool size: 100
      */
-    private static final Integer DEFAULT_MAXIMUM_POOL_SIZE_SIZE = 100;
+    public static final Integer DEFAULT_MAXIMUM_POOL_SIZE_SIZE = 100;
 
     /**
      * default keepalive time: 60
      */
-    private static final Long DEFAULT_KEEP_ALIVE_TIME = 60L;
+    public static final Long DEFAULT_KEEP_ALIVE_TIME = 60L;
 
     /**
      * default keepalive time unit: seconds
      */
-    private static final TimeUnit DEFAULT_UNIT = TimeUnit.SECONDS;
+    public static final TimeUnit DEFAULT_UNIT = TimeUnit.SECONDS;
 
     /**
      * default work queue capacity: 1000
      */
-    private static final Integer DEFAULT_WORK_QUEUE_CAPACITY = 1000;
+    public static final Integer DEFAULT_WORK_QUEUE_CAPACITY = 1000;
 
     /**
      * thread name identifier
