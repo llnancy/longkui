@@ -1,8 +1,8 @@
 package com.sunchaser.shushan.rpc.core.call;
 
-import com.sunchaser.shushan.rpc.core.protocol.RpcFuture;
-import com.sunchaser.shushan.rpc.core.protocol.RpcResponse;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.Future;
 
 /**
  * thread hold the rpc response future
@@ -13,16 +13,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RpcFutureHolder {
 
-    private static final ThreadLocal<RpcFuture<RpcResponse>> RPC_FUTURE_THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<RpcInvokeFuture<?>> RPC_FUTURE_THREAD_LOCAL = new ThreadLocal<>();
 
-    public static RpcFuture<RpcResponse> getFuture() {
-        RpcFuture<RpcResponse> future = RPC_FUTURE_THREAD_LOCAL.get();
+    public static <T> Future<T> getFuture() {
+        @SuppressWarnings("unchecked")
+        Future<T> future = (Future<T>) RPC_FUTURE_THREAD_LOCAL.get();
         removeFuture();
         return future;
     }
 
-    public static void setFuture(RpcFuture<RpcResponse> future) {
-        RPC_FUTURE_THREAD_LOCAL.set(future);
+    public static void setFuture(RpcInvokeFuture<?> invokeFuture) {
+        RPC_FUTURE_THREAD_LOCAL.set(invokeFuture);
     }
 
     public static void removeFuture() {

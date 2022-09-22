@@ -4,10 +4,7 @@ import com.sunchaser.shushan.rpc.core.balancer.Weightable;
 import com.sunchaser.shushan.rpc.core.call.CallType;
 import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.util.ServiceUtils;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * rpc service config
@@ -19,6 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class RpcServiceConfig {
 
     /**
@@ -34,7 +32,7 @@ public class RpcServiceConfig {
     /**
      * 默认超时时间
      */
-    public static final Long DEFAULT_TIMEOUT = 0L;
+    public static final long DEFAULT_TIMEOUT = 0L;
 
     /**
      * rpc服务提供类Class（目标代理类的Class）
@@ -64,7 +62,7 @@ public class RpcServiceConfig {
     /**
      * rpc调用超时时间
      */
-    private Long timeout = DEFAULT_TIMEOUT;
+    private long timeout = DEFAULT_TIMEOUT;
 
     /**
      * rpc call type, default SYNC
@@ -79,7 +77,7 @@ public class RpcServiceConfig {
         return ServiceUtils.buildServiceKey(this.getClassName(), this.group, this.version);
     }
 
-    public static RpcServiceConfig createDefaultConfig(Class<?> clazz) {
+    public static <T> RpcServiceConfig createDefaultConfig(Class<T> clazz) {
         return new RpcServiceConfig().setTargetClass(clazz);
     }
 }

@@ -1,10 +1,7 @@
 package com.sunchaser.shushan.rpc.core.proxy;
 
 import com.google.common.base.Preconditions;
-import com.sunchaser.shushan.rpc.core.call.CallType;
-import com.sunchaser.shushan.rpc.core.call.RpcCallback;
-import com.sunchaser.shushan.rpc.core.call.RpcCallbackHolder;
-import com.sunchaser.shushan.rpc.core.call.RpcFutureHolder;
+import com.sunchaser.shushan.rpc.core.call.*;
 import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.common.RpcMessageTypeEnum;
@@ -68,9 +65,9 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
 
     private final Compressor compressor;
 
-    public ProxyInvokeHandler(RpcClientConfig rpcClientConfig) {
+    public ProxyInvokeHandler(RpcClientConfig rpcClientConfig, RpcServiceConfig rpcServiceConfig) {
         this.rpcProtocolConfig = rpcClientConfig.getRpcProtocolConfig();
-        this.rpcServiceConfig = rpcClientConfig.getRpcServiceConfig();
+        this.rpcServiceConfig = rpcServiceConfig;
         this.registry = ExtensionLoader.getExtensionLoader(Registry.class).getExtension(rpcClientConfig.getRegistry());
         String rpcClientType = rpcClientConfig.getRpcClient();
         if (Constants.NETTY.equals(rpcClientType)) {
@@ -136,7 +133,7 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
                 RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()));
                 // 保存协议唯一标识sequenceId与RpcFuture对象的映射关系
                 RpcPendingHolder.putRpcFuture(sequenceId, rpcFuture);
-                RpcFutureHolder.setFuture(rpcFuture);
+                RpcFutureHolder.setFuture(new RpcInvokeFuture<>(rpcFuture.getPromise()));
                 rpcClient.invoke(rpcProtocol, host, port);
             } catch (Throwable t) {
                 // rpc调用异常时删除对应RpcFuture
@@ -145,8 +142,7 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
             }
         } else if (callType == CallType.CALLBACK) {
             try {
-                @SuppressWarnings("unchecked")
-                RpcCallback<RpcResponse> rpcCallback = (RpcCallback<RpcResponse>) RpcCallbackHolder.getCallback();
+                RpcCallback<?> rpcCallback = RpcCallbackHolder.getCallback();
                 Preconditions.checkNotNull(rpcCallback, "sunchaser-rpc >>>>>> RpcInvokeCallback(CallType = CALLBACK) instance cannot be null.");
                 // 创建保存RPC调用结果的RpcFuture对象
                 RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()), rpcCallback);

@@ -27,18 +27,18 @@ public class ByteBuddyDynamicProxy extends AbstractDynamicProxy {
     /**
      * doCreateProxyInstance
      *
-     * @param rpcClientConfig rpc client config
+     * @param rpcClientConfig  rpc client config
+     * @param rpcServiceConfig rpc service config
      * @return proxy object
      */
     @SuppressWarnings("all")
     @SneakyThrows
     @Override
-    protected Object doCreateProxyInstance(RpcClientConfig rpcClientConfig) {
-        RpcServiceConfig rpcServiceConfig = rpcClientConfig.getRpcServiceConfig();
+    protected Object doCreateProxyInstance(RpcClientConfig rpcClientConfig, RpcServiceConfig rpcServiceConfig) {
         Class<?> clazz = rpcServiceConfig.getTargetClass();
         return new ByteBuddy().subclass(clazz)
                 .method(ElementMatchers.isDeclaredBy(clazz))
-                .intercept(MethodDelegation.to(new ProxyInvokeHandler(rpcClientConfig)))
+                .intercept(MethodDelegation.to(new ProxyInvokeHandler(rpcClientConfig, rpcServiceConfig)))
                 .make()
                 .load(clazz.getClassLoader(), ClassLoadingStrategy.Default.INJECTION)
                 .getLoaded()

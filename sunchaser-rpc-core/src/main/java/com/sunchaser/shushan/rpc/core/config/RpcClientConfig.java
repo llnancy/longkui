@@ -3,7 +3,10 @@ package com.sunchaser.shushan.rpc.core.config;
 import com.sunchaser.shushan.rpc.core.balancer.LoadBalancerEnum;
 import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.proxy.DynamicProxyEnum;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * rpc client config
@@ -15,7 +18,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@EqualsAndHashCode
 public class RpcClientConfig {
 
     /**
@@ -68,17 +70,7 @@ public class RpcClientConfig {
      */
     private RpcProtocolConfig rpcProtocolConfig = RpcProtocolConfig.createDefaultConfig();
 
-    /**
-     * rpc service config
-     */
-    private RpcServiceConfig rpcServiceConfig;
-
     public static RpcClientConfig createDefaultConfig() {
         return new RpcClientConfig();
-    }
-
-    public static <T> RpcClientConfig createDefaultConfig(Class<T> clazz) {
-        RpcServiceConfig rpcServiceConfig = RpcServiceConfig.createDefaultConfig(clazz);
-        return createDefaultConfig().setRpcServiceConfig(rpcServiceConfig);
     }
 }

@@ -48,9 +48,9 @@ public class LocalRpc {
         new NettyRpcServer(rpcServerConfig).start();
 
         // consumer
-        RpcClientConfig rpcClientConfig = RpcClientConfig.createDefaultConfig(HelloService.class);
+        RpcClientConfig rpcClientConfig = RpcClientConfig.createDefaultConfig();
         DynamicProxy dynamicProxy = JdkDynamicProxy.getInstance();
-        HelloService helloService = dynamicProxy.createProxyInstance(rpcClientConfig);
+        HelloService helloService = dynamicProxy.createProxyInstance(rpcClientConfig, rpcServiceConfig);
         String hello = helloService.sayHello("SunChaser", null, 1L);
         LOGGER.info("sayHello result: {}", hello);
     }

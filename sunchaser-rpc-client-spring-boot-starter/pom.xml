@@ -21,13 +21,8 @@
     <dependencies>
         <dependency>
             <groupId>com.sunchaser.shushan</groupId>
-            <artifactId>sunchaser-rpc-core</artifactId>
+            <artifactId>sunchaser-rpc-client-spring-boot-autoconfigure</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
         </dependency>
     </dependencies>
 </project>

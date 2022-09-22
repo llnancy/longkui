@@ -23,15 +23,15 @@ public class JMHCglibDynamicProxy extends JMHAbstractDynamicProxy {
     /**
      * doCreateProxyInstance
      *
-     * @param rpcClientConfig rpc client config
+     * @param rpcClientConfig  rpc client config
+     * @param rpcServiceConfig rpc service config
      * @return proxy object
      */
     @Override
-    protected Object doCreateProxyInstance(RpcClientConfig rpcClientConfig) {
-        RpcServiceConfig rpcServiceConfig = rpcClientConfig.getRpcServiceConfig();
+    protected Object doCreateProxyInstance(RpcClientConfig rpcClientConfig, RpcServiceConfig rpcServiceConfig) {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(rpcServiceConfig.getTargetClass());
-        enhancer.setCallback(new JMHProxyInvokeHandler(rpcClientConfig));
+        enhancer.setCallback(new JMHProxyInvokeHandler(rpcClientConfig, rpcServiceConfig));
         return enhancer.create();
     }
 }

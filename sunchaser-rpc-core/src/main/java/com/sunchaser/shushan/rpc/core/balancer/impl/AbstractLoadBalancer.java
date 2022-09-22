@@ -16,8 +16,6 @@ import java.util.function.Function;
  */
 public abstract class AbstractLoadBalancer implements LoadBalancer {
 
-    private static final int DEFAULT_WARMUP = 10 * 60 * 1000;
-
     /**
      * 负载均衡
      *

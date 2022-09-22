@@ -58,7 +58,8 @@ public class RpcResponseHandler extends SimpleChannelInboundHandler<RpcProtocol<
             return;
         }
         RpcResponse rpcResponse = msg.getRpcBody();
-        RpcCallback<RpcResponse> rpcCallback = rpcFuture.getRpcCallback();
+        @SuppressWarnings("unchecked")
+        RpcCallback<Object> rpcCallback = (RpcCallback<Object>) rpcFuture.getRpcCallback();
         if (Objects.nonNull(rpcCallback)) {
             // callback type
             rpcCallbackExecutor.execute(() -> {
@@ -66,7 +67,7 @@ public class RpcResponseHandler extends SimpleChannelInboundHandler<RpcProtocol<
                 if (StringUtils.isNotBlank(errorMsg)) {
                     rpcCallback.onError(new RpcException(errorMsg));
                 } else {
-                    rpcCallback.onSuccess(rpcResponse);
+                    rpcCallback.onSuccess(rpcResponse.getResult());
                 }
             });
         } else {
