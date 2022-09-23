@@ -42,4 +42,8 @@ public class RpcPendingHolder {
     public static RpcFuture<RpcResponse> removeRpcFuture(Long sequenceId) {
         return RPC_FUTURE_MAP.remove(sequenceId);
     }
+
+    public static RpcFuture<RpcResponse> getRpcFuture(Long sequenceId) {
+        return RPC_FUTURE_MAP.get(sequenceId);
+    }
 }
