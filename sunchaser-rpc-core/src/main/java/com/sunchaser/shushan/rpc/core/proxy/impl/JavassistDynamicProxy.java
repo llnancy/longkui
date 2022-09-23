@@ -19,7 +19,7 @@ package com.sunchaser.shushan.rpc.core.proxy.impl;
 import com.sunchaser.shushan.rpc.core.config.RpcClientConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
-import com.sunchaser.shushan.rpc.core.proxy.ProxyInvokeHandler;
+import com.sunchaser.shushan.rpc.core.proxy.DynamicProxyHandler;
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyObject;
 import lombok.SneakyThrows;
@@ -56,7 +56,7 @@ public class JavassistDynamicProxy extends AbstractDynamicProxy {
         Class<?> proxyClass = factory.createClass();
         ProxyObject proxyObject = (ProxyObject) proxyClass.getDeclaredConstructor()
                 .newInstance();
-        proxyObject.setHandler(new ProxyInvokeHandler(rpcClientConfig, rpcServiceConfig));
+        proxyObject.setHandler(new DynamicProxyHandler(rpcClientConfig, rpcServiceConfig));
         return proxyObject;
     }
 }

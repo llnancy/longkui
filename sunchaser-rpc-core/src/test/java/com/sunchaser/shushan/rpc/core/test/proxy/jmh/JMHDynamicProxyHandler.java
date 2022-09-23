@@ -39,13 +39,13 @@ import java.lang.reflect.Method;
  */
 @Getter
 @Slf4j
-public class JMHProxyInvokeHandler implements InvocationHandler, MethodInterceptor, MethodHandler {
+public class JMHDynamicProxyHandler implements InvocationHandler, MethodInterceptor, MethodHandler {
 
     private final RpcClientConfig rpcClientConfig;
 
     private final RpcServiceConfig rpcServiceConfig;
 
-    public JMHProxyInvokeHandler(RpcClientConfig rpcClientConfig, RpcServiceConfig rpcServiceConfig) {
+    public JMHDynamicProxyHandler(RpcClientConfig rpcClientConfig, RpcServiceConfig rpcServiceConfig) {
         this.rpcClientConfig = rpcClientConfig;
         this.rpcServiceConfig = rpcServiceConfig;
     }

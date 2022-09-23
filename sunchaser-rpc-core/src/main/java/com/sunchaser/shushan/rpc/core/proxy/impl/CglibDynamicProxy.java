@@ -19,7 +19,7 @@ package com.sunchaser.shushan.rpc.core.proxy.impl;
 import com.sunchaser.shushan.rpc.core.config.RpcClientConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
-import com.sunchaser.shushan.rpc.core.proxy.ProxyInvokeHandler;
+import com.sunchaser.shushan.rpc.core.proxy.DynamicProxyHandler;
 import net.sf.cglib.proxy.Enhancer;
 
 /**
@@ -47,7 +47,7 @@ public class CglibDynamicProxy extends AbstractDynamicProxy {
     protected Object doCreateProxyInstance(RpcClientConfig rpcClientConfig, RpcServiceConfig rpcServiceConfig) {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(rpcServiceConfig.getTargetClass());
-        enhancer.setCallback(new ProxyInvokeHandler(rpcClientConfig, rpcServiceConfig));
+        enhancer.setCallback(new DynamicProxyHandler(rpcClientConfig, rpcServiceConfig));
         return enhancer.create();
     }
 }

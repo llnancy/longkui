@@ -16,7 +16,9 @@
 
 package com.sunchaser.shushan.rpc.core.proxy;
 
+import cn.hutool.core.lang.func.VoidFunc0;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import com.sunchaser.shushan.rpc.core.call.*;
 import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
@@ -40,6 +42,7 @@ import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Promise;
 import javassist.util.proxy.MethodHandler;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.implementation.bind.annotation.AllArguments;
 import net.bytebuddy.implementation.bind.annotation.Origin;
@@ -52,6 +55,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -65,23 +70,50 @@ import java.util.concurrent.TimeUnit;
  * @since JDK8 2022/8/12
  */
 @Slf4j
-public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor, MethodHandler {
+public class DynamicProxyHandler implements InvocationHandler, MethodInterceptor, MethodHandler {
 
+    /**
+     * rpc protocol config
+     */
     private final RpcProtocolConfig rpcProtocolConfig;
 
+    /**
+     * rpc service config
+     */
     private final RpcServiceConfig rpcServiceConfig;
 
+    /**
+     * service registry
+     */
     private final Registry registry;
 
+    /**
+     * rpc client
+     */
     private final RpcClient rpcClient;
 
+    /**
+     * sequence id generator
+     */
     private final SequenceIdGenerator sequenceIdGenerator;
 
+    /**
+     * serializer
+     */
     private final Serializer serializer;
 
+    /**
+     * compressor
+     */
     private final Compressor compressor;
 
-    public ProxyInvokeHandler(RpcClientConfig rpcClientConfig, RpcServiceConfig rpcServiceConfig) {
+    /**
+     * constructor
+     *
+     * @param rpcClientConfig  rpc client config
+     * @param rpcServiceConfig rpc service config
+     */
+    public DynamicProxyHandler(RpcClientConfig rpcClientConfig, RpcServiceConfig rpcServiceConfig) {
         this.rpcProtocolConfig = rpcClientConfig.getRpcProtocolConfig();
         this.rpcServiceConfig = rpcServiceConfig;
         this.registry = ExtensionLoader.getExtensionLoader(Registry.class).getExtension(rpcClientConfig.getRegistry());
@@ -96,41 +128,60 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
         this.compressor = ExtensionLoader.getExtensionLoader(Compressor.class).getExtension(this.rpcProtocolConfig.getCompressor());
     }
 
+    /**
+     * do invoke.
+     * adapt to different dynamic proxy.
+     *
+     * @param method java.lang.reflect.Method
+     * @param args   Object Array
+     * @return rpc result
+     * @throws Throwable rpc error
+     */
     protected Object doInvoke(Method method, Object[] args) throws Throwable {
-        long sequenceId = this.sequenceIdGenerator.nextSequenceId();
-        // 构建协议头
-        RpcHeader rpcHeader = buildRpcHeader(sequenceId);
-
-        // kryo、protostuff等序列化框架会忽略数组中间索引的null元素，这里用特殊值代替null
-        ArrayElement.wrapArgs(args);
-
-        // 构建协议体
-        RpcRequest rpcRequest = buildRpcRequest(method, args);
-
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("AbstractProxy#proxyInvoke: args: {}", Arrays.toString(args));
             LOGGER.debug("AbstractProxy#proxyInvoke: argTypes: {}", Arrays.toString(method.getParameterTypes()));
         }
-
+        long sequenceId = this.sequenceIdGenerator.nextSequenceId();
         // 构建一条完整的RPC协议消息
-        RpcProtocol<RpcRequest> rpcProtocol = buildRpcProtocol(rpcHeader, rpcRequest);
+        RpcProtocol<RpcRequest> rpcProtocol = buildRpcProtocol(method, args, sequenceId);
 
         // 服务发现
         ServiceMetaData serviceMetaData = registry.discovery(rpcServiceConfig.getRpcServiceKey());
-        String host = serviceMetaData.getHost();
-        Integer port = serviceMetaData.getPort();
-        CallType callType = rpcServiceConfig.getCallType();
-        if (callType == CallType.SYNC) {
-            try {
-                // 创建保存RPC调用结果的RpcFuture对象
-                RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()));
-                // 保存协议唯一标识sequenceId与RpcFuture对象的映射关系
-                RpcPendingHolder.putRpcFuture(sequenceId, rpcFuture);
-                // invoke
-                rpcClient.invoke(rpcProtocol, host, port);
+
+        // build rpc caller context
+        RpcCallerContext rpcCallerContext = RpcCallerContext.builder()
+                .caller(() -> rpcClient.invoke(rpcProtocol, serviceMetaData.getHost(), serviceMetaData.getPort()))
+                .timeout(rpcServiceConfig.getTimeout())
+                .sequenceId(sequenceId)
+                .build();
+
+        // do call
+        return RpcCaller.match(rpcServiceConfig.getCallType())
+                .call(rpcCallerContext);
+    }
+
+    /**
+     * rpc caller.
+     * Contains four calling methods.
+     * Use the strategy pattern and template method design pattern and simple factory pattern
+     */
+    @AllArgsConstructor
+    @Getter
+    enum RpcCaller {
+
+        /**
+         * sync caller
+         */
+        SYNC_CALLER(CallType.SYNC) {
+            @Override
+            protected Object afterCall() throws Throwable {
+                RpcCallerContext rpcCallerContext = RPC_CALLER_CONTEXT_THREAD_LOCAL.get();
+                long sequenceId = rpcCallerContext.getSequenceId();
+                RpcFuture<RpcResponse> rpcFuture = RpcPendingHolder.getRpcFuture(sequenceId);
                 Promise<RpcResponse> promise = rpcFuture.getPromise();
-                long timeout = rpcServiceConfig.getTimeout();
                 // todo get(0) => get() ?
+                long timeout = rpcCallerContext.getTimeout();
                 RpcResponse rpcResponse = timeout == 0 ? promise.get() : promise.get(timeout, TimeUnit.MILLISECONDS);
                 String errorMsg = rpcResponse.getErrorMsg();
                 if (StringUtils.isNotBlank(errorMsg)) {
@@ -138,61 +189,147 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
                     throw new RpcException(errorMsg);
                 }
                 return rpcResponse.getResult();
-            } catch (Throwable t) {
-                // rpc调用异常时删除对应RpcFuture
-                RpcPendingHolder.removeRpcFuture(sequenceId);
-                throw t;
             }
-        } else if (callType == CallType.FUTURE) {
-            try {
-                // 创建保存RPC调用结果的RpcFuture对象
-                RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()));
-                // 保存协议唯一标识sequenceId与RpcFuture对象的映射关系
-                RpcPendingHolder.putRpcFuture(sequenceId, rpcFuture);
+        },
+
+        /**
+         * future caller
+         */
+        FUTURE_CALLER(CallType.FUTURE) {
+            @Override
+            protected void beforeCall() {
+                super.beforeCall();
+                RpcCallerContext rpcCallerContext = RPC_CALLER_CONTEXT_THREAD_LOCAL.get();
+                long sequenceId = rpcCallerContext.getSequenceId();
+                RpcFuture<RpcResponse> rpcFuture = RpcPendingHolder.getRpcFuture(sequenceId);
                 RpcFutureHolder.setFuture(new RpcInvokeFuture<>(rpcFuture.getPromise()));
-                rpcClient.invoke(rpcProtocol, host, port);
-            } catch (Throwable t) {
-                // rpc调用异常时删除对应RpcFuture
-                RpcPendingHolder.removeRpcFuture(sequenceId);
-                throw t;
             }
-        } else if (callType == CallType.CALLBACK) {
-            try {
+        },
+
+        /**
+         * callback caller
+         */
+        CALLBACK_CALLER(CallType.CALLBACK) {
+            @Override
+            protected void beforeCall() {
                 RpcCallback<?> rpcCallback = RpcCallbackHolder.getCallback();
                 Preconditions.checkNotNull(rpcCallback, "sunchaser-rpc >>>>>> RpcInvokeCallback(CallType = CALLBACK) instance cannot be null.");
-                // 创建保存RPC调用结果的RpcFuture对象
+                RpcCallerContext rpcCallerContext = RPC_CALLER_CONTEXT_THREAD_LOCAL.get();
+                long sequenceId = rpcCallerContext.getSequenceId();
+                // 创建包含rpcCallback的保存RPC调用结果的RpcFuture对象
                 RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()), rpcCallback);
                 // 保存协议唯一标识sequenceId与RpcFuture对象的映射关系
                 RpcPendingHolder.putRpcFuture(sequenceId, rpcFuture);
-                rpcClient.invoke(rpcProtocol, host, port);
-            } catch (Throwable t) {
-                // rpc调用异常时删除对应RpcFuture
-                RpcPendingHolder.removeRpcFuture(sequenceId);
-                throw t;
             }
-        } else if (callType == CallType.ONEWAY) {
-            rpcClient.invoke(rpcProtocol, host, port);
-        } else {
-            throw new RpcException("sunchaser-rpc >>>>>> CallType of " + callType + " is not supported!");
+        },
+
+        /**
+         * oneway caller
+         */
+        ONEWAY_CALLER(CallType.ONEWAY) {
+            @Override
+            protected void beforeCall() {
+            }
+
+            @Override
+            protected void onException() {
+            }
+        };
+
+        /**
+         * rpc call type
+         */
+        private final CallType callType;
+
+        private static final Map<CallType, RpcCaller> ENUM_MAP = Maps.newHashMap();
+
+        static {
+            for (RpcCaller rpcCaller : RpcCaller.values()) {
+                ENUM_MAP.put(rpcCaller.callType, rpcCaller);
+            }
         }
-        return null;
+
+        public static RpcCaller match(CallType callType) {
+            return Optional.ofNullable(ENUM_MAP.get(callType))
+                    .orElseThrow(() -> new RpcException("sunchaser-rpc >>>>>> CallType of " + callType + " is not supported!"));
+        }
+
+        /**
+         * use ThreadLocal to pass RpcCallerContext.
+         */
+        protected final ThreadLocal<RpcCallerContext> RPC_CALLER_CONTEXT_THREAD_LOCAL = new ThreadLocal<>();
+
+        Object call(RpcCallerContext rpcCallerContext) throws Throwable {
+            try {
+                RPC_CALLER_CONTEXT_THREAD_LOCAL.set(rpcCallerContext);
+                beforeCall();
+                // do call
+                rpcCallerContext.getCaller().call();
+                return afterCall();
+            } catch (Throwable t) {
+                onException();
+                throw t;
+            } finally {
+                RPC_CALLER_CONTEXT_THREAD_LOCAL.remove();
+            }
+        }
+
+        protected void beforeCall() {
+            RpcCallerContext rpcCallerContext = RPC_CALLER_CONTEXT_THREAD_LOCAL.get();
+            long sequenceId = rpcCallerContext.getSequenceId();
+            // 创建保存RPC调用结果的RpcFuture对象
+            RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()));
+            // 保存协议唯一标识sequenceId与RpcFuture对象的映射关系
+            RpcPendingHolder.putRpcFuture(sequenceId, rpcFuture);
+        }
+
+        protected Object afterCall() throws Throwable {
+            return null;
+        }
+
+        protected void onException() {
+            RpcCallerContext rpcCallerContext = RPC_CALLER_CONTEXT_THREAD_LOCAL.get();
+            long sequenceId = rpcCallerContext.getSequenceId();
+            // rpc调用异常时删除对应RpcFuture
+            RpcPendingHolder.removeRpcFuture(sequenceId);
+        }
     }
 
-    private static RpcProtocol<RpcRequest> buildRpcProtocol(RpcHeader rpcHeader, RpcRequest rpcRequest) {
+    /**
+     * rpc caller context
+     */
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    static class RpcCallerContext {
+
+        /**
+         * caller. Functional programming, passing methods through parameters
+         */
+        private VoidFunc0 caller;
+
+        /**
+         * rpc future.get() timeout
+         */
+        private long timeout;
+
+        /**
+         * rpc sequence id
+         */
+        private long sequenceId;
+    }
+
+    private RpcProtocol<RpcRequest> buildRpcProtocol(Method method, Object[] args, long sequenceId) {
+        // 构建协议头
+        RpcHeader rpcHeader = buildRpcHeader(sequenceId);
+        // kryo、protostuff等序列化框架会忽略数组中间索引的null元素，这里用特殊值代替null
+        ArrayElement.wrapArgs(args);
+        // 构建协议体
+        RpcRequest rpcRequest = buildRpcRequest(method, args);
         return RpcProtocol.<RpcRequest>builder()
                 .rpcHeader(rpcHeader)
                 .rpcBody(rpcRequest)
-                .build();
-    }
-
-    private RpcRequest buildRpcRequest(Method method, Object[] args) {
-        return RpcRequest.builder()
-                .serviceName(rpcServiceConfig.getClassName())
-                .version(rpcServiceConfig.getVersion())
-                .group(rpcServiceConfig.getGroup())
-                .methodName(method.getName())
-                .argTypes(method.getParameterTypes())
-                .args(args)
                 .build();
     }
 
@@ -204,6 +341,17 @@ public class ProxyInvokeHandler implements InvocationHandler, MethodInterceptor,
                 .serialize(serializer.getTypeId())
                 .compress(compressor.getTypeId())
                 .sequenceId(sequenceId)
+                .build();
+    }
+
+    private RpcRequest buildRpcRequest(Method method, Object[] args) {
+        return RpcRequest.builder()
+                .serviceName(rpcServiceConfig.getClassName())
+                .version(rpcServiceConfig.getVersion())
+                .group(rpcServiceConfig.getGroup())
+                .methodName(method.getName())
+                .argTypes(method.getParameterTypes())
+                .args(args)
                 .build();
     }
 

@@ -19,7 +19,7 @@ package com.sunchaser.shushan.rpc.core.test.proxy.jmh.impl;
 import com.sunchaser.shushan.rpc.core.config.RpcClientConfig;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.proxy.DynamicProxy;
-import com.sunchaser.shushan.rpc.core.test.proxy.jmh.JMHProxyInvokeHandler;
+import com.sunchaser.shushan.rpc.core.test.proxy.jmh.JMHDynamicProxyHandler;
 
 import java.lang.reflect.Proxy;
 
@@ -54,7 +54,7 @@ public class JMHJdkDynamicProxy extends JMHAbstractDynamicProxy {
         return Proxy.newProxyInstance(
                 Thread.currentThread().getContextClassLoader(),
                 new Class[]{clazz},
-                new JMHProxyInvokeHandler(rpcClientConfig, rpcServiceConfig)
+                new JMHDynamicProxyHandler(rpcClientConfig, rpcServiceConfig)
         );
     }
 }
