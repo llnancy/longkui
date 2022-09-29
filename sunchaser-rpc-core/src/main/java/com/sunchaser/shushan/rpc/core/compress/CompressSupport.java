@@ -32,7 +32,7 @@ import java.util.Set;
  * @since JDK8 2022/9/15
  */
 @Slf4j
-public class CompressSupport {
+public final class CompressSupport {
 
     private CompressSupport() {
     }
@@ -65,6 +65,9 @@ public class CompressSupport {
      * 4 bzip2
      * 5 LZ4
      * 6 LZO
+     *
+     * @param compress compress byte
+     * @return Compressor
      */
     public static Compressor getCompressor(byte compress) {
         return ID_COMPRESSOR_MAP.getOrDefault(compress, new SnappyCompressor());

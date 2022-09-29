@@ -28,7 +28,11 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -56,11 +60,22 @@ public class ExtensionLoader<T> {
         this.type = type;
     }
 
+    /**
+     * get ExtensionLoader by type
+     *
+     * @param type Class
+     * @param <T>  T
+     * @return ExtensionLoader
+     */
     @SuppressWarnings("unchecked")
     public static <T> ExtensionLoader<T> getExtensionLoader(Class<T> type) {
         Preconditions.checkNotNull(type, "Extension type == null");
         Preconditions.checkArgument(type.isInterface(), "Extension type (" + type + ") is not an interface!");
-        Preconditions.checkArgument(Objects.nonNull(type.getAnnotation(SPI.class)), "Extension type (" + type + ") is not an extension, because it is NOT annotated with @" + SPI.class.getSimpleName() + "!");
+        Preconditions.checkArgument(
+                Objects.nonNull(type.getAnnotation(SPI.class)),
+                "Extension type (" + type + ") is not an extension, because it is NOT annotated with @"
+                        + SPI.class.getSimpleName() + "!"
+        );
         // find in local cache
         ExtensionLoader<T> loader = (ExtensionLoader<T>) EXTENSION_LOADERS.get(type);
         if (Objects.isNull(loader)) {
@@ -77,6 +92,8 @@ public class ExtensionLoader<T> {
      * <p>
      * In order to trigger extension load, call {@link #getExtension(String)} instead.
      *
+     * @param name extension name
+     * @return Extension instance
      * @see #getExtension(String)
      */
     @SuppressWarnings("unchecked")
@@ -100,6 +117,7 @@ public class ExtensionLoader<T> {
      * <p>
      * Usually {@link #getSupportedExtensions()} should be called in order to get all extensions.
      *
+     * @return Set of loaded extension instance.
      * @see #getSupportedExtensions()
      */
     public Set<String> getLoadedExtensions() {
@@ -110,6 +128,13 @@ public class ExtensionLoader<T> {
         return getExtension(em.name().replaceAll(Constants.UNDERLINE, Constants.EMPTY).toLowerCase());
     }
 
+    /**
+     * Find the extension with the given name. If the specified name is not found, then {@link IllegalStateException}
+     * will be thrown.
+     *
+     * @param name extension name
+     * @return extension instance
+     */
     @SuppressWarnings("unchecked")
     public T getExtension(String name) {
         Preconditions.checkArgument(StringUtils.isNotBlank(name), "Extension name == null");
@@ -131,6 +156,12 @@ public class ExtensionLoader<T> {
         return (T) instance;
     }
 
+    /**
+     * create extension instance by name
+     *
+     * @param name extension name
+     * @return extension instance
+     */
     @SuppressWarnings("unchecked")
     private T createExtension(String name) {
         Class<?> clazz = getExtensionClasses().get(name);
@@ -150,6 +181,11 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * get loaded extensions class map
+     *
+     * @return k: extension name; v: extension class
+     */
     private Map<String, Class<?>> getExtensionClasses() {
         Map<String, Class<?>> classes = cachedClasses.get();
         if (Objects.isNull(classes)) {
@@ -170,6 +206,12 @@ public class ExtensionLoader<T> {
         return extensionClasses;
     }
 
+    /**
+     * load directory
+     *
+     * @param extensionClasses extension class map
+     * @param dir              directory
+     */
     private void loadDirectory(Map<String, Class<?>> extensionClasses, String dir) {
         String fileName = dir + type.getName();
         try {
@@ -191,11 +233,18 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * load resource
+     *
+     * @param extensionClasses extension class map
+     * @param classLoader      ClassLoader
+     * @param resourceUrl      URL
+     */
     private void loadResource(Map<String, Class<?>> extensionClasses, ClassLoader classLoader, URL resourceUrl) {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(resourceUrl.openStream(), StandardCharsets.UTF_8));
             String line;
-            while (Objects.nonNull(line = reader.readLine())) {
+            while ((line = reader.readLine()) != null) {
                 // 忽略#后面的注释
                 int ci = line.indexOf('#');
                 if (ci >= 0) {
@@ -219,6 +268,13 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * load class
+     *
+     * @param extensionClasses extension class map
+     * @param clazz            extension class
+     * @param name             extension name
+     */
     private void loadClass(Map<String, Class<?>> extensionClasses, Class<?> clazz, String name) {
         String clazzName = clazz.getName();
         Preconditions.checkState(type.isAssignableFrom(clazz), "Error when load extension class(interface: " + type + ", class line: " + clazzName + "), class " + clazzName + " is not subtype of interface.");

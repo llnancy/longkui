@@ -57,9 +57,7 @@ public enum WorkQueueType {
         public BlockingQueue<Runnable> getWorkQueue(Integer capacity) {
             return (Objects.isNull(capacity) || capacity == 0) ? Queues.newLinkedBlockingQueue() : Queues.newLinkedBlockingQueue(capacity);
         }
-    },
-
-    ;
+    };
 
     public abstract BlockingQueue<Runnable> getWorkQueue(Integer capacity);
 }

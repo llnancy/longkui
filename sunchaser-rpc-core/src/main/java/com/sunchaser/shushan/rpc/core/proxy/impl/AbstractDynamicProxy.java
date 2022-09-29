@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public abstract class AbstractDynamicProxy implements DynamicProxy {
 
-    private final ConcurrentMap<RpcServiceConfig, Object> PROXY_CACHE = Maps.newConcurrentMap();
+    private final ConcurrentMap<RpcServiceConfig, Object> proxyCache = Maps.newConcurrentMap();
 
     /**
      * 根据 {@link RpcClientConfig} 和 {@link RpcServiceConfig} 创建并获取代理对象
@@ -44,7 +44,7 @@ public abstract class AbstractDynamicProxy implements DynamicProxy {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T createProxyInstance(RpcClientConfig rpcClientConfig, RpcServiceConfig rpcServiceConfig) {
-        return (T) PROXY_CACHE.computeIfAbsent(rpcServiceConfig, proxy -> doCreateProxyInstance(rpcClientConfig, rpcServiceConfig));
+        return (T) proxyCache.computeIfAbsent(rpcServiceConfig, proxy -> doCreateProxyInstance(rpcClientConfig, rpcServiceConfig));
     }
 
     /**

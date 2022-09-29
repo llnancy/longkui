@@ -22,7 +22,7 @@ package com.sunchaser.shushan.rpc.core.util;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/9/21
  */
-public class ServiceUtils {
+public final class ServiceUtils {
 
     private ServiceUtils() {
     }

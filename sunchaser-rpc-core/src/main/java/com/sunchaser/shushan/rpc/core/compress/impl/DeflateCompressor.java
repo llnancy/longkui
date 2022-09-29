@@ -16,6 +16,7 @@
 
 package com.sunchaser.shushan.rpc.core.compress.impl;
 
+import com.sunchaser.shushan.rpc.core.util.IoUtils;
 import lombok.SneakyThrows;
 
 import java.io.ByteArrayOutputStream;
@@ -55,7 +56,7 @@ public class DeflateCompressor extends AbstractCompressor {
             deflater = new Deflater(1);
             deflater.setInput(data);
             deflater.finish();
-            final byte[] buffer = new byte[2048];
+            final byte[] buffer = new byte[IoUtils.DEFAULT_BUFFER_SIZE];
             while (!deflater.finished()) {
                 int len = deflater.deflate(buffer);
                 bos.write(buffer, 0, len);
@@ -81,7 +82,7 @@ public class DeflateCompressor extends AbstractCompressor {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             inflater = new Inflater();
             inflater.setInput(data);
-            final byte[] buffer = new byte[2048];
+            final byte[] buffer = new byte[IoUtils.DEFAULT_BUFFER_SIZE];
             while (!inflater.finished()) {
                 int len = inflater.inflate(buffer);
                 bos.write(buffer, 0, len);

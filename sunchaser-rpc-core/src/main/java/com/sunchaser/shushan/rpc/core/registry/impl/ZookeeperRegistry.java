@@ -61,6 +61,10 @@ public class ZookeeperRegistry implements Registry {
 
     private static final String DEFAULT_ZK_ADDRESS = "127.0.0.1:2181";
 
+    private static final int DEFAULT_BASE_SLEEP_TIME_MS = 1000;
+
+    private static final int DEFAULT_MAX_RETRIES = 3;
+
     private static final String ZK_BASE_PATH = "/sunchaser-rpc";
 
     private final CuratorFramework client;
@@ -81,7 +85,7 @@ public class ZookeeperRegistry implements Registry {
     @SneakyThrows
     public ZookeeperRegistry(String zkAddress) {
         // 创建Curator客户端并启动
-        client = CuratorFrameworkFactory.newClient(zkAddress, new ExponentialBackoffRetry(1000, 3));
+        client = CuratorFrameworkFactory.newClient(zkAddress, new ExponentialBackoffRetry(DEFAULT_BASE_SLEEP_TIME_MS, DEFAULT_MAX_RETRIES));
         client.start();
         // 序列化器
         JsonInstanceSerializer<ServiceMetaData> serializer = new JsonInstanceSerializer<>(ServiceMetaData.class);
@@ -167,6 +171,12 @@ public class ZookeeperRegistry implements Registry {
         return select.getNode().getPayload();
     }
 
+    /**
+     * build and start service cache
+     *
+     * @param serviceKey service key
+     * @return ServiceCache
+     */
     @SneakyThrows
     private ServiceCache<ServiceMetaData> buildAndStartServiceCache(String serviceKey) {
         ServiceCache<ServiceMetaData> cache = this.serviceDiscovery.serviceCacheBuilder()

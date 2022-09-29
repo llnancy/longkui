@@ -20,7 +20,11 @@ import com.sunchaser.shushan.rpc.core.balancer.Weightable;
 import com.sunchaser.shushan.rpc.core.call.CallType;
 import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.util.ServiceUtils;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * rpc service config

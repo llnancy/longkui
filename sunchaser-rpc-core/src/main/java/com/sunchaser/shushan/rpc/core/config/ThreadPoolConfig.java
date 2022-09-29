@@ -18,7 +18,11 @@ package com.sunchaser.shushan.rpc.core.config;
 
 import com.google.common.collect.Queues;
 import com.sunchaser.shushan.rpc.core.common.Constants;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;

@@ -24,37 +24,37 @@ import com.sunchaser.shushan.rpc.core.registry.RegistryEnum;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/8/16
  */
-public interface Constants {
+public class Constants {
 
-    String DEFAULT = "default";
+    public static final String DEFAULT = "default";
 
-    String NETTY = "netty";
+    public static final String NETTY = "netty";
 
-    String UNDERLINE = "_";
+    public static final String UNDERLINE = "_";
 
-    String EMPTY = "";
+    public static final String EMPTY = "";
 
     /**
      * version: 1
      */
-    byte DEFAULT_PROTOCOL_VERSION = (byte) 1;
+    public static final byte DEFAULT_PROTOCOL_VERSION = (byte) 1;
 
     /**
      * Hessian2
      */
-    byte DEFAULT_SERIALIZE = (byte) 0;
+    public static final byte DEFAULT_SERIALIZE = (byte) 0;
 
     /**
      * Snappy
      */
-    byte DEFAULT_COMPRESS = (byte) 1;
+    public static final byte DEFAULT_COMPRESS = (byte) 1;
 
-    int DEFAULT_CONNECTION_TIMEOUT = 3000;
+    public static final int DEFAULT_CONNECTION_TIMEOUT = 3000;
 
-    int DEFAULT_IO_THREADS = Math.min(Runtime.getRuntime().availableProcessors() + 1, 32);
+    public static final int DEFAULT_IO_THREADS = Math.min(Runtime.getRuntime().availableProcessors() + 1, 32);
 
     /**
      * default registry implementation. zookeeper
      */
-    String DEFAULT_REGISTRY = RegistryEnum.ZOOKEEPER.name().toLowerCase();
+    public static final String DEFAULT_REGISTRY = RegistryEnum.ZOOKEEPER.name().toLowerCase();
 }

@@ -37,6 +37,11 @@ import lombok.NoArgsConstructor;
 public class RpcClientConfig {
 
     /**
+     * default writer idle time seconds.
+     */
+    public static final Integer DEFAULT_WRITER_IDLE_TIME_SECONDS = 30;
+
+    /**
      * default dynamic proxy implementation. JDK
      */
     private static final String DEFAULT_DYNAMIC_PROXY = DynamicProxyEnum.JDK.name().toLowerCase();

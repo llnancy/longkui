@@ -112,6 +112,13 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<R
                 .build();
     }
 
+    /**
+     * do invoke
+     *
+     * @param rpcRequest RpcRequest
+     * @return invoke result
+     * @throws Exception invoke Exception
+     */
     private Object doInvoke(RpcRequest rpcRequest) throws Exception {
         String serviceKey = rpcRequest.getRpcServiceKey();
         Object bean = serviceProvider.getProvider(serviceKey);

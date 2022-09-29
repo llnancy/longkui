@@ -71,6 +71,11 @@ public class DemoController {
         return future.get();
     }
 
+    /**
+     * callback
+     *
+     * @param hello hello
+     */
     @GetMapping("/callback")
     public void callback(String hello) {
         RpcCallbackHolder.setCallback(new RpcCallback<String>() {

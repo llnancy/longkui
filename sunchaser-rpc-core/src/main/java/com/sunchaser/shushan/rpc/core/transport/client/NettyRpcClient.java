@@ -26,7 +26,12 @@ import com.sunchaser.shushan.rpc.core.protocol.RpcRequest;
 import com.sunchaser.shushan.rpc.core.transport.NettyEventLoopFactory;
 import com.sunchaser.shushan.rpc.core.transport.codec.RpcCodec;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +69,11 @@ public class NettyRpcClient extends AbstractRpcClient {
         initBootstrap(rpcClientConfig);
     }
 
+    /**
+     * init bootstrap
+     *
+     * @param rpcClientConfig client config
+     */
     private void initBootstrap(RpcClientConfig rpcClientConfig) {
         this.eventLoopGroup = NettyEventLoopFactory.eventLoopGroup(rpcClientConfig.getIoThreads(), "NettyClientWorker");
         RpcCallbackExecutor rpcCallbackExecutor = new RpcCallbackExecutor(rpcClientConfig.getCallbackThreadPoolConfig());
@@ -77,7 +87,7 @@ public class NettyRpcClient extends AbstractRpcClient {
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ch.pipeline()
                                 .addLast("rpc-codec", new RpcCodec<>())
-                                .addLast("rpc-client-idle-state-handler", new IdleStateHandler(0, 30, 0))
+                                .addLast("rpc-client-idle-state-handler", new IdleStateHandler(0, RpcClientConfig.DEFAULT_WRITER_IDLE_TIME_SECONDS, 0))
                                 .addLast("rpc-client-handler", new RpcResponseHandler(rpcCallbackExecutor));
                     }
                 });
@@ -103,6 +113,12 @@ public class NettyRpcClient extends AbstractRpcClient {
         }
     }
 
+    /**
+     * connect server
+     *
+     * @param connectAddress net address, host:port.
+     * @return netty Channel
+     */
     public Channel connect(InetSocketAddress connectAddress) {
         Channel channel = null;
         ChannelFuture future = bootstrap.connect(connectAddress);

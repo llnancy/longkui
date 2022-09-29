@@ -69,6 +69,12 @@ public class RpcInvokeFuture<T> implements Future<T> {
         return doGet(promise.get(timeout, unit));
     }
 
+    /**
+     * do get rpc response
+     *
+     * @param rpcResponse rpc response
+     * @return result
+     */
     @SuppressWarnings("unchecked")
     private T doGet(RpcResponse rpcResponse) {
         String errorMsg = rpcResponse.getErrorMsg();

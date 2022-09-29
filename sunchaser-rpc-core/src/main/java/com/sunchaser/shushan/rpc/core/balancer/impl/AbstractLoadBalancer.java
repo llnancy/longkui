@@ -55,6 +55,14 @@ public abstract class AbstractLoadBalancer implements LoadBalancer {
         return select(nodes, nodeList -> doSelect(nodeList, hashKey));
     }
 
+    /**
+     * use Function
+     *
+     * @param nodes    nodes
+     * @param function Function
+     * @param <T>      T
+     * @return Node
+     */
     private <T> Node<T> select(List<? extends Node<T>> nodes, Function<List<? extends Node<T>>, Node<T>> function) {
         if (CollectionUtils.isEmpty(nodes)) {
             return null;
@@ -73,6 +81,13 @@ public abstract class AbstractLoadBalancer implements LoadBalancer {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * get weight with warmup
+     *
+     * @param weightNode WeightNode
+     * @param <T>        WeightNode type
+     * @return weight
+     */
     protected <T> int getWeight(WeightNode<T> weightNode) {
         int weight = weightNode.getWeight();
         if (weight > 0) {

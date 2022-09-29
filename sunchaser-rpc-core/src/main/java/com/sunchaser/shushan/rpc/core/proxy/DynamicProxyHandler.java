@@ -19,7 +19,11 @@ package com.sunchaser.shushan.rpc.core.proxy;
 import cn.hutool.core.lang.func.VoidFunc0;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import com.sunchaser.shushan.rpc.core.call.*;
+import com.sunchaser.shushan.rpc.core.call.CallType;
+import com.sunchaser.shushan.rpc.core.call.RpcCallback;
+import com.sunchaser.shushan.rpc.core.call.RpcCallbackHolder;
+import com.sunchaser.shushan.rpc.core.call.RpcFutureHolder;
+import com.sunchaser.shushan.rpc.core.call.RpcInvokeFuture;
 import com.sunchaser.shushan.rpc.core.common.Constants;
 import com.sunchaser.shushan.rpc.core.common.RpcContext;
 import com.sunchaser.shushan.rpc.core.common.RpcMessageTypeEnum;
@@ -30,7 +34,11 @@ import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 import com.sunchaser.shushan.rpc.core.exceptions.RpcException;
 import com.sunchaser.shushan.rpc.core.extension.ExtensionLoader;
 import com.sunchaser.shushan.rpc.core.handler.RpcPendingHolder;
-import com.sunchaser.shushan.rpc.core.protocol.*;
+import com.sunchaser.shushan.rpc.core.protocol.RpcFuture;
+import com.sunchaser.shushan.rpc.core.protocol.RpcHeader;
+import com.sunchaser.shushan.rpc.core.protocol.RpcProtocol;
+import com.sunchaser.shushan.rpc.core.protocol.RpcRequest;
+import com.sunchaser.shushan.rpc.core.protocol.RpcResponse;
 import com.sunchaser.shushan.rpc.core.registry.Registry;
 import com.sunchaser.shushan.rpc.core.registry.ServiceMetaData;
 import com.sunchaser.shushan.rpc.core.serialize.ArrayElement;
@@ -42,7 +50,11 @@ import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Promise;
 import javassist.util.proxy.MethodHandler;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.implementation.bind.annotation.AllArguments;
 import net.bytebuddy.implementation.bind.annotation.Origin;
@@ -176,7 +188,7 @@ public class DynamicProxyHandler implements InvocationHandler, MethodInterceptor
         SYNC_CALLER(CallType.SYNC) {
             @Override
             protected Object afterCall() throws Throwable {
-                RpcCallerContext rpcCallerContext = RPC_CALLER_CONTEXT_THREAD_LOCAL.get();
+                RpcCallerContext rpcCallerContext = rpcCallerContextThreadLocal.get();
                 long sequenceId = rpcCallerContext.getSequenceId();
                 RpcFuture<RpcResponse> rpcFuture = RpcPendingHolder.getRpcFuture(sequenceId);
                 Promise<RpcResponse> promise = rpcFuture.getPromise();
@@ -199,7 +211,7 @@ public class DynamicProxyHandler implements InvocationHandler, MethodInterceptor
             @Override
             protected void beforeCall() {
                 super.beforeCall();
-                RpcCallerContext rpcCallerContext = RPC_CALLER_CONTEXT_THREAD_LOCAL.get();
+                RpcCallerContext rpcCallerContext = rpcCallerContextThreadLocal.get();
                 long sequenceId = rpcCallerContext.getSequenceId();
                 RpcFuture<RpcResponse> rpcFuture = RpcPendingHolder.getRpcFuture(sequenceId);
                 RpcFutureHolder.setFuture(new RpcInvokeFuture<>(rpcFuture.getPromise()));
@@ -214,7 +226,7 @@ public class DynamicProxyHandler implements InvocationHandler, MethodInterceptor
             protected void beforeCall() {
                 RpcCallback<?> rpcCallback = RpcCallbackHolder.getCallback();
                 Preconditions.checkNotNull(rpcCallback, "sunchaser-rpc >>>>>> RpcInvokeCallback(CallType = CALLBACK) instance cannot be null.");
-                RpcCallerContext rpcCallerContext = RPC_CALLER_CONTEXT_THREAD_LOCAL.get();
+                RpcCallerContext rpcCallerContext = rpcCallerContextThreadLocal.get();
                 long sequenceId = rpcCallerContext.getSequenceId();
                 // 创建包含rpcCallback的保存RPC调用结果的RpcFuture对象
                 RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()), rpcCallback);
@@ -257,11 +269,18 @@ public class DynamicProxyHandler implements InvocationHandler, MethodInterceptor
         /**
          * use ThreadLocal to pass RpcCallerContext.
          */
-        protected final ThreadLocal<RpcCallerContext> RPC_CALLER_CONTEXT_THREAD_LOCAL = new ThreadLocal<>();
+        protected final ThreadLocal<RpcCallerContext> rpcCallerContextThreadLocal = new ThreadLocal<>();
 
+        /**
+         * rpc call
+         *
+         * @param rpcCallerContext rpc caller context
+         * @return rpc call result
+         * @throws Throwable throws eg.Future#get
+         */
         Object call(RpcCallerContext rpcCallerContext) throws Throwable {
             try {
-                RPC_CALLER_CONTEXT_THREAD_LOCAL.set(rpcCallerContext);
+                rpcCallerContextThreadLocal.set(rpcCallerContext);
                 beforeCall();
                 // do call
                 rpcCallerContext.getCaller().call();
@@ -270,12 +289,15 @@ public class DynamicProxyHandler implements InvocationHandler, MethodInterceptor
                 onException();
                 throw t;
             } finally {
-                RPC_CALLER_CONTEXT_THREAD_LOCAL.remove();
+                rpcCallerContextThreadLocal.remove();
             }
         }
 
+        /**
+         * template method. before rpc call.
+         */
         protected void beforeCall() {
-            RpcCallerContext rpcCallerContext = RPC_CALLER_CONTEXT_THREAD_LOCAL.get();
+            RpcCallerContext rpcCallerContext = rpcCallerContextThreadLocal.get();
             long sequenceId = rpcCallerContext.getSequenceId();
             // 创建保存RPC调用结果的RpcFuture对象
             RpcFuture<RpcResponse> rpcFuture = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()));
@@ -288,7 +310,7 @@ public class DynamicProxyHandler implements InvocationHandler, MethodInterceptor
         }
 
         protected void onException() {
-            RpcCallerContext rpcCallerContext = RPC_CALLER_CONTEXT_THREAD_LOCAL.get();
+            RpcCallerContext rpcCallerContext = rpcCallerContextThreadLocal.get();
             long sequenceId = rpcCallerContext.getSequenceId();
             // rpc调用异常时删除对应RpcFuture
             RpcPendingHolder.removeRpcFuture(sequenceId);
@@ -320,6 +342,14 @@ public class DynamicProxyHandler implements InvocationHandler, MethodInterceptor
         private long sequenceId;
     }
 
+    /**
+     * build rpc protocol
+     *
+     * @param method     Method
+     * @param args       Object array
+     * @param sequenceId sequence
+     * @return RpcProtocol
+     */
     private RpcProtocol<RpcRequest> buildRpcProtocol(Method method, Object[] args, long sequenceId) {
         // 构建协议头
         RpcHeader rpcHeader = buildRpcHeader(sequenceId);
@@ -333,6 +363,12 @@ public class DynamicProxyHandler implements InvocationHandler, MethodInterceptor
                 .build();
     }
 
+    /**
+     * build rpc header
+     *
+     * @param sequenceId sequence
+     * @return RpcHeader
+     */
     private RpcHeader buildRpcHeader(long sequenceId) {
         return RpcHeader.builder()
                 .magic(RpcContext.MAGIC)
@@ -344,6 +380,13 @@ public class DynamicProxyHandler implements InvocationHandler, MethodInterceptor
                 .build();
     }
 
+    /**
+     * build rpc request
+     *
+     * @param method Method
+     * @param args   Object array
+     * @return RpcRequest
+     */
     private RpcRequest buildRpcRequest(Method method, Object[] args) {
         return RpcRequest.builder()
                 .serviceName(rpcServiceConfig.getClassName())
@@ -357,6 +400,8 @@ public class DynamicProxyHandler implements InvocationHandler, MethodInterceptor
 
     /**
      * JDK动态代理
+     *
+     * @return proxy object
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -365,6 +410,8 @@ public class DynamicProxyHandler implements InvocationHandler, MethodInterceptor
 
     /**
      * cglib动态代理
+     *
+     * @return proxy object
      */
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
@@ -373,6 +420,8 @@ public class DynamicProxyHandler implements InvocationHandler, MethodInterceptor
 
     /**
      * javassist动态代理
+     *
+     * @return proxy object
      */
     @Override
     public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable {
@@ -381,6 +430,12 @@ public class DynamicProxyHandler implements InvocationHandler, MethodInterceptor
 
     /**
      * byte buddy动态代理
+     *
+     * @param proxy  proxy
+     * @param method Method
+     * @param args   Object array
+     * @return proxy object
+     * @throws Throwable throws
      */
     @RuntimeType
     public Object byteBuddyInvoke(@This Object proxy, @Origin Method method, @AllArguments @RuntimeType Object[] args) throws Throwable {

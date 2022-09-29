@@ -59,6 +59,9 @@ public class RpcShutdownHook extends Thread {
         destroyAll();
     }
 
+    /**
+     * destroy all resources.
+     */
     public void destroyAll() {
         if (!destroyed.compareAndSet(false, true)) {
             return;
@@ -73,6 +76,9 @@ public class RpcShutdownHook extends Thread {
         destroyRpcClient();
     }
 
+    /**
+     * destroy registry instance.
+     */
     private static void destroyRegistry() {
         ExtensionLoader<Registry> loader = ExtensionLoader.getExtensionLoader(Registry.class);
         for (String registryName : loader.getLoadedExtensions()) {
@@ -88,6 +94,9 @@ public class RpcShutdownHook extends Thread {
         }
     }
 
+    /**
+     * destroy rpc server instance.
+     */
     private static void destroyRpcServer() {
         ExtensionLoader<RpcServer> loader = ExtensionLoader.getExtensionLoader(RpcServer.class);
         for (String rpcServerName : loader.getLoadedExtensions()) {
@@ -103,6 +112,9 @@ public class RpcShutdownHook extends Thread {
         }
     }
 
+    /**
+     * destroy rpc client instance.
+     */
     private static void destroyRpcClient() {
         ExtensionLoader<RpcClient> loader = ExtensionLoader.getExtensionLoader(RpcClient.class);
         for (String rpcClientName : loader.getLoadedExtensions()) {

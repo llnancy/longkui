@@ -117,6 +117,9 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
                 .decode(rpcHeader, data, out);
     }
 
+    /**
+     * rpc message decoder enum
+     */
     @AllArgsConstructor
     @Getter
     enum RpcMessageDecoderEnum {
@@ -154,9 +157,7 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
                 RpcProtocol<String> rpcProtocol = buildRpcMessage(rpcHeader, data, String.class);
                 out.add(rpcProtocol);
             }
-        }
-
-        ;
+        };
 
         private final RpcMessageTypeEnum rpcType;
 
@@ -176,6 +177,15 @@ public class RpcCodec<T> extends ByteToMessageCodec<RpcProtocol<T>> {
                                     byte[] data,
                                     List<Object> out);
 
+        /**
+         * build rpc message
+         *
+         * @param rpcHeader rpc header
+         * @param data      rpc data
+         * @param clazz     Class
+         * @param <I>       type
+         * @return RpcProtocol
+         */
         <I> RpcProtocol<I> buildRpcMessage(RpcHeader rpcHeader,
                                            byte[] data,
                                            Class<I> clazz) {
