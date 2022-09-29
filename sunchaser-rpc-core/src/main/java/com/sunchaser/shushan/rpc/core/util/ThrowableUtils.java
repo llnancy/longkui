@@ -25,7 +25,7 @@ import java.io.StringWriter;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/13
  */
-public class ThrowableUtils {
+public final class ThrowableUtils {
 
     private ThrowableUtils() {
     }

@@ -36,6 +36,12 @@ public class ChannelContainer {
         CHANNEL_POOL.put(key, channel);
     }
 
+    /**
+     * get channel by key
+     *
+     * @param key host:port
+     * @return Channel
+     */
     public static Channel getChannel(String key) {
         Channel channel = CHANNEL_POOL.get(key);
         if (Objects.nonNull(channel)) {

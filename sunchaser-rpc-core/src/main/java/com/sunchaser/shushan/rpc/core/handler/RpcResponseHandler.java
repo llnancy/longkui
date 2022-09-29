@@ -105,6 +105,11 @@ public class RpcResponseHandler extends SimpleChannelInboundHandler<RpcProtocol<
         }
     }
 
+    /**
+     * heart bean: send ping
+     *
+     * @param ctx ChannelHandlerContext
+     */
     private static void sendPingHeartBeat(ChannelHandlerContext ctx) {
         SocketAddress remoteAddress = ctx.channel().remoteAddress();
         LOGGER.info("[{}] triggered write idle event", remoteAddress);

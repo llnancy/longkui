@@ -48,7 +48,8 @@ public class RpcClientConfigurer {
      */
     public void configure(RpcClientConfig rpcClientConfig) {
         PropertyMapper map = PropertyMapper.get();
-        {// client connection timeout and io threads
+        {
+            // client connection timeout and io threads
             map.from(rpcClientProperties::getConnectionTimeout)
                     .whenNonNull()
                     .to(rpcClientConfig::setConnectionTimeout);
@@ -56,7 +57,8 @@ public class RpcClientConfigurer {
                     .whenNonNull()
                     .to(rpcClientConfig::setIoThreads);
         }
-        {// rpc components
+        {
+            // rpc components
             map.from(rpcClientProperties::getDynamicProxy)
                     .whenHasText()
                     .to(rpcClientConfig::setDynamicProxy);
@@ -70,14 +72,16 @@ public class RpcClientConfigurer {
                     .whenHasText()
                     .to(rpcClientConfig::setRpcClient);
         }
-        {// rpc protocol info
+        {
+            // rpc protocol info
             configureRpcProtocol(
                     map,
                     rpcClientProperties::getRpcProtocol,
                     rpcClientConfig::getRpcProtocolConfig
             );
         }
-        {// callback executor thread pool
+        {
+            // callback executor thread pool
             Configurers.configureThreadPool(
                     map,
                     rpcClientProperties::getCallbackThreadPool,
@@ -86,6 +90,13 @@ public class RpcClientConfigurer {
         }
     }
 
+    /**
+     * configure rpc protocol
+     *
+     * @param map    PropertyMapper
+     * @param source source RpcProtocolConfig
+     * @param target target RpcProtocolConfig
+     */
     private void configureRpcProtocol(PropertyMapper map,
                                       Supplier<RpcProtocolConfig> source,
                                       Supplier<RpcProtocolConfig> target) {

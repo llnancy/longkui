@@ -28,7 +28,7 @@ import java.util.Objects;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/20
  */
-public class IoUtils {
+public final class IoUtils {
 
     private IoUtils() {
     }

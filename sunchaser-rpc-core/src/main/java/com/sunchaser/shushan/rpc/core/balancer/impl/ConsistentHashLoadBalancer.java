@@ -36,6 +36,11 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
 
+    /**
+     * ConsistentHash Selector
+     *
+     * @param <T> Node Type
+     */
     static class ConsistentHashSelector<T> {
 
         /**
@@ -65,17 +70,23 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
         @Getter
         private final int identityHashCode;
 
-        public ConsistentHashSelector(List<? extends Node<T>> nodes, int identityHashCode) {
+        ConsistentHashSelector(List<? extends Node<T>> nodes, int identityHashCode) {
             this(nodes, identityHashCode, DEFAULT_REPLICA_NUMBER);
         }
 
-        public ConsistentHashSelector(List<? extends Node<T>> nodes, int identityHashCode, int replicaNumber) {
+        ConsistentHashSelector(List<? extends Node<T>> nodes, int identityHashCode, int replicaNumber) {
             this.hashRing = Maps.newTreeMap();
             this.replicaNumber = replicaNumber;
             this.identityHashCode = identityHashCode;
             this.createHashRing(nodes, replicaNumber);
         }
 
+        /**
+         * create hash ring with virtual node.
+         *
+         * @param nodes         sources nodes
+         * @param replicaNumber replica number
+         */
         private void createHashRing(List<? extends Node<T>> nodes, int replicaNumber) {
             // 构建含虚拟节点的哈希环
             for (Node<T> node : nodes) {
@@ -93,7 +104,7 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
                         // h = 1时，取digest的[4, 7]位字节进行位运算
                         // h = 2时，取digest的[8, 11]位字节进行位运算
                         // h = 3时，取digest的[12, 15]位字节进行位运算
-                        long m = hash(digest, h);
+                        long m = hashCode(digest, h);
                         // 放入哈希环
                         hashRing.put(m, node);
                     }
@@ -105,9 +116,15 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
             // 计算key的哈希值
             byte[] digest = Hashing.sha256().hashString(hashKey, StandardCharsets.UTF_8).asBytes();
             // 进行匹配
-            return selectForKey(hash(digest, 0));
+            return selectForKey(hashCode(digest, 0));
         }
 
+        /**
+         * select Node by key
+         *
+         * @param hash key
+         * @return Node
+         */
         private Node<T> selectForKey(long hash) {
             // 从哈希环中（TreeMap按照key排序）查找第一个hash值大于或等于传入hash值的Node节点对象。
             Map.Entry<Long, Node<T>> entry = hashRing.ceilingEntry(hash);
@@ -118,7 +135,7 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
             return entry.getValue();
         }
 
-        private long hash(byte[] digest, int number) {
+        private long hashCode(byte[] digest, int number) {
             return (((long) (digest[3 + number * 4] & 0xFF) << 24)
                     | ((long) (digest[2 + number * 4] & 0xFF) << 16)
                     | ((long) (digest[1 + number * 4] & 0xFF) << 8)

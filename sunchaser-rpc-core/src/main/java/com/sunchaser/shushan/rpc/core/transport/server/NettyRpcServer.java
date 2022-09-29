@@ -76,7 +76,7 @@ public class NettyRpcServer implements RpcServer {
                     protected void initChannel(NioSocketChannel ch) throws Exception {
                         ch.pipeline()
                                 .addLast("rpc-codec", new RpcCodec<>())
-                                .addLast("rpc-server-idle-state-handler", new IdleStateHandler(60, 0, 0))
+                                .addLast("rpc-server-idle-state-handler", new IdleStateHandler(RpcServerConfig.DEFAULT_READER_IDLE_TIME_SECONDS, 0, 0))
                                 .addLast("rpc-server-handler", new RpcRequestHandler(requestExecutor));
                     }
                 });

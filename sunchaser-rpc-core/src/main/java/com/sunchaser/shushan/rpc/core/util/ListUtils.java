@@ -25,7 +25,7 @@ import java.util.Objects;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/9/9
  */
-public class ListUtils {
+public final class ListUtils {
 
     private ListUtils() {
     }

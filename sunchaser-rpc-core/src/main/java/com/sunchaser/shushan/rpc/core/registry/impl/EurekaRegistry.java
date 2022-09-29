@@ -70,6 +70,11 @@ public class EurekaRegistry implements Registry {
         setInstanceStatus(InstanceInfo.InstanceStatus.UP);
     }
 
+    /**
+     * init eureka client
+     *
+     * @param serviceMetaData ServiceMetaData
+     */
     private void initEurekaClient(ServiceMetaData serviceMetaData) {
         if (Objects.nonNull(this.eurekaClient)) {
             return;
@@ -89,6 +94,11 @@ public class EurekaRegistry implements Registry {
         });
     }
 
+    /**
+     * on CacheRefreshedEvent
+     *
+     * @param event CacheRefreshedEvent
+     */
     private void onCacheRefreshedEvent(CacheRefreshedEvent event) {
         // Make sure thread-safe in async execution
         synchronized (this) {
@@ -108,6 +118,11 @@ public class EurekaRegistry implements Registry {
         return new DiscoveryClient(this.applicationInfoManager, eurekaClientConfig);
     }
 
+    /**
+     * init ApplicationInfoManager
+     *
+     * @param serviceMetaData ServiceMetaData
+     */
     private void initApplicationInfoManager(ServiceMetaData serviceMetaData) {
         ConfigurableEurekaInstanceConfig eurekaInstanceConfig = new ConfigurableEurekaInstanceConfig()
                 .setAppname(serviceMetaData.getServiceKey())

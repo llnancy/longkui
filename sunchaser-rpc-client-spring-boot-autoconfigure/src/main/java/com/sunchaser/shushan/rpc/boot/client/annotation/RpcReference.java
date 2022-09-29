@@ -19,7 +19,12 @@ package com.sunchaser.shushan.rpc.boot.client.annotation;
 import com.sunchaser.shushan.rpc.core.call.CallType;
 import com.sunchaser.shushan.rpc.core.config.RpcServiceConfig;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * rpc reference

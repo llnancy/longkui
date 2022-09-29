@@ -18,7 +18,11 @@ package com.sunchaser.shushan.rpc.core.compress.impl;
 
 import com.sunchaser.shushan.rpc.core.util.IoUtils;
 import lombok.SneakyThrows;
-import org.anarres.lzo.*;
+import org.anarres.lzo.LzoAlgorithm;
+import org.anarres.lzo.LzoConstraint;
+import org.anarres.lzo.LzoInputStream;
+import org.anarres.lzo.LzoLibrary;
+import org.anarres.lzo.LzoOutputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

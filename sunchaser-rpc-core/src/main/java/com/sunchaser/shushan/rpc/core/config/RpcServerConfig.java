@@ -37,6 +37,11 @@ import java.net.InetAddress;
 public class RpcServerConfig {
 
     /**
+     * default reader idle time seconds.
+     */
+    public static final Integer DEFAULT_READER_IDLE_TIME_SECONDS = 60;
+
+    /**
      * server host
      */
     private String host;

@@ -53,7 +53,7 @@ public class Lz4Compressor extends AbstractCompressor {
     @Override
     protected byte[] doCompress(byte[] data) {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             LZ4BlockOutputStream lz4Bos = new LZ4BlockOutputStream(bos, 2048, LZ4Factory.fastestInstance().fastCompressor())) {
+             LZ4BlockOutputStream lz4Bos = new LZ4BlockOutputStream(bos, IoUtils.DEFAULT_BUFFER_SIZE, LZ4Factory.fastestInstance().fastCompressor())) {
             lz4Bos.write(data);
             return bos.toByteArray();
         }

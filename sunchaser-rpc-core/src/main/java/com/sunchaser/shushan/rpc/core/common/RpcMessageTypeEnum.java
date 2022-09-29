@@ -50,9 +50,7 @@ public enum RpcMessageTypeEnum {
     /**
      * 响应
      */
-    RESPONSE((byte) 2),
-
-    ;
+    RESPONSE((byte) 2);
 
     private final byte code;
 

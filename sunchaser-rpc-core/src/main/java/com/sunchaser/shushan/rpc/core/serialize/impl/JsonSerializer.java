@@ -55,6 +55,11 @@ public class JsonSerializer implements Serializer {
         OM = initObjectMapper();
     }
 
+    /**
+     * init ObjectMapper
+     *
+     * @return ObjectMapper instance
+     */
     private static ObjectMapper initObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         // 忽略空bean转对象异常

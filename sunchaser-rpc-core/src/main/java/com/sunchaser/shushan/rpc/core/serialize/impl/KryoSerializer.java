@@ -35,6 +35,8 @@ import java.util.Objects;
  */
 public class KryoSerializer implements Serializer {
 
+    private static final int DEFAULT_BUFFER_SIZE = 1024;
+
     /**
      * 对象池模式
      * 也可使用ThreadLocal来保证线程安全
@@ -57,14 +59,14 @@ public class KryoSerializer implements Serializer {
     private static final Pool<Output> OUTPUT_POOL = new Pool<Output>(true, false, 16) {
         @Override
         protected Output create() {
-            return new Output(1024, -1);
+            return new Output(DEFAULT_BUFFER_SIZE, -1);
         }
     };
 
     private static final Pool<Input> INPUT_POOL = new Pool<Input>(true, false, 16) {
         @Override
         protected Input create() {
-            return new Input(1024);
+            return new Input(DEFAULT_BUFFER_SIZE);
         }
     };
 

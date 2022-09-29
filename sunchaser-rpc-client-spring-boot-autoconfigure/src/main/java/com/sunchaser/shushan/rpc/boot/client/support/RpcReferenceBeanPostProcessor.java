@@ -73,6 +73,14 @@ public class RpcReferenceBeanPostProcessor implements BeanPostProcessor {
         return bean;
     }
 
+    /**
+     * create rpc service config
+     *
+     * @param clazz        target class
+     * @param rpcReference @RpcReference
+     * @param <T>          T
+     * @return RpcServiceConfig
+     */
     private static <T> RpcServiceConfig createRpcServiceConfig(Class<T> clazz, RpcReference rpcReference) {
         RpcServiceConfig rpcServiceConfig = RpcServiceConfig.createDefaultConfig(clazz);
         rpcServiceConfig.setVersion(rpcReference.version())

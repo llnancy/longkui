@@ -24,7 +24,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * ThreadPool Utils
@@ -33,13 +37,19 @@ import java.util.concurrent.*;
  * @since JDK8 2022/7/17
  */
 @Slf4j
-public class ThreadPools {
+public final class ThreadPools {
 
     private ThreadPools() {
     }
 
     private static final Map<ThreadPoolConfig, ExecutorService> EXECUTOR_SERVICE_MAP = Maps.newConcurrentMap();
 
+    /**
+     * create thread pool if absent.
+     *
+     * @param config thread pool config
+     * @return ExecutorService
+     */
     public static ExecutorService createThreadPoolIfAbsent(ThreadPoolConfig config) {
         ExecutorService executorService = EXECUTOR_SERVICE_MAP.computeIfAbsent(config, v -> createThreadPool(config));
         if (executorService.isShutdown() || executorService.isTerminated()) {
@@ -50,6 +60,12 @@ public class ThreadPools {
         return executorService;
     }
 
+    /**
+     * create thread pool.
+     *
+     * @param config thread pool config
+     * @return ExecutorService
+     */
     public static ExecutorService createThreadPool(ThreadPoolConfig config) {
         String threadNameIdentifier = config.getThreadNameIdentifier();
         return new ThreadPoolExecutor(
@@ -72,6 +88,12 @@ public class ThreadPools {
         );
     }
 
+    /**
+     * create thread factory
+     *
+     * @param threadNameIdentifier Identifier thread name
+     * @return ThreadFactory
+     */
     private static ThreadFactory createThreadFactory(String threadNameIdentifier) {
         if (StringUtils.isNotBlank(threadNameIdentifier)) {
             return new ThreadFactoryBuilder()
@@ -89,6 +111,11 @@ public class ThreadPools {
         }
     }
 
+    /**
+     * shutdown ExecutorService
+     *
+     * @param executorService ExecutorService
+     */
     public static void shutdown(ExecutorService executorService) {
         try {
             // 暂停新任务提交

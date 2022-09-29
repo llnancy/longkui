@@ -32,7 +32,7 @@ import java.util.Set;
  * @since JDK8 2022/9/15
  */
 @Slf4j
-public class SerializeSupport {
+public final class SerializeSupport {
 
     private SerializeSupport() {
     }
@@ -63,6 +63,9 @@ public class SerializeSupport {
      * 2 XML
      * 3 PROTOSTUFF
      * 4 KRYO
+     *
+     * @param serialize serialize byte
+     * @return Serializer
      */
     public static Serializer getSerializer(byte serialize) {
         return ID_SERIALIZER_MAP.getOrDefault(serialize, new Hessian2Serializer());

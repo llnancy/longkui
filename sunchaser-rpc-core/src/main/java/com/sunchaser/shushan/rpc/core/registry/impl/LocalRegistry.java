@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentMap;
  * @author sunchaser admin@lilu.org.cn
  * @since JDK8 2022/7/17
  */
-public class LocalRegistry implements Registry {
+public final class LocalRegistry implements Registry {
 
     private final ConcurrentMap<String, ServiceMetaData> services = Maps.newConcurrentMap();
 
