@@ -12,14 +12,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Check License
-        uses: apache/skywalking-eyes/header@main
-        with:
-          mode: fix
-      - name: Apply Changes
-        uses: EndBug/add-and-commit@v4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          author_name: github-actions[bot]
-          author_email: 41898282+github-actions[bot]@users.noreply.github.com
-          message: 'Automatic application of license header'
+        uses: apache/skywalking-eyes/header@501a28d2fb4a9b962661987e50cf0219631b32ff
