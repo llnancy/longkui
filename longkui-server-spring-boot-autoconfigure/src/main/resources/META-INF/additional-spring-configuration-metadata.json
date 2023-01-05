@@ -1,0 +1,6 @@
+{
+  "properties": [{
+    "name": "longkui.server.port",
+    "defaultValue": 1234
+  }]
+}

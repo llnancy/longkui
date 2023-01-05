@@ -1,0 +1,1 @@
+netty=io.github.llnancy.longkui.core.transport.server.NettyRpcServer

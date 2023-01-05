@@ -1,0 +1,4 @@
+jdk=io.github.llnancy.longkui.core.proxy.impl.JdkDynamicProxy
+cglib=io.github.llnancy.longkui.core.proxy.impl.CglibDynamicProxy
+javassist=io.github.llnancy.longkui.core.proxy.impl.JavassistDynamicProxy
+bytebuddy=io.github.llnancy.longkui.core.proxy.impl.ByteBuddyDynamicProxy

@@ -1,0 +1,2 @@
+atomiclong=io.github.llnancy.longkui.core.uid.impl.AtomicLongIdGenerator
+snowflake=io.github.llnancy.longkui.core.uid.impl.SnowflakeIdGenerator

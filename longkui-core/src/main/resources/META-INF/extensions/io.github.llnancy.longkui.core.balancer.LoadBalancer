@@ -1,0 +1,3 @@
+random=io.github.llnancy.longkui.core.balancer.impl.RandomLoadBalancer
+roundrobin=io.github.llnancy.longkui.core.balancer.impl.RoundRobinLoadBalancer
+consistenthash=io.github.llnancy.longkui.core.balancer.impl.ConsistentHashLoadBalancer

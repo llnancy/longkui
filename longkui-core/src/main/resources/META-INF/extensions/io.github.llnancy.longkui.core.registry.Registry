@@ -1,0 +1,1 @@
+zookeeper=io.github.llnancy.longkui.core.registry.impl.ZookeeperRegistry
