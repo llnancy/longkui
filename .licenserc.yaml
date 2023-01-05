@@ -16,7 +16,6 @@ header:
   license:
     spdx-id: Apache-2.0
     copyright-owner: LongKui
-
   paths-ignore:
     - '.github/**'
     - '**/.gitignore'
@@ -46,7 +45,5 @@ header:
     - 'examples/docker/zk-compose.yml'
     - 'lombok.config'
     - 'checkstyle/**'
-
   comment: on-failure
-
   license-location-threshold: 130
