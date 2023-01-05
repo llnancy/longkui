@@ -1,6 +1,0 @@
-{
-  "properties": [{
-    "name": "sunchaser.rpc.server.port",
-    "defaultValue": 1234
-  }]
-}

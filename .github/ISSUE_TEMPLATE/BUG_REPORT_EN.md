@@ -6,11 +6,11 @@ labels: 'bug'
 assignees: ''
 ---
 
-<!-- The content in here will not be show。To forbid duplication，easier search in the feature，before you create an issue，please check the following. If your question is a newer/beginner's，recommend to https://github.com/sunchaser-lilu/sunchaser-rpc/discussions to ask it. -->
+<!-- The content in here will not be show。To forbid duplication，easier search in the feature，before you create an issue，please check the following. If your question is a newer/beginner's，recommend to https://github.com/llnancy/longkui/discussions to ask it. -->
 
-- [ ] I have checked the [discussions](https://github.com/sunchaser-lilu/sunchaser-rpc/discussions)
-- [ ] I have searched the [issues](https://github.com/sunchaser-lilu/sunchaser-rpc/issues) of this repository and believe that this is not a duplicate.
-- [ ] I have checked the [FAQ](https://github.com/sunchaser-lilu/sunchaser-rpc/discussions/36) of this repository and believe that this is not a duplicate.
+- [ ] I have checked the [discussions](https://github.com/llnancy/longkui/discussions)
+- [ ] I have searched the [issues](https://github.com/llnancy/longkui/issues) of this repository and believe that this is not a duplicate.
+- [ ] I have checked the [FAQ](https://github.com/llnancy/longkui/discussions/36) of this repository and believe that this is not a duplicate.
 
 **Describe the bug**
 A clear and concise description of what the bug is.

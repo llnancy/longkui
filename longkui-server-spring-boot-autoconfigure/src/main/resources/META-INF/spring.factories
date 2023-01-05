@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  io.github.llnancy.longkui.boot.server.autoconfigure.RpcServerAutoConfiguration

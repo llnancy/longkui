@@ -1,0 +1,7 @@
+none=io.github.llnancy.longkui.core.compress.impl.NoneCompressor
+snappy=io.github.llnancy.longkui.core.compress.impl.SnappyCompressor
+deflate=io.github.llnancy.longkui.core.compress.impl.DeflateCompressor
+gzip=io.github.llnancy.longkui.core.compress.impl.GzipCompressor
+bzip2=io.github.llnancy.longkui.core.compress.impl.Bzip2Compressor
+lz4=io.github.llnancy.longkui.core.compress.impl.Lz4Compressor
+lzo=io.github.llnancy.longkui.core.compress.impl.LzoCompressor

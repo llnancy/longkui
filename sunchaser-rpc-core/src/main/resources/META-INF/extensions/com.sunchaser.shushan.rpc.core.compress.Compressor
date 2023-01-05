@@ -1,7 +1,0 @@
-none=com.sunchaser.shushan.rpc.core.compress.impl.NoneCompressor
-snappy=com.sunchaser.shushan.rpc.core.compress.impl.SnappyCompressor
-deflate=com.sunchaser.shushan.rpc.core.compress.impl.DeflateCompressor
-gzip=com.sunchaser.shushan.rpc.core.compress.impl.GzipCompressor
-bzip2=com.sunchaser.shushan.rpc.core.compress.impl.Bzip2Compressor
-lz4=com.sunchaser.shushan.rpc.core.compress.impl.Lz4Compressor
-lzo=com.sunchaser.shushan.rpc.core.compress.impl.LzoCompressor

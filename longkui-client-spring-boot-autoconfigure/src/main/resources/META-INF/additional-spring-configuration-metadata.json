@@ -1,0 +1,6 @@
+{
+  "properties": [{
+    "name": "longkui.client.connection-timeout",
+    "defaultValue": 3000
+  }]
+}

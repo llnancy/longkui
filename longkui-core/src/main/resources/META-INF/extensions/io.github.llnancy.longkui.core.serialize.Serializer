@@ -1,0 +1,5 @@
+hessian2=io.github.llnancy.longkui.core.serialize.impl.Hessian2Serializer
+json=io.github.llnancy.longkui.core.serialize.impl.JsonSerializer
+kryo=io.github.llnancy.longkui.core.serialize.impl.KryoSerializer
+protostuff=io.github.llnancy.longkui.core.serialize.impl.ProtostuffSerializer
+xml=io.github.llnancy.longkui.core.serialize.impl.XmlSerializer

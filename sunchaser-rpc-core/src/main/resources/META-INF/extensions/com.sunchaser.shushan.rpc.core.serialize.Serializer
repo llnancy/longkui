@@ -1,5 +1,0 @@
-hessian2=com.sunchaser.shushan.rpc.core.serialize.impl.Hessian2Serializer
-json=com.sunchaser.shushan.rpc.core.serialize.impl.JsonSerializer
-kryo=com.sunchaser.shushan.rpc.core.serialize.impl.KryoSerializer
-protostuff=com.sunchaser.shushan.rpc.core.serialize.impl.ProtostuffSerializer
-xml=com.sunchaser.shushan.rpc.core.serialize.impl.XmlSerializer

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2022 SunChaser
+  ~ Copyright 2022 LongKui
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -20,18 +20,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.sunchaser.shushan</groupId>
-    <artifactId>sunchaser-rpc</artifactId>
+    <groupId>io.github.llnancy</groupId>
+    <artifactId>longkui</artifactId>
     <packaging>pom</packaging>
     <version>0.0.1-SNAPSHOT</version>
     <modules>
         <module>examples</module>
-        <module>sunchaser-rpc-core</module>
-        <module>sunchaser-rpc-common-spring-boot</module>
-        <module>sunchaser-rpc-client-spring-boot-autoconfigure</module>
-        <module>sunchaser-rpc-server-spring-boot-autoconfigure</module>
-        <module>sunchaser-rpc-client-spring-boot-starter</module>
-        <module>sunchaser-rpc-server-spring-boot-starter</module>
+        <module>longkui-core</module>
+        <module>longkui-common-spring-boot</module>
+        <module>longkui-client-spring-boot-autoconfigure</module>
+        <module>longkui-server-spring-boot-autoconfigure</module>
+        <module>longkui-client-spring-boot-starter</module>
+        <module>longkui-server-spring-boot-starter</module>
     </modules>
 
     <properties>
