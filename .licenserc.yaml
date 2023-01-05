@@ -45,6 +45,7 @@ header:
     - '**/vendor/**'
     - 'examples/docker/zk-compose.yml'
     - 'lombok.config'
+    - 'checkstyle/**'
 
   comment: on-failure
 
