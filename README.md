@@ -1,8 +1,8 @@
 <p align="center">
     <img src="https://cdn.lilu.org.cn/sunchaser-logo.png" alt="logo" />
-    <h2 align="center">longkui</h2>
+    <h2 align="center">LongKui</h2>
     <p align="center">
-        longkui, A high performance RPC framework based on Netty.
+        LongKui, A high performance RPC framework based on Netty.
         <br /><br />
         <img src="https://img.shields.io/circleci/project/github/badges/shields/master?color=%231ab1ad&label=master" alt="project" />
         <img src="https://img.shields.io/badge/JDK-8.0+-0e83c" alt="java-version" />
@@ -10,13 +10,15 @@
     </p>
 </p>
 
+> 龙葵：千年不灭，唯情而已。古姜国公主，被封印在魔剑千年，只为了等待与王兄重逢。
+
 # 背景
 
 `RPC`：像调用本地方法一样调用远程服务。
 
 # 介绍
 
-`longkui` 是一个分布式服务框架，提供高性能的 `RPC` 远程过程调用功能。拥有分布式、高性能、服务治理、注册中心、负载均衡及微内核架构等诸多特性。
+`LongKui` 是一个分布式服务框架，提供高性能的 `RPC` 远程过程调用功能。拥有分布式、高性能、服务治理、注册中心、负载均衡及微内核架构等诸多特性。
 
 # 特性
 
