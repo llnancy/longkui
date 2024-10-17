@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://images.lilu.org.cn/website/logo/sunchaser-logo.png" alt="logo" />
+    <img src="https://cdn.lilu.org.cn/website/logo/sunchaser-logo.png" alt="logo" />
     <h2 align="center">LongKui</h2>
     <p align="center">
         LongKui, A high performance RPC framework based on Netty.
