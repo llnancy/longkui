@@ -34,3 +34,6 @@ build/
 ### arthas ###
 /arthas-output/
 *jmh-result.json
+
+.DS_Store
+
